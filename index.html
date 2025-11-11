@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Solar360 - Instalación de paneles solares profesionales. Ahorra hasta 90% en tu factura eléctrica. Cotización gratis.">
+    <title>Solar360 | Instalación de Paneles Solares en Argentina</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Leaflet CSS y JS para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="container">
+            <div class="nav-container">
+                <div class="logo">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="5" fill="#FDB813"/>
+                        <path d="M12 2V4M12 20V22M22 12H20M4 12H2M19.07 4.93L17.66 6.34M6.34 17.66L4.93 19.07M19.07 19.07L17.66 17.66M6.34 6.34L4.93 4.93" 
+                              stroke="#FDB813" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                    <span class="logo-text">Solar360</span>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="#inicio" class="nav-link active">Inicio</a></li>
+                    <li><a href="#beneficios" class="nav-link">Beneficios</a></li>
+                    <li><a href="#productos" class="nav-link">Productos</a></li>
+                    <li><a href="#simulador" class="nav-link">Simulador</a></li>
+                    <li><a href="#proceso" class="nav-link">Proceso</a></li>
+                    <li><a href="#contacto" class="nav-link">Contacto</a></li>
+                </ul>
+                <a href="#contacto" class="btn btn-primary">Cotizar Gratis</a>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="hero">
+        <video autoplay muted loop playsinline class="hero-video">
+            <source src="images/230464_small.mp4" type="video/mp4">
+        </video>
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text-left">
+                    <span class="hero-badge">🌱 Energía Limpia & Renovable</span>
+                    <h1 class="hero-title">
+                        Reduce tu Factura de Luz hasta un
+                        <span class="highlight">90%</span>
+                    </h1>
+                    <p class="hero-subtitle">
+                        Instala paneles solares de alta calidad y empieza a ahorrar desde el primer mes. 
+                        Financiamiento disponible • Garantía de 25 años • Instalación profesional
+                    </p>
+                </div>
+                
+                <div class="hero-cta-right">
+                    <div class="hero-buttons">
+                        <a href="#contacto" class="btn btn-primary btn-large">
+                            <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
+                                <path d="M3 8L10.89 13.26C11.19 13.47 11.34 13.57 11.5 13.61C11.64 13.65 11.78 13.65 11.92 13.61C12.08 13.57 12.23 13.47 12.53 13.26L20.42 8M2.4 6.8L2.4 17.2C2.4 18.88 2.4 19.72 2.76 20.36C3.08 20.92 3.58 21.42 4.14 21.74C4.78 22.1 5.62 22.1 7.3 22.1H16.7C18.38 22.1 19.22 22.1 19.86 21.74C20.42 21.42 20.92 20.92 21.24 20.36C21.6 19.72 21.6 18.88 21.6 17.2V6.8C21.6 5.12 21.6 4.28 21.24 3.64C20.92 3.08 20.42 2.58 19.86 2.26C19.22 1.9 18.38 1.9 16.7 1.9H7.3C5.62 1.9 4.78 1.9 4.14 2.26C3.58 2.58 3.08 3.08 2.76 3.64C2.4 4.28 2.4 5.12 2.4 6.8Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            Solicitar Cotización
+                        </a>
+                        <a href="#simulador" class="btn btn-secondary btn-large">
+                            Calcular Mi Ahorro
+                        </a>
+                    </div>
+                    
+                    <div class="hero-trust">
+                        <div class="trust-item">
+                            <strong>+500</strong>
+                            <span>Instalaciones</span>
+                        </div>
+                        <div class="trust-item">
+                            <strong>25 años</strong>
+                            <span>Garantía</span>
+                        </div>
+                        <div class="trust-item">
+                            <strong>4.9/5</strong>
+                            <span>Satisfacción</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Beneficios -->
+    <section id="beneficios" class="benefits-section">
+        <div class="container">
+            <div class="section-header center">
+                <span class="section-badge">¿Por qué Solar360?</span>
+                <h2 class="section-title">Beneficios que te hacen ahorrar</h2>
+                <p class="section-subtitle">Más de 500 familias y empresas ya confían en nosotros</p>
+            </div>
+            
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">💰</div>
+                    <h3>Ahorra hasta 90%</h3>
+                    <p>Reduce drásticamente tu factura eléctrica desde el primer mes de instalación.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🌍</div>
+                    <h3>Cuida el Planeta</h3>
+                    <p>Reduce tu huella de carbono y contribuye a un futuro más sostenible.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">📈</div>
+                    <h3>Aumenta el Valor</h3>
+                    <p>Tu propiedad incrementa su valor de mercado hasta en un 20%.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">🛡️</div>
+                    <h3>25 Años de Garantía</h3>
+                    <p>Paneles de máxima calidad con garantía extendida de rendimiento.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">💳</div>
+                    <h3>Financiamiento</h3>
+                    <p>Opciones flexibles de pago. Empieza a ahorrar sin inversión inicial.</p>
+                </div>
+                
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Instalación Rápida</h3>
+                    <p>Tu sistema listo y operando en menos de 7 días hábiles.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Productos/Paquetes -->
+    <section id="productos" class="products-section">
+        <div class="container">
+            <div class="section-header center">
+                <span class="section-badge">Nuestros Paquetes</span>
+                <h2 class="section-title">Elige el plan perfecto para ti</h2>
+                <p class="section-subtitle">Todos incluyen instalación profesional y garantía extendida</p>
+            </div>
+            
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-badge">Hogar</div>
+                    <h3 class="product-title">Básico</h3>
+                    <div class="product-price">
+                        <span class="price-amount">$850,000</span>
+                        <span class="price-period">Instalación completa</span>
+                    </div>
+                    <ul class="product-features">
+                        <li>✓ 4-6 paneles (1.4 - 2.1 kW)</li>
+                        <li>✓ Ideal para consumo bajo</li>
+                        <li>✓ Ahorro: $15,000 - $25,000/mes</li>
+                        <li>✓ ROI: 4-5 años</li>
+                        <li>✓ Instalación en 5 días</li>
+                        <li>✓ Garantía 25 años</li>
+                    </ul>
+                    <a href="#contacto" class="btn btn-secondary btn-block">Solicitar Cotización</a>
+                </div>
+                
+                <div class="product-card featured">
+                    <div class="product-badge popular">Más Popular</div>
+                    <h3 class="product-title">Estándar</h3>
+                    <div class="product-price">
+                        <span class="price-amount">$1,600,000</span>
+                        <span class="price-period">Instalación completa</span>
+                    </div>
+                    <ul class="product-features">
+                        <li>✓ 8-10 paneles (2.8 - 3.5 kW)</li>
+                        <li>✓ Ideal para consumo medio</li>
+                        <li>✓ Ahorro: $35,000 - $50,000/mes</li>
+                        <li>✓ ROI: 2.5-3 años</li>
+                        <li>✓ Instalación en 7 días</li>
+                        <li>✓ Garantía 25 años</li>
+                    </ul>
+                    <a href="#contacto" class="btn btn-primary btn-block">Solicitar Cotización</a>
+                </div>
+                
+                <div class="product-card">
+                    <div class="product-badge">Comercial</div>
+                    <h3 class="product-title">Premium</h3>
+                    <div class="product-price">
+                        <span class="price-amount">$3,200,000</span>
+                        <span class="price-period">Instalación completa</span>
+                    </div>
+                    <ul class="product-features">
+                        <li>✓ 15-20 paneles (5.2 - 7.0 kW)</li>
+                        <li>✓ Ideal para consumo alto</li>
+                        <li>✓ Ahorro: $70,000 - $100,000/mes</li>
+                        <li>✓ ROI: 2-2.5 años</li>
+                        <li>✓ Instalación en 10 días</li>
+                        <li>✓ Garantía 25 años + soporte</li>
+                    </ul>
+                    <a href="#contacto" class="btn btn-secondary btn-block">Solicitar Cotización</a>
+                </div>
+            </div>
+            
+            <div class="custom-solution">
+                <div class="custom-content">
+                    <h3>¿Necesitas una solución personalizada?</h3>
+                    <p>Ofrecemos instalaciones a medida para empresas, industrias y proyectos de gran escala.</p>
+                    <a href="#contacto" class="btn btn-primary">Hablar con un Experto</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Simulador (Ahora es una herramienta dentro del sitio) -->
+    <section id="simulador" class="simulator-section">
+        <div class="container">
+            <div class="section-header center">
+                <span class="section-badge">Herramienta Gratuita</span>
+                <h2 class="section-title">Calcula tu Ahorro con Nuestro Simulador</h2>
+                <p class="section-subtitle">Descubre cuánto puedes ahorrar con datos climáticos reales de tu zona</p>
+            </div>
+
+            <div class="simulator-container">
+                <!-- Formulario del Simulador -->
+                <div class="simulator-card input-card">
+                    <h3 class="card-title">⚙️ Configuración</h3>
+                    
+                    <form id="simulatorForm" class="simulator-form">
+                        <!-- Sistema -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">📋 Parámetros del Sistema</h4>
+                            
+                            <div class="form-grid-2">
+                                <div class="form-group">
+                                    <label for="inclinacion">Inclinación de Paneles (°)</label>
+                                    <input type="number" id="inclinacion" value="25" min="0" max="90" step="1" required>
+                                    <small>Recomendado: 20-30° para Argentina</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="consumo">Consumo Mensual (kWh)</label>
+                                    <input type="number" id="consumo" value="400" min="50" step="10" required>
+                                    <small>Verifica tu factura de luz</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="precio_kwh">Precio por kWh ($)</label>
+                                    <input type="number" id="precio_kwh" value="0.15" min="0.01" step="0.01" required>
+                                    <small>Costo actual de electricidad</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="costo_panel">Costo por Panel ($)</label>
+                                    <input type="number" id="costo_panel" value="200" min="50" step="10" required>
+                                    <small>Precio unitario estimado</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Selección de Modo -->
+                        <div class="form-section">
+                            <h4 class="form-section-title">🌤️ Datos Climáticos de Tu Zona</h4>
+                            <p class="form-section-help">Elige cómo quieres ingresar los datos climáticos</p>
+                            
+                            <div class="mode-selection">
+                                <button type="button" class="mode-btn mode-active" id="modeUbicacion">
+                                    <div class="mode-icon">📍</div>
+                                    <div class="mode-title">Seleccionar Ubicación</div>
+                                    <div class="mode-desc">Obtener datos automáticamente</div>
+                                </button>
+                                <button type="button" class="mode-btn" id="modeManual">
+                                    <div class="mode-icon">⌨️</div>
+                                    <div class="mode-title">Modo Experto</div>
+                                    <div class="mode-desc">Introducir datos manualmente</div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Sección de Ubicación (Modo Automático) -->
+                        <div class="form-section" id="seccionUbicacion">
+                            <h4 class="form-section-title">📍 Selecciona tu Ubicación</h4>
+                            <p class="form-section-help">
+                                Haz clic en "Seleccionar en el Mapa" para elegir tu ubicación en Argentina 
+                                y obtener automáticamente los datos solares reales de NASA POWER.
+                            </p>
+                            
+                            <div class="form-group">
+                                <div class="button-group">
+                                    <button type="button" id="openMapButton" class="btn btn-primary">
+                                        🗺️ Seleccionar en el Mapa de Argentina
+                                    </button>
+                                </div>
+                                <div id="locationStatus" class="location-status" style="display: none;">
+                                    <div class="status-icon">⏳</div>
+                                    <div class="status-text">Obteniendo datos solares...</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Datos Manuales (Modo Experto) -->
+                        <div class="form-section" id="seccionManual" style="display: none;">
+                            <h4 class="form-section-title">⌨️ Datos Climáticos Mensuales</h4>
+                            <p class="form-section-help">
+                                Introduce los datos mensuales de irradiación solar (PSH) y temperatura promedio para tu ubicación.
+                            </p>
+
+                            <div class="monthly-data">
+                                <div class="monthly-header">
+                                    <span>Mes</span>
+                                    <span>PSH (h/día)</span>
+                                    <span>Temp (°C)</span>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Enero</label>
+                                    <input type="number" id="psh_1" step="0.1" min="0" required>
+                                    <input type="number" id="temp_1" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Febrero</label>
+                                    <input type="number" id="psh_2" step="0.1" min="0" required>
+                                    <input type="number" id="temp_2" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Marzo</label>
+                                    <input type="number" id="psh_3" step="0.1" min="0" required>
+                                    <input type="number" id="temp_3" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Abril</label>
+                                    <input type="number" id="psh_4" step="0.1" min="0" required>
+                                    <input type="number" id="temp_4" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Mayo</label>
+                                    <input type="number" id="psh_5" step="0.1" min="0" required>
+                                    <input type="number" id="temp_5" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Junio</label>
+                                    <input type="number" id="psh_6" step="0.1" min="0" required>
+                                    <input type="number" id="temp_6" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Julio</label>
+                                    <input type="number" id="psh_7" step="0.1" min="0" required>
+                                    <input type="number" id="temp_7" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Agosto</label>
+                                    <input type="number" id="psh_8" step="0.1" min="0" required>
+                                    <input type="number" id="temp_8" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Septiembre</label>
+                                    <input type="number" id="psh_9" step="0.1" min="0" required>
+                                    <input type="number" id="temp_9" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Octubre</label>
+                                    <input type="number" id="psh_10" step="0.1" min="0" required>
+                                    <input type="number" id="temp_10" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Noviembre</label>
+                                    <input type="number" id="psh_11" step="0.1" min="0" required>
+                                    <input type="number" id="temp_11" step="0.1" required>
+                                </div>
+                                
+                                <div class="monthly-row">
+                                    <label>Diciembre</label>
+                                    <input type="number" id="psh_12" step="0.1" min="0" required>
+                                    <input type="number" id="temp_12" step="0.1" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botón Calcular (Solo en Modo Manual) -->
+                        <div id="botonCalcular" style="display: none;">
+                            <button type="submit" class="btn btn-primary btn-large btn-block pulse-button">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
+                                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                </svg>
+                                Calcular Mi Sistema Solar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Results -->
+                <div id="resultsContainer" class="simulator-card results-card" style="display: none;">
+                    <h3 class="card-title">📊 Resultados del Dimensionamiento</h3>
+                    
+                    <div class="results-summary">
+                        <!-- Grande Izquierda: Paneles -->
+                        <div class="result-card result-primary">
+                            <div class="result-icon">🔆</div>
+                            <div class="result-content">
+                                <div class="result-label">Paneles Recomendados</div>
+                                <div class="result-value" id="numPaneles">-</div>
+                                <div class="result-sublabel" id="potenciaTotal">-</div>
+                            </div>
+                        </div>
+
+                        <!-- Fila Superior Derecha (3 tarjetas) -->
+                        <div class="result-card result-featured">
+                            <div class="result-icon">💰</div>
+                            <div class="result-content">
+                                <div class="result-label">Ahorro Anual</div>
+                                <div class="result-value" id="ahorroAnual">-</div>
+                                <div class="result-sublabel" id="ahorroMensual">-</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card result-featured">
+                            <div class="result-icon">🌍</div>
+                            <div class="result-content">
+                                <div class="result-label">Impacto Ambiental</div>
+                                <div class="result-value" id="co2Anual">-</div>
+                                <div class="result-sublabel">CO₂ evitado</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">⚡</div>
+                            <div class="result-content">
+                                <div class="result-label">Generación</div>
+                                <div class="result-value" id="energiaAnual">-</div>
+                                <div class="result-sublabel" id="energiaMensual">-</div>
+                            </div>
+                        </div>
+
+                        <!-- Fila Inferior Derecha (3 tarjetas) -->
+                        <div class="result-card">
+                            <div class="result-icon">💵</div>
+                            <div class="result-content">
+                                <div class="result-label">Inversión</div>
+                                <div class="result-value" id="costoTotal">-</div>
+                                <div class="result-sublabel" id="costoPorPanel">-</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">🎯</div>
+                            <div class="result-content">
+                                <div class="result-label">ROI</div>
+                                <div class="result-value" id="roi">-</div>
+                                <div class="result-sublabel">Recuperación</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">📊</div>
+                            <div class="result-content">
+                                <div class="result-label">Cobertura</div>
+                                <div class="result-value" id="cobertura">-</div>
+                                <div class="result-sublabel">Del consumo</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts -->
+                    <div class="charts-container">
+                        <div class="chart-wrapper">
+                            <h4 class="chart-title">Generación Mensual Estimada</h4>
+                            <canvas id="monthlyChart"></canvas>
+                        </div>
+                        
+                        <div class="chart-wrapper">
+                            <h4 class="chart-title">Análisis Financiero (5 años)</h4>
+                            <canvas id="financialChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="uncertainty-box">
+                        <h4>📊 Bandas de Incertidumbre</h4>
+                        <p>
+                            Basado en el modelo de regresión OLS con RMSE de ±<span id="rmseValue">5.8</span>W,
+                            la generación anual estimada tiene un rango de:
+                        </p>
+                        <div class="uncertainty-range">
+                            <span id="rangoInferior">-</span> a <span id="rangoSuperior">-</span> kWh/año
+                            (intervalo de confianza del 95%)
+                        </div>
+                    </div>
+
+                    <!-- Reporte detallado para impresión (tipo factura) -->
+                    <div id="printReport" class="print-report" style="display: none;">
+                        <!-- Este contenido se generará dinámicamente al imprimir -->
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-secondary" onclick="imprimirReporte()">
+                            🖨️ Imprimir Reporte
+                        </button>
+                        <a href="#contacto" class="btn btn-primary">
+                            📞 Hablar con un Experto
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Proceso -->
+    <section id="proceso" class="process-section">
+        <div class="container">
+            <div class="section-header center">
+                <span class="section-badge">Proceso Simple</span>
+                <h2 class="section-title">Tu Instalación en 4 Pasos</h2>
+                <p class="section-subtitle">De la cotización a la generación de energía limpia</p>
+            </div>
+            
+            <div class="process-timeline">
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <h3>Cotización Gratuita</h3>
+                    <p>Evaluamos tu consumo y te enviamos una propuesta personalizada sin compromiso.</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <h3>Visita Técnica</h3>
+                    <p>Nuestro equipo visita tu propiedad para confirmar viabilidad y diseño óptimo.</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <h3>Instalación Profesional</h3>
+                    <p>Instalamos tu sistema en 5-10 días con la máxima calidad y seguridad.</p>
+                </div>
+                
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <h3>Empieza a Ahorrar</h3>
+                    <p>Comienza a generar energía limpia y reduce tu factura desde el día 1.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>¿Listo para dar el paso a la energía solar?</h2>
+                <p>Solicita tu cotización gratuita hoy y empieza a ahorrar</p>
+                <a href="#contacto" class="btn btn-primary btn-large">
+                    Solicitar Cotización Gratis
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contacto -->
+    <section id="contacto" class="contact-section">
+        <div class="container">
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h2>Hablemos de tu Proyecto</h2>
+                    <p>Nuestro equipo de expertos está listo para ayudarte a dar el paso hacia la energía solar.</p>
+                    
+                    <div class="contact-methods">
+                        <div class="contact-method">
+                            <div class="contact-icon">📞</div>
+                            <div>
+                                <strong>Teléfono</strong>
+                                <p>+54 11 1234-5678</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <div class="contact-icon">📧</div>
+                            <div>
+                                <strong>Email</strong>
+                                <p>info@solar360.com.ar</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <div class="contact-icon">📍</div>
+                            <div>
+                                <strong>Oficina</strong>
+                                <p>Buenos Aires, Argentina</p>
+                            </div>
+                        </div>
+                        
+                        <div class="contact-method">
+                            <div class="contact-icon">⏰</div>
+                            <div>
+                                <strong>Horario</strong>
+                                <p>Lun - Vie: 9:00 - 18:00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-form-container">
+                    <form class="contact-form" onsubmit="event.preventDefault(); alert('¡Gracias! Te contactaremos pronto.');">
+                        <div class="form-group">
+                            <label>Nombre Completo</label>
+                            <input type="text" required placeholder="Tu nombre">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" required placeholder="tu@email.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Teléfono</label>
+                            <input type="tel" required placeholder="+54 11 1234-5678">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Tipo de Propiedad</label>
+                            <select required>
+                                <option value="">Selecciona una opción</option>
+                                <option value="casa">Casa/Hogar</option>
+                                <option value="empresa">Empresa/Comercio</option>
+                                <option value="industria">Industria</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Consumo Mensual Aproximado (kWh)</label>
+                            <input type="number" placeholder="Ej: 400">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Mensaje</label>
+                            <textarea rows="4" placeholder="Cuéntanos sobre tu proyecto..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary btn-block btn-large">
+                            Enviar Solicitud
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-col">
+                    <div class="footer-logo">
+                        <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="5" fill="#FDB813"/>
+                            <path d="M12 2V4M12 20V22M22 12H20M4 12H2M19.07 4.93L17.66 6.34M6.34 17.66L4.93 19.07M19.07 19.07L17.66 17.66M6.34 6.34L4.93 4.93" 
+                                  stroke="#FDB813" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                        <span class="logo-text">Solar360</span>
+                    </div>
+                    <p>Haciendo la energía solar accesible para todos.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Empresa</h4>
+                    <ul class="footer-links">
+                        <li><a href="#beneficios">Beneficios</a></li>
+                        <li><a href="#productos">Productos</a></li>
+                        <li><a href="#proceso">Proceso</a></li>
+                        <li><a href="#simulador">Simulador</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Recursos</h4>
+                    <ul class="footer-links">
+                        <li><a href="https://globalsolaratlas.info/" target="_blank">Global Solar Atlas</a></li>
+                        <li><a href="#">Blog</a></li>
+                        <li><a href="#">Casos de Éxito</a></li>
+                        <li><a href="#">Preguntas Frecuentes</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Contacto</h4>
+                    <ul class="footer-links">
+                        <li>📧 info@solar360.com.ar</li>
+                        <li>📞 +54 11 1234-5678</li>
+                        <li>📍 Buenos Aires, Argentina</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2025 Solar360. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Modal del Mapa -->
+    <div id="mapModal" class="map-modal">
+        <div class="map-modal-content">
+            <div class="map-modal-header">
+                <h3>Selecciona tu Ubicación en Argentina</h3>
+                <button class="map-close-btn" onclick="cerrarMapa()">&times;</button>
+            </div>
+            <div class="map-modal-body">
+                <div class="map-info">
+                    <p>Haz clic en el mapa para seleccionar tu ubicación y obtener datos solares automáticamente</p>
+                    
+                    <div class="city-shortcuts">
+                        <span class="city-label">Ciudades principales:</span>
+                        <button onclick="seleccionarCiudad(-34.6037, -58.3816, 'Buenos Aires')" class="city-btn">Buenos Aires</button>
+                        <button onclick="seleccionarCiudad(-31.4201, -64.1888, 'Córdoba')" class="city-btn">Córdoba</button>
+                        <button onclick="seleccionarCiudad(-32.8895, -68.8458, 'Mendoza')" class="city-btn">Mendoza</button>
+                        <button onclick="seleccionarCiudad(-34.9205, -57.9536, 'La Plata')" class="city-btn">La Plata</button>
+                        <button onclick="seleccionarCiudad(-31.5375, -68.5364, 'San Juan')" class="city-btn">San Juan</button>
+                        <button onclick="seleccionarCiudad(-26.8083, -65.2176, 'Tucumán')" class="city-btn">Tucumán</button>
+                    </div>
+                    
+                    <div id="selectedLocation" class="selected-location" style="display: none;"></div>
+                </div>
+                
+                <div id="map" class="map-container"></div>
+                
+                <div class="map-modal-actions">
+                    <button onclick="confirmarUbicacion()" class="btn btn-primary">Obtener Datos Solares de Esta Ubicación</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
