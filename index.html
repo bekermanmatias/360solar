@@ -56,7 +56,7 @@
                 <div class="hero-text-left">
                     <span class="hero-badge">🌱 Energía Limpia & Renovable</span>
                     <h1 class="hero-title">
-                        Reduce tu Factura de Luz hasta un
+                        Reduce tu Factura hasta un
                         <span class="highlight">90%</span>
                     </h1>
                     <p class="hero-subtitle">
@@ -160,14 +160,14 @@
                     <div class="product-badge">Hogar</div>
                     <h3 class="product-title">Básico</h3>
                     <div class="product-price">
-                        <span class="price-amount">$850,000</span>
+                        <span class="price-amount">$2.280.000</span>
                         <span class="price-period">Instalación completa</span>
                     </div>
                     <ul class="product-features">
                         <li>✓ 4-6 paneles (1.4 - 2.1 kW)</li>
-                        <li>✓ Ideal para consumo bajo</li>
-                        <li>✓ Ahorro: $15,000 - $25,000/mes</li>
-                        <li>✓ ROI: 4-5 años</li>
+                        <li>✓ Ideal para consumo bajo (200-300 kWh/mes)</li>
+                        <li>✓ Ahorro: $36.000 - $54.000/mes</li>
+                        <li>✓ ROI: 3.5-4 años</li>
                         <li>✓ Instalación en 5 días</li>
                         <li>✓ Garantía 25 años</li>
                     </ul>
@@ -178,13 +178,13 @@
                     <div class="product-badge popular">Más Popular</div>
                     <h3 class="product-title">Estándar</h3>
                     <div class="product-price">
-                        <span class="price-amount">$1,600,000</span>
+                        <span class="price-amount">$3.800.000</span>
                         <span class="price-period">Instalación completa</span>
                     </div>
                     <ul class="product-features">
                         <li>✓ 8-10 paneles (2.8 - 3.5 kW)</li>
-                        <li>✓ Ideal para consumo medio</li>
-                        <li>✓ Ahorro: $35,000 - $50,000/mes</li>
+                        <li>✓ Ideal para consumo medio (350-500 kWh/mes)</li>
+                        <li>✓ Ahorro: $63.000 - $90.000/mes</li>
                         <li>✓ ROI: 2.5-3 años</li>
                         <li>✓ Instalación en 7 días</li>
                         <li>✓ Garantía 25 años</li>
@@ -196,13 +196,13 @@
                     <div class="product-badge">Comercial</div>
                     <h3 class="product-title">Premium</h3>
                     <div class="product-price">
-                        <span class="price-amount">$3,200,000</span>
+                        <span class="price-amount">$7.600.000</span>
                         <span class="price-period">Instalación completa</span>
                     </div>
                     <ul class="product-features">
                         <li>✓ 15-20 paneles (5.2 - 7.0 kW)</li>
-                        <li>✓ Ideal para consumo alto</li>
-                        <li>✓ Ahorro: $70,000 - $100,000/mes</li>
+                        <li>✓ Ideal para consumo alto (700-1000 kWh/mes)</li>
+                        <li>✓ Ahorro: $126.000 - $180.000/mes</li>
                         <li>✓ ROI: 2-2.5 años</li>
                         <li>✓ Instalación en 10 días</li>
                         <li>✓ Garantía 25 años + soporte</li>
@@ -224,10 +224,10 @@
     <!-- Simulador (Ahora es una herramienta dentro del sitio) -->
     <section id="simulador" class="simulator-section">
         <div class="container">
-            <div class="section-header center">
-                <span class="section-badge">Herramienta Gratuita</span>
-                <h2 class="section-title">Calcula tu Ahorro con Nuestro Simulador</h2>
-                <p class="section-subtitle">Descubre cuánto puedes ahorrar con datos climáticos reales de tu zona</p>
+            <div class="section-header center" style="margin-bottom: 2rem;">
+                <span class="section-badge" style="font-size: 0.85rem; padding: 0.4rem 1rem;">⚡ Simulador Solar</span>
+                <h2 class="section-title" style="font-size: 2rem; margin-bottom: 0.5rem;">Calcula tu Sistema Fotovoltaico</h2>
+                <p class="section-subtitle" style="font-size: 1rem;">Resultados precisos basados en datos climáticos reales</p>
             </div>
 
             <div class="simulator-container">
@@ -249,20 +249,20 @@
 
                                 <div class="form-group">
                                     <label for="consumo">Consumo Mensual (kWh)</label>
-                                    <input type="number" id="consumo" value="400" min="50" step="10" required>
-                                    <small>Verifica tu factura de luz</small>
+                                    <input type="number" id="consumo" value="350" min="50" step="10" required>
+                                    <small>Hogar promedio en Argentina</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="precio_kwh">Precio por kWh ($)</label>
-                                    <input type="number" id="precio_kwh" value="0.15" min="0.01" step="0.01" required>
-                                    <small>Costo actual de electricidad</small>
+                                    <label for="precio_kwh">Precio por kWh (ARS)</label>
+                                    <input type="number" id="precio_kwh" value="180" min="1" step="5" required>
+                                    <small>Nov 2025: ~$180 ARS/kWh</small>
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="costo_panel">Costo por Panel ($)</label>
-                                    <input type="number" id="costo_panel" value="200" min="50" step="10" required>
-                                    <small>Precio unitario estimado</small>
+                                    <label for="costo_panel">Costo por Panel (ARS)</label>
+                                    <input type="number" id="costo_panel" value="380000" min="1000" step="10000" required>
+                                    <small>Panel 350W: ~$380.000 ARS</small>
                                 </div>
                             </div>
                         </div>
@@ -296,8 +296,8 @@
                             
                             <div class="form-group">
                                 <div class="button-group">
-                                    <button type="button" id="openMapButton" class="btn btn-primary">
-                                        🗺️ Seleccionar en el Mapa de Argentina
+                                    <button type="button" id="openMapButton" class="btn btn-primary" style="width: 100%; font-size: 0.9rem; padding: 0.75rem;">
+                                        🗺️ Seleccionar Ubicación en el Mapa
                                     </button>
                                 </div>
                                 <div id="locationStatus" class="location-status" style="display: none;">
@@ -396,12 +396,12 @@
                         </div>
 
                         <!-- Botón Calcular (Solo en Modo Manual) -->
-                        <div id="botonCalcular" style="display: none;">
-                            <button type="submit" class="btn btn-primary btn-large btn-block pulse-button">
-                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none">
+                        <div id="botonCalcular" style="display: none; padding-top: 0.75rem;">
+                            <button type="submit" class="btn btn-primary btn-block pulse-button" style="padding: 0.85rem 1.5rem; font-size: 0.95rem; font-weight: 700;">
+                                <svg class="btn-icon" viewBox="0 0 24 24" fill="none" style="width: 18px; height: 18px;">
                                     <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                                Calcular Mi Sistema Solar
+                                Calcular Sistema Solar
                             </button>
                         </div>
                     </form>
@@ -601,7 +601,7 @@
                             <div class="contact-icon">📍</div>
                             <div>
                                 <strong>Oficina</strong>
-                                <p>Buenos Aires, Argentina</p>
+                                <p>La Plata, Buenos Aires, Argentina</p>
                             </div>
                         </div>
                         
@@ -702,7 +702,7 @@
                     <ul class="footer-links">
                         <li>📧 info@solar360.com.ar</li>
                         <li>📞 +54 11 1234-5678</li>
-                        <li>📍 Buenos Aires, Argentina</li>
+                        <li>📍 La Plata, Buenos Aires, Argentina</li>
                     </ul>
                 </div>
             </div>

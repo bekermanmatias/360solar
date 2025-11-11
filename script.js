@@ -143,8 +143,65 @@ function initializeApp() {
         }
     });
     
+    // Scroll Spy - Activar sección actual en el menú
+    initScrollSpy();
+    
+    // Header scroll effect
+    initHeaderScroll();
+    
     console.log('✅ Solar360 Simulator inicializado');
     console.log('📊 Modelo OLS cargado:', MODELO_OLS);
+}
+
+// ============================================
+// Scroll Spy para el Menú de Navegación
+// ============================================
+
+function initScrollSpy() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    window.addEventListener('scroll', () => {
+        let current = '';
+        const scrollPosition = window.scrollY + 100; // Offset para activar antes
+        
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.clientHeight;
+            
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                current = section.getAttribute('id');
+            }
+        });
+        
+        navLinks.forEach(link => {
+            link.classList.remove('active');
+            if (link.getAttribute('href') === `#${current}`) {
+                link.classList.add('active');
+            }
+        });
+    });
+}
+
+// ============================================
+// Header Scroll Effect
+// ============================================
+
+function initHeaderScroll() {
+    const header = document.querySelector('.header');
+    let lastScroll = 0;
+    
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.scrollY;
+        
+        if (currentScroll > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        lastScroll = currentScroll;
+    });
 }
 
 // ============================================
@@ -246,8 +303,8 @@ async function confirmarUbicacion() {
     const statusText = statusDiv.querySelector('.status-text');
     
     statusDiv.style.display = 'flex';
-    statusIcon.textContent = '🌐';
-    statusText.textContent = `Obteniendo ubicación y datos solares...`;
+    statusIcon.innerHTML = '<div class="spinner"></div>';
+    statusText.textContent = `Obteniendo datos...`;
     
     // Guardar coordenadas
     ubicacionActual.lat = selectedLat;
@@ -415,7 +472,8 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
         // API de NASA POWER - Datos solares mensuales
         // Documentación: https://power.larc.nasa.gov/docs/services/api/
         
-        statusText.textContent = 'Consultando NASA POWER (datos solares)...';
+        statusIcon.innerHTML = '<div class="spinner"></div>';
+        statusText.textContent = 'Obteniendo datos solares...';
         
         // Parámetros solares:
         // ALLSKY_SFC_SW_DWN: Irradiancia solar (kWh/m²/día)
@@ -468,9 +526,9 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
         // Éxito
         statusIcon.textContent = '✅';
         const ubicacionTexto = ubicacionActual.nombre || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-        statusText.innerHTML = `Datos cargados de NASA POWER (${year})<br>📍 ${ubicacionTexto}`;
+        statusText.innerHTML = `Datos cargados correctamente<br>📍 ${ubicacionTexto}`;
         
-        mostrarNotificacion('✅ Datos solares de tu ubicación cargados correctamente', 'success');
+        mostrarNotificacion('✅ Datos solares cargados correctamente', 'success');
         
         setTimeout(() => statusDiv.style.display = 'none', 5000);
         
@@ -495,7 +553,8 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
 
 async function obtenerDatosSolaresOpenMeteo(lat, lon, statusDiv, statusIcon, statusText) {
     try {
-        statusText.textContent = 'Consultando Open-Meteo (API alternativa)...';
+        statusIcon.innerHTML = '<div class="spinner"></div>';
+        statusText.textContent = 'Obteniendo datos solares...';
         
         // Open-Meteo Archive API para datos históricos
         const endDate = new Date();
