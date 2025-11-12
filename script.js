@@ -186,23 +186,45 @@ function initScrollSpy() {
 }
 
 // ============================================
-// Header Scroll Effect
+// Header Scroll Effect - Hide/Show on scroll
 // ============================================
 
 function initHeaderScroll() {
     const header = document.querySelector('.header');
     let lastScroll = 0;
+    let ticking = false;
     
     window.addEventListener('scroll', () => {
-        const currentScroll = window.scrollY;
-        
-        if (currentScroll > 50) {
-            header.classList.add('scrolled');
-        } else {
-            header.classList.remove('scrolled');
+        if (!ticking) {
+            window.requestAnimationFrame(() => {
+                const currentScroll = window.scrollY;
+                
+                // Si estamos en la parte superior, siempre mostrar el header
+                if (currentScroll <= 50) {
+                    header.classList.remove('scrolled');
+                    header.classList.remove('header-hidden');
+                    header.classList.add('header-visible');
+                } else {
+                    header.classList.add('scrolled');
+                    
+                    // Scroll hacia abajo: ocultar header
+                    if (currentScroll > lastScroll && currentScroll > 100) {
+                        header.classList.remove('header-visible');
+                        header.classList.add('header-hidden');
+                    }
+                    // Scroll hacia arriba: mostrar header
+                    else if (currentScroll < lastScroll) {
+                        header.classList.remove('header-hidden');
+                        header.classList.add('header-visible');
+                    }
+                }
+                
+                lastScroll = currentScroll;
+                ticking = false;
+            });
+            
+            ticking = true;
         }
-        
-        lastScroll = currentScroll;
     });
 }
 
@@ -1128,16 +1150,40 @@ function imprimirReporte() {
         return;
     }
 
-    printReport.innerHTML = generarContenidoBoleta();
-    printReport.style.display = 'block';
+    // Capturar gráficos como imágenes base64
+    let imagenGeneracion = '';
+    let imagenFinanciera = '';
 
+    // Esperar un momento para asegurar que los gráficos estén renderizados
     setTimeout(() => {
-        window.print();
-        printReport.style.display = 'none';
+        try {
+            if (monthlyChart && typeof monthlyChart.toBase64Image === 'function') {
+                imagenGeneracion = monthlyChart.toBase64Image('image/png', 1.0);
+            }
+        } catch (e) {
+            console.warn('No se pudo capturar gráfico de generación:', e);
+        }
+
+        try {
+            if (financialChart && typeof financialChart.toBase64Image === 'function') {
+                imagenFinanciera = financialChart.toBase64Image('image/png', 1.0);
+            }
+        } catch (e) {
+            console.warn('No se pudo capturar gráfico financiero:', e);
+        }
+
+        printReport.innerHTML = generarContenidoBoleta(imagenGeneracion, imagenFinanciera);
+        printReport.style.display = 'block';
+
+        // Esperar un momento más para que las imágenes se carguen
+        setTimeout(() => {
+            window.print();
+            printReport.style.display = 'none';
+        }, 200);
     }, 100);
 }
 
-function generarContenidoBoleta() {
+function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
     const fecha = new Date();
     const fechaFormateada = fecha.toLocaleDateString('es-AR', {
         weekday: 'long',
@@ -1249,6 +1295,24 @@ function generarContenidoBoleta() {
                     </tbody>
                 </table>
             </section>
+
+            ${imagenGeneracion ? `
+            <section class="print-section print-chart-section">
+                <h2>📈 Generación Mensual Estimada</h2>
+                <div class="print-chart-container">
+                    <img src="${imagenGeneracion}" alt="Gráfico de Generación Mensual" class="print-chart-image" />
+                </div>
+            </section>
+            ` : ''}
+
+            ${imagenFinanciera ? `
+            <section class="print-section print-chart-section">
+                <h2>💰 Análisis Financiero (5 años)</h2>
+                <div class="print-chart-container">
+                    <img src="${imagenFinanciera}" alt="Gráfico de Análisis Financiero" class="print-chart-image" />
+                </div>
+            </section>
+            ` : ''}
 
             <section class="print-section">
                 <h2>🔧 Especificaciones Técnicas</h2>
