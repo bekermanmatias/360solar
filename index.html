@@ -305,10 +305,26 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="costo_panel">Costo por Panel (ARS)</label>
-                                    <input type="number" id="costo_panel" value="380000" min="1000" step="10000" required>
-                                    <small>Panel 350W: ~$380.000 ARS</small>
+                                    <label for="tipo_panel">Tipo de Panel Solar</label>
+                                    <select id="tipo_panel" onchange="actualizarPrecioPanel()" required>
+                                        <option value="300000" data-potencia="300">Estándar 300W - $300.000</option>
+                                        <option value="350000" data-potencia="350">Premium 350W - $350.000</option>
+                                        <option value="380000" data-potencia="350" selected>High Efficiency 350W - $380.000</option>
+                                        <option value="420000" data-potencia="400">Premium Plus 400W - $420.000</option>
+                                        <option value="480000" data-potencia="450">Tier 1 - 450W - $480.000</option>
+                                        <option value="650000" data-potencia="550">Bifacial 550W - $650.000</option>
+                                        <option value="custom">🔧 Personalizado...</option>
+                                    </select>
+                                    <small id="panel-info">Alta eficiencia, garantía 25 años</small>
                                 </div>
+                                
+                                <div class="form-group" id="custom-price-group" style="display: none;">
+                                    <label for="costo_panel_custom">Costo Personalizado (ARS)</label>
+                                    <input type="number" id="costo_panel_custom" value="380000" min="1000" step="10000">
+                                    <small>Ingresa el costo por panel</small>
+                                </div>
+                                
+                                <input type="hidden" id="costo_panel" value="380000">
                             </div>
                         </div>
 
@@ -482,15 +498,170 @@
                     </form>
                 </div>
 
+                <!-- Contenedor de Resultados (Preview y Reales) -->
+                <div class="results-wrapper">
+                    <!-- Preview de Resultados (antes de calcular) -->
+                    <div id="resultsPreview" class="simulator-card results-card results-preview">
+                    <div class="preview-overlay">
+                        <div class="preview-message">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 48px; height: 48px; margin-bottom: 1rem;">
+                                <circle cx="12" cy="12" r="5"/>
+                                <line x1="12" y1="1" x2="12" y2="3"/>
+                                <line x1="12" y1="21" x2="12" y2="23"/>
+                                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                <line x1="1" y1="12" x2="3" y2="12"/>
+                                <line x1="21" y1="12" x2="23" y2="12"/>
+                                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                            </svg>
+                            <h3>¡Descubre tu Potencial Solar!</h3>
+                            <p>Completa los datos y calcula cuánto puedes ahorrar con energía solar</p>
+                        </div>
+                    </div>
+                    
+                    <div class="results-header">
+                        <h3 class="card-title">
+                            <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"/>
+                                <path d="M18 17V9M13 17V5M8 17v-3"/>
+                            </svg>
+                            Resultados
+                        </h3>
+                    </div>
+                    
+                    <div class="results-summary">
+                        <div class="result-card result-primary">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="5"/>
+                                    <line x1="12" y1="1" x2="12" y2="3"/>
+                                    <line x1="12" y1="21" x2="12" y2="23"/>
+                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                                    <line x1="1" y1="12" x2="3" y2="12"/>
+                                    <line x1="21" y1="12" x2="23" y2="12"/>
+                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">Paneles Recomendados</div>
+                                <div class="result-value">8</div>
+                                <div class="result-sublabel">High Efficiency 350W • 2.8 kW</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card result-featured">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">Ahorro Anual</div>
+                                <div class="result-value">$756.000</div>
+                                <div class="result-sublabel">$63.000/mes</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card result-featured">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">Impacto Ambiental</div>
+                                <div class="result-value">3.2 Ton</div>
+                                <div class="result-sublabel">CO₂ evitado</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">Generación</div>
+                                <div class="result-value">4.200 kWh</div>
+                                <div class="result-sublabel">350 kWh/mes</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+                                    <line x1="1" y1="10" x2="23" y2="10"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">Inversión</div>
+                                <div class="result-value">$3.040.000</div>
+                                <div class="result-sublabel">$380.000/panel</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M16 12l-4-4-4 4M12 16V8"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">ROI</div>
+                                <div class="result-value">4.0 años</div>
+                                <div class="result-sublabel">Recuperación</div>
+                            </div>
+                        </div>
+
+                        <div class="result-card">
+                            <div class="result-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 3v18h18"/>
+                                    <path d="M18 17V9M13 17V5M8 17v-3"/>
+                                </svg>
+                            </div>
+                            <div class="result-content">
+                                <div class="result-label">Cobertura</div>
+                                <div class="result-value">100%</div>
+                                <div class="result-sublabel">Del consumo</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Results -->
                 <div id="resultsContainer" class="simulator-card results-card" style="display: none;">
-                    <h3 class="card-title">
-                        <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M3 3v18h18"/>
-                            <path d="M18 17V9M13 17V5M8 17v-3"/>
-                        </svg>
-                        Resultados del Dimensionamiento
-                    </h3>
+                    <div class="results-header">
+                        <h3 class="card-title">
+                            <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M3 3v18h18"/>
+                                <path d="M18 17V9M13 17V5M8 17v-3"/>
+                            </svg>
+                            Resultados
+                        </h3>
+                        <div class="results-actions">
+                            <button class="btn btn-icon-only" onclick="imprimirReporte()" title="Imprimir resumen">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 6 2 18 2 18 9"/>
+                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                    <rect x="6" y="14" width="12" height="8"/>
+                                </svg>
+                            </button>
+                            <a href="#contacto" class="btn btn-primary btn-compact">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                </svg>
+                                Contactar Experto
+                            </a>
+                        </div>
+                    </div>
                     
                     <div class="results-summary">
                         <!-- Grande Izquierda: Paneles -->
@@ -612,39 +783,8 @@
                             <canvas id="financialChart"></canvas>
                         </div>
                     </div>
-
-                    <div class="uncertainty-box">
-                        <h4>
-                            <svg class="inline-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle; margin-right: 0.5rem;">
-                                <path d="M3 3v18h18"/>
-                                <path d="M18 17V9M13 17V5M8 17v-3"/>
-                            </svg>
-                            Bandas de Incertidumbre
-                        </h4>
-                        <p>
-                            Basado en el modelo de regresión OLS con RMSE de ±<span id="rmseValue">5.8</span>W,
-                            la generación anual estimada tiene un rango de:
-                        </p>
-                        <div class="uncertainty-range">
-                            <span id="rangoInferior">-</span> a <span id="rangoSuperior">-</span> kWh/año
-                            (intervalo de confianza del 95%)
-                        </div>
-                    </div>
-
-                    <!-- Reporte detallado para impresión (tipo factura) -->
-                    <div id="printReport" class="print-report" style="display: none;">
-                        <!-- Este contenido se generará dinámicamente al imprimir -->
-                    </div>
-                    
-                    <div class="action-buttons">
-                        <button class="btn btn-secondary" onclick="imprimirReporte()">
-                            🖨️ Imprimir Reporte
-                        </button>
-                        <a href="#contacto" class="btn btn-primary">
-                            📞 Hablar con un Experto
-                        </a>
-                    </div>
                 </div>
+                </div><!-- /results-wrapper -->
             </div>
         </div>
     </section>
@@ -891,6 +1031,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Contenedor para impresión -->
+    <div id="printReport" class="print-report" style="display: none;"></div>
 
     <script src="script.js"></script>
 </body>

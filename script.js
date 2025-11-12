@@ -56,6 +56,8 @@ const MESES = [
 
 let monthlyChart = null;
 let financialChart = null;
+let ultimosResultados = null;
+let ultimaGeneracionMensual = null;
 let ubicacionActual = {
     nombre: '',
     lat: null,
@@ -223,6 +225,49 @@ function abrirMapa() {
 function cerrarMapa() {
     const modal = document.getElementById('mapModal');
     modal.style.display = 'none';
+}
+
+// ============================================
+// Actualizar Precio de Panel
+// ============================================
+
+function actualizarPrecioPanel() {
+    const selectPanel = document.getElementById('tipo_panel');
+    const costoPanel = document.getElementById('costo_panel');
+    const customGroup = document.getElementById('custom-price-group');
+    const customInput = document.getElementById('costo_panel_custom');
+    const panelInfo = document.getElementById('panel-info');
+    
+    const selectedOption = selectPanel.options[selectPanel.selectedIndex];
+    const valor = selectedOption.value;
+    
+    if (valor === 'custom') {
+        // Mostrar campo personalizado
+        customGroup.style.display = 'block';
+        costoPanel.value = customInput.value;
+        panelInfo.textContent = 'Ingresa el costo de tu panel';
+        
+        // Actualizar cuando cambie el input personalizado
+        customInput.addEventListener('input', function() {
+            costoPanel.value = this.value;
+        });
+    } else {
+        // Ocultar campo personalizado
+        customGroup.style.display = 'none';
+        costoPanel.value = valor;
+        
+        // Actualizar información según el tipo de panel
+        const potencia = selectedOption.getAttribute('data-potencia');
+        const infoTexts = {
+            '300000': 'Estándar, ideal para presupuestos ajustados',
+            '350000': 'Óptimo balance precio-rendimiento',
+            '380000': 'Alta eficiencia, garantía 25 años',
+            '420000': 'Mayor potencia, menos paneles necesarios',
+            '480000': 'Tier 1, máxima calidad y eficiencia',
+            '650000': 'Tecnología bifacial, genera por ambos lados'
+        };
+        panelInfo.textContent = infoTexts[valor] || 'Panel solar fotovoltaico';
+    }
 }
 
 function inicializarMapa() {
@@ -523,14 +568,8 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
             }
         }
         
-        // Éxito
-        statusIcon.textContent = '✅';
-        const ubicacionTexto = ubicacionActual.nombre || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-        statusText.innerHTML = `Datos cargados correctamente<br>📍 ${ubicacionTexto}`;
-        
-        mostrarNotificacion('✅ Datos solares cargados correctamente', 'success');
-        
-        setTimeout(() => statusDiv.style.display = 'none', 5000);
+        // Éxito - ocultar automáticamente sin mensaje
+        setTimeout(() => statusDiv.style.display = 'none', 800);
         
     } catch (error) {
         console.error('Error consultando NASA POWER:', error);
@@ -609,14 +648,8 @@ async function obtenerDatosSolaresOpenMeteo(lat, lon, statusDiv, statusIcon, sta
             }
         }
         
-        // Éxito
-        statusIcon.textContent = '✅';
-        const ubicacionTexto = ubicacionActual.nombre || `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-        statusText.innerHTML = `Datos cargados de Open-Meteo<br>📍 ${ubicacionTexto}`;
-        
-        mostrarNotificacion('✅ Datos solares de tu ubicación cargados (Open-Meteo)', 'success');
-        
-        setTimeout(() => statusDiv.style.display = 'none', 5000);
+        // Éxito - ocultar automáticamente sin mensaje
+        setTimeout(() => statusDiv.style.display = 'none', 800);
         
     } catch (error) {
         console.error('Error consultando Open-Meteo:', error);
@@ -817,15 +850,31 @@ function calcularResultados(datos, generacionMensual) {
 // ============================================
 
 function mostrarResultados(resultados, generacionMensual) {
-    // Mostrar contenedor de resultados
+    // Guardar resultados para la impresión
+    ultimosResultados = resultados;
+    ultimaGeneracionMensual = generacionMensual;
+    
+    // Ocultar preview y mostrar resultados reales
+    const resultsPreview = document.getElementById('resultsPreview');
+    if (resultsPreview) {
+        resultsPreview.style.display = 'none';
+    }
+    
     const resultsContainer = document.getElementById('resultsContainer');
-    resultsContainer.style.display = 'block';
+    resultsContainer.style.display = 'flex';
     resultsContainer.classList.add('show');
     
-    // Actualizar valores
+    // Obtener información del tipo de panel seleccionado
+    const selectPanel = document.getElementById('tipo_panel');
+    const selectedOption = selectPanel.options[selectPanel.selectedIndex];
+    const tipoPanelTexto = selectedOption.value === 'custom' 
+        ? 'Personalizado' 
+        : selectedOption.text.split(' - ')[0]; // "High Efficiency 350W"
+    
+    // Actualizar valores con tipo de panel
     document.getElementById('numPaneles').textContent = resultados.num_paneles;
     document.getElementById('potenciaTotal').textContent = 
-        `${resultados.potencia_total_kw.toFixed(2)} kW instalados`;
+        `${tipoPanelTexto} • ${resultados.potencia_total_kw.toFixed(2)} kW`;
     
     document.getElementById('energiaAnual').textContent = 
         `${formatNumber(resultados.energia_anual_total)} kWh`;
@@ -851,11 +900,6 @@ function mostrarResultados(resultados, generacionMensual) {
     // Cobertura del consumo
     document.getElementById('cobertura').textContent = 
         `${resultados.cobertura.toFixed(0)}%`;
-    
-    // Bandas de incertidumbre
-    document.getElementById('rangoInferior').textContent = formatNumber(resultados.rango_inferior);
-    document.getElementById('rangoSuperior').textContent = formatNumber(resultados.rango_superior);
-    document.getElementById('rmseValue').textContent = MODELO_OLS.metricas.rmse.toFixed(1);
     
     // Generar gráficas
     generarGraficaMensual(generacionMensual, resultados.num_paneles);
@@ -1069,219 +1113,206 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
 }
 
 // ============================================
-// Función de Impresión Mejorada (Formato Factura)
+// Funcionalidad de impresión estilo boleta
 // ============================================
 
 function imprimirReporte() {
+    if (!ultimosResultados || !ultimaGeneracionMensual) {
+        mostrarNotificacion('⚠️ Calcula primero el dimensionamiento antes de imprimir.', 'error');
+        return;
+    }
+
     const printReport = document.getElementById('printReport');
-    
-    // Obtener fecha actual
-    const fecha = new Date().toLocaleDateString('es-AR', {
+    if (!printReport) {
+        console.error('Error: no se encontró el contenedor printReport.');
+        return;
+    }
+
+    printReport.innerHTML = generarContenidoBoleta();
+    printReport.style.display = 'block';
+
+    setTimeout(() => {
+        window.print();
+        printReport.style.display = 'none';
+    }, 100);
+}
+
+function generarContenidoBoleta() {
+    const fecha = new Date();
+    const fechaFormateada = fecha.toLocaleDateString('es-AR', {
+        weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
-    
-    // Obtener datos del usuario
+    const horaFormateada = fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' });
+
     const inclinacion = document.getElementById('inclinacion').value;
-    const consumo = document.getElementById('consumo').value;
-    const precio_kwh = document.getElementById('precio_kwh').value;
-    const costo_panel = document.getElementById('costo_panel').value;
-    
-    // Obtener resultados calculados
-    const numPaneles = document.getElementById('numPaneles').textContent;
-    const potenciaTotal = document.getElementById('potenciaTotal').textContent;
-    const energiaAnual = document.getElementById('energiaAnual').textContent;
-    const energiaMensual = document.getElementById('energiaMensual').textContent;
-    const costoTotal = document.getElementById('costoTotal').textContent;
-    const costoPorPanel = document.getElementById('costoPorPanel').textContent;
-    const ahorroAnual = document.getElementById('ahorroAnual').textContent;
-    const ahorroMensual = document.getElementById('ahorroMensual').textContent;
-    const roi = document.getElementById('roi').textContent;
-    const co2Anual = document.getElementById('co2Anual').textContent;
-    const cobertura = document.getElementById('cobertura').textContent;
-    const rangoInferior = document.getElementById('rangoInferior').textContent;
-    const rangoSuperior = document.getElementById('rangoSuperior').textContent;
-    
-    // Obtener datos mensuales PSH y Temperatura
-    let datosMenuales = '';
-    const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
-                   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
-    for (let i = 1; i <= 12; i++) {
-        const psh = document.getElementById(`psh_${i}`).value || '-';
-        const temp = document.getElementById(`temp_${i}`).value || '-';
-        datosMenuales += `
-            <tr>
-                <td>${meses[i-1]}</td>
-                <td>${psh} h/día</td>
-                <td>${temp} °C</td>
-            </tr>`;
-    }
-    
-    // Obtener ubicación
-    const ubicacionTexto = ubicacionActual.nombre || 
-                          (ubicacionActual.lat ? `${ubicacionActual.lat.toFixed(2)}°, ${ubicacionActual.lon.toFixed(2)}°` : 'No especificada');
-    
-    // Generar HTML del reporte tipo factura
-    printReport.innerHTML = `
-        <div class="factura-header">
-            <h1>☀️ SOLAR360</h1>
-            <p>Reporte de Dimensionamiento Fotovoltaico</p>
-            <p class="factura-fecha">Fecha: ${fecha}</p>
-        </div>
-        
-        <div class="factura-separador"></div>
-        
-        <div class="factura-seccion">
-            <h2>DATOS DE ENTRADA</h2>
-            <table class="factura-tabla">
-                <tr>
-                    <td class="factura-label">📍 Ubicación seleccionada:</td>
-                    <td class="factura-valor">${ubicacionTexto}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">Inclinación de los paneles:</td>
-                    <td class="factura-valor">${inclinacion}°</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">Consumo mensual estimado:</td>
-                    <td class="factura-valor">${consumo} kWh/mes</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">Precio de electricidad:</td>
-                    <td class="factura-valor">$${precio_kwh}/kWh</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">Costo por panel:</td>
-                    <td class="factura-valor">$${costo_panel}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div class="factura-separador"></div>
-        
-        <div class="factura-seccion">
-            <h2>RESULTADOS DEL DIMENSIONAMIENTO</h2>
-            <table class="factura-tabla">
-                <tr>
-                    <td class="factura-label">🔆 Paneles recomendados:</td>
-                    <td class="factura-valor factura-destacado">${numPaneles} paneles</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">   Potencia instalada:</td>
-                    <td class="factura-valor">${potenciaTotal}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">⚡ Generación anual estimada:</td>
-                    <td class="factura-valor">${energiaAnual}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">   Generación mensual promedio:</td>
-                    <td class="factura-valor">${energiaMensual}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">📊 Cobertura del consumo:</td>
-                    <td class="factura-valor">${cobertura}</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div class="factura-separador"></div>
-        
-        <div class="factura-seccion">
-            <h2>ANÁLISIS ECONÓMICO</h2>
-            <table class="factura-tabla">
-                <tr>
-                    <td class="factura-label">💵 Inversión inicial:</td>
-                    <td class="factura-valor factura-destacado">${costoTotal}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">   Detalle:</td>
-                    <td class="factura-valor">${costoPorPanel}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">💰 Ahorro anual estimado:</td>
-                    <td class="factura-valor factura-destacado">${ahorroAnual}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">   Ahorro mensual:</td>
-                    <td class="factura-valor">${ahorroMensual}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">🎯 Retorno de inversión (ROI):</td>
-                    <td class="factura-valor factura-destacado">${roi}</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">🌍 Impacto ambiental:</td>
-                    <td class="factura-valor">${co2Anual} CO₂ evitado/año</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div class="factura-separador"></div>
-        
-        <div class="factura-seccion">
-            <h2>DATOS CLIMÁTICOS MENSUALES</h2>
-            <table class="factura-tabla factura-tabla-mensual">
-                <thead>
-                    <tr>
-                        <th>Mes</th>
-                        <th>Irradiación (PSH)</th>
-                        <th>Temperatura</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${datosMenuales}
-                </tbody>
-            </table>
-        </div>
-        
-        <div class="factura-separador"></div>
-        
-        <div class="factura-seccion">
-            <h2>BANDA DE INCERTIDUMBRE</h2>
-            <table class="factura-tabla">
-                <tr>
-                    <td class="factura-label">Rango estimado de generación anual:</td>
-                    <td class="factura-valor">${rangoInferior} - ${rangoSuperior} kWh/año</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">Nivel de confianza:</td>
-                    <td class="factura-valor">95%</td>
-                </tr>
-                <tr>
-                    <td class="factura-label">Modelo utilizado:</td>
-                    <td class="factura-valor">Regresión OLS (R² = 97%)</td>
-                </tr>
-            </table>
-        </div>
-        
-        <div class="factura-separador"></div>
-        
-        <div class="factura-footer">
-            <p><strong>NOTAS IMPORTANTES:</strong></p>
-            <p>• Los cálculos están basados en un modelo de regresión por mínimos cuadrados con 97% de precisión.</p>
-            <p>• Los datos solares provienen de NASA POWER (datos satelitales verificados).</p>
-            <p>• Se recomienda consultar con un instalador profesional certificado.</p>
-            <p>• El ROI puede variar según incentivos locales y tarifas eléctricas.</p>
-            <p>• Este reporte es válido únicamente para fines informativos y de planificación.</p>
-            <br>
-            <p class="factura-firma">_______________________________</p>
-            <p class="factura-firma-texto">Solar360 - www.solar360.com.ar</p>
+    const consumo = parseFloat(document.getElementById('consumo').value);
+    const precioKwh = parseFloat(document.getElementById('precio_kwh').value);
+
+    const selectPanel = document.getElementById('tipo_panel');
+    const tipoPanel = selectPanel.options[selectPanel.selectedIndex].text;
+    const costoPanel = parseFloat(document.getElementById('costo_panel').value);
+
+    const ubicacionTexto = ubicacionActual.nombre || 'Ubicación personalizada';
+    const coordenadas = ubicacionActual.lat && ubicacionActual.lon
+        ? `${ubicacionActual.lat.toFixed(4)}°, ${ubicacionActual.lon.toFixed(4)}°`
+        : 'No disponible';
+
+    const r = ultimosResultados;
+
+    return `
+        <div class="print-wrapper">
+            <header class="print-header">
+                <h1>☀ SOLAR360</h1>
+                <p class="print-subtitle">Resumen de Dimensionamiento Solar</p>
+                <p class="print-date">${fechaFormateada} • ${horaFormateada}</p>
+            </header>
+
+            <section class="print-section">
+                <h2>📍 Datos del Proyecto</h2>
+                <table>
+                    <tbody>
+                        <tr><td>Ubicación</td><td>${ubicacionTexto}</td></tr>
+                        <tr><td>Coordenadas</td><td>${coordenadas}</td></tr>
+                        <tr><td>Inclinación de paneles</td><td>${inclinacion}°</td></tr>
+                        <tr><td>Consumo mensual</td><td>${consumo.toFixed(0)} kWh</td></tr>
+                        <tr><td>Tarifa eléctrica</td><td>$${precioKwh.toFixed(2)}/kWh</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="print-section">
+                <h2>⚡ Sistema Recomendado</h2>
+                <table>
+                    <tbody>
+                        <tr><td>Tipo de panel</td><td>${tipoPanel}</td></tr>
+                        <tr><td>Cantidad de paneles</td><td><strong>${r.num_paneles}</strong></td></tr>
+                        <tr><td>Potencia instalada</td><td>${r.potencia_total_kw.toFixed(2)} kW</td></tr>
+                        <tr><td>Generación anual</td><td>${formatNumber(r.energia_anual_total.toFixed(0))} kWh</td></tr>
+                        <tr><td>Generación mensual promedio</td><td>${formatNumber(r.energia_mensual_promedio.toFixed(0))} kWh</td></tr>
+                        <tr><td>Cobertura del consumo</td><td>${r.cobertura.toFixed(1)}%</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="print-section">
+                <h2>💰 Análisis Financiero</h2>
+                <table>
+                    <tbody>
+                        <tr><td>Inversión total estimada</td><td>$${formatNumber(r.costo_total.toFixed(0))}</td></tr>
+                        <tr><td>Costo por panel</td><td>$${formatNumber(costoPanel.toFixed(0))}</td></tr>
+                        <tr><td>Ahorro mensual</td><td>$${formatNumber(r.ahorro_mensual.toFixed(0))}</td></tr>
+                        <tr><td>Ahorro anual</td><td>$${formatNumber(r.ahorro_anual.toFixed(0))}</td></tr>
+                        <tr><td>Retorno de inversión</td><td>${r.roi_anos.toFixed(1)} años</td></tr>
+                        <tr><td>Ahorro estimado a 25 años</td><td>$${formatNumber((r.ahorro_anual * 25).toFixed(0))}</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="print-section">
+                <h2>🌍 Impacto Ambiental</h2>
+                <table>
+                    <tbody>
+                        <tr><td>CO₂ evitado por año</td><td>${formatNumber(r.co2_anual.toFixed(0))} kg</td></tr>
+                        <tr><td>CO₂ evitado en 25 años</td><td>${formatNumber((r.co2_anual * 25).toFixed(0))} kg</td></tr>
+                        <tr><td>Equivalente árboles plantados (25 años)</td><td>~${formatNumber((r.co2_anual * 25 / 20).toFixed(0))} árboles</td></tr>
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="print-section">
+                <h2>☀ Datos NASA POWER (Mensual)</h2>
+                <table class="print-table-monthly">
+                    <thead>
+                        <tr>
+                            <th>Mes</th>
+                            <th>PSH (h/día)</th>
+                            <th>Temp. (°C)</th>
+                            <th>Generación por panel (kWh)</th>
+                            <th>Generación total (kWh)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${generarTablaMensualBoleta()}
+                    </tbody>
+                </table>
+                <p class="print-footnote">Fuente: NASA POWER (datos satelitales históricos para la ubicación seleccionada)</p>
+            </section>
+
+            <section class="print-section">
+                <h2>📊 Generación por Estación</h2>
+                <table>
+                    <tbody>
+                        ${generarAnalisisEstacionalBoleta()}
+                    </tbody>
+                </table>
+            </section>
+
+            <section class="print-section">
+                <h2>🔧 Especificaciones Técnicas</h2>
+                <ul class="print-list">
+                    <li>Modelo de cálculo: Regresión OLS (R² = ${MODELO_OLS.metricas.r2.toFixed(3)})</li>
+                    <li>Performance Ratio (PR): ${(MODELO_OLS.constantes.performance_ratio * 100).toFixed(0)}%</li>
+                    <li>Degradación anual estimada: 0.5%</li>
+                    <li>Vida útil esperada del sistema: 25-30 años</li>
+                    <li>Rango de incertidumbre anual: ±${formatNumber(r.incertidumbre_anual.toFixed(0))} kWh</li>
+                </ul>
+            </section>
+
+            <footer class="print-footer">
+                <p><strong>Solar360</strong> • La Plata, Buenos Aires • info@solar360.com.ar • +54 11 1234-5678</p>
+                <p class="print-footnote">Este reporte es informativo. Se recomienda evaluación técnica en sitio antes de realizar la instalación.</p>
+            </footer>
         </div>
     `;
-    
-    // Mostrar el reporte y ocultar el contenido normal
-    printReport.style.display = 'block';
-    
-    // Imprimir
-    window.print();
-    
-    // Ocultar el reporte después de imprimir
-    setTimeout(() => {
-        printReport.style.display = 'none';
-    }, 500);
+}
+
+function generarTablaMensualBoleta() {
+    const meses = [
+        'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+        'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+
+    return meses.map((mes, index) => {
+        const psh = document.getElementById(`psh_${index + 1}`)?.value || '-';
+        const temp = document.getElementById(`temp_${index + 1}`)?.value || '-';
+        const energiaPorPanel = ultimaGeneracionMensual[index].energia_mensual.toFixed(2);
+        const energiaTotal = (ultimaGeneracionMensual[index].energia_mensual * ultimosResultados.num_paneles).toFixed(1);
+
+        return `
+            <tr>
+                <td>${mes}</td>
+                <td>${psh}</td>
+                <td>${temp}</td>
+                <td>${energiaPorPanel}</td>
+                <td>${energiaTotal}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function generarAnalisisEstacionalBoleta() {
+    const temporadas = {
+        '☀️ Verano (Dic-Feb)': [11, 0, 1],
+        '🍂 Otoño (Mar-May)': [2, 3, 4],
+        '❄️ Invierno (Jun-Ago)': [5, 6, 7],
+        '🌸 Primavera (Sep-Nov)': [8, 9, 10]
+    };
+
+    return Object.entries(temporadas).map(([nombre, indices]) => {
+        const promedio = indices.reduce((acum, idx) => (
+            acum + ultimaGeneracionMensual[idx].energia_mensual * ultimosResultados.num_paneles
+        ), 0) / indices.length;
+
+        return `
+            <tr>
+                <td>${nombre}</td>
+                <td style="text-align:right;"><strong>${promedio.toFixed(1)} kWh/mes</strong></td>
+            </tr>
+        `;
+    }).join('');
 }
 
 // Agregar animaciones CSS
