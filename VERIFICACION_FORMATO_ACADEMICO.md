@@ -42,8 +42,14 @@
 - ⚠️ **Leyendas**: Deben estar en ARIAL 9, cursiva, debajo de cada figura
 
 ### 7. **REFERENCIAS BIBLIOGRÁFICAS** ✓
-- ✅ Numeradas correctamente: [1], [2], [3], [4], [5]
+- ✅ Numeradas correctamente: [1], [2], [3], [4], [5], [6], [7]
 - ✅ Formato consistente con el requerido
+- ✅ **Actualización de comparaciones con benchmarks**: Se actualizaron las comparaciones con PVWatts y SolarGIS usando información verificable de estudios reales:
+  - PVWatts: precisión típica 4-7% para sistemas residenciales en EE.UU. [2]
+  - PVGIS: precisión 3-5% para instalaciones en Europa [6]
+  - SolarGIS: nRMSE de 14,09% para irradiancia global horizontal [7]
+  - Se eliminaron valores de R² y RMSE no respaldados por referencias específicas
+  - Se agregaron referencias [6] y [7] con fuentes verificables
 
 ---
 

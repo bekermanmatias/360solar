@@ -93,7 +93,9 @@ function seleccionarModoUbicacion() {
     // Mostrar/ocultar secciones
     document.getElementById('seccionUbicacion').style.display = 'block';
     document.getElementById('seccionManual').style.display = 'none';
-    document.getElementById('botonCalcular').style.display = 'none';
+    
+    // Validar si se puede habilitar el botón calcular
+    validarYHabilitarBotonCalcular();
 }
 
 function seleccionarModoManual() {
@@ -106,7 +108,19 @@ function seleccionarModoManual() {
     // Mostrar/ocultar secciones
     document.getElementById('seccionUbicacion').style.display = 'none';
     document.getElementById('seccionManual').style.display = 'block';
-    document.getElementById('botonCalcular').style.display = 'block';
+    
+    // Validar si se puede habilitar el botón calcular
+    validarYHabilitarBotonCalcular();
+}
+
+function redimensionarGraficos() {
+    // Redimensionar gráficos si existen
+    if (monthlyChart) {
+        monthlyChart.resize();
+    }
+    if (financialChart) {
+        financialChart.resize();
+    }
 }
 
 function initializeApp() {
@@ -115,6 +129,12 @@ function initializeApp() {
     document.getElementById('modeManual').addEventListener('click', seleccionarModoManual);
     document.getElementById('openMapButton').addEventListener('click', abrirMapa);
     document.getElementById('simulatorForm').addEventListener('submit', calcularDimensionamiento);
+    
+    // Agregar validación en tiempo real a todos los campos
+    agregarValidacionTiempoReal();
+    
+    // Validar estado inicial del botón
+    validarYHabilitarBotonCalcular();
     
     // Smooth scroll para navegación
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -150,6 +170,15 @@ function initializeApp() {
     
     // Header scroll effect
     initHeaderScroll();
+    
+    // Listener para redimensionar gráficos cuando cambie el tamaño de la ventana
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            redimensionarGraficos();
+        }, 250);
+    });
     
     console.log('✅ Solar360 Simulator inicializado');
     console.log('📊 Modelo OLS cargado:', MODELO_OLS);
@@ -256,40 +285,28 @@ function cerrarMapa() {
 function actualizarPrecioPanel() {
     const selectPanel = document.getElementById('tipo_panel');
     const costoPanel = document.getElementById('costo_panel');
-    const customGroup = document.getElementById('custom-price-group');
-    const customInput = document.getElementById('costo_panel_custom');
     const panelInfo = document.getElementById('panel-info');
     
     const selectedOption = selectPanel.options[selectPanel.selectedIndex];
     const valor = selectedOption.value;
     
-    if (valor === 'custom') {
-        // Mostrar campo personalizado
-        customGroup.style.display = 'block';
-        costoPanel.value = customInput.value;
-        panelInfo.textContent = 'Ingresa el costo de tu panel';
-        
-        // Actualizar cuando cambie el input personalizado
-        customInput.addEventListener('input', function() {
-            costoPanel.value = this.value;
-        });
-    } else {
-        // Ocultar campo personalizado
-        customGroup.style.display = 'none';
-        costoPanel.value = valor;
-        
-        // Actualizar información según el tipo de panel
-        const potencia = selectedOption.getAttribute('data-potencia');
-        const infoTexts = {
-            '300000': 'Estándar, ideal para presupuestos ajustados',
-            '350000': 'Óptimo balance precio-rendimiento',
-            '380000': 'Alta eficiencia, garantía 25 años',
-            '420000': 'Mayor potencia, menos paneles necesarios',
-            '480000': 'Tier 1, máxima calidad y eficiencia',
-            '650000': 'Tecnología bifacial, genera por ambos lados'
-        };
-        panelInfo.textContent = infoTexts[valor] || 'Panel solar fotovoltaico';
-    }
+    // Actualizar costo del panel
+    costoPanel.value = valor;
+    
+    // Actualizar información según el tipo de panel
+    const potencia = selectedOption.getAttribute('data-potencia');
+    const infoTexts = {
+        '300000': 'Estándar, ideal para presupuestos ajustados',
+        '350000': 'Óptimo balance precio-rendimiento',
+        '380000': 'Alta eficiencia, garantía 25 años',
+        '420000': 'Mayor potencia, menos paneles necesarios',
+        '480000': 'Tier 1, máxima calidad y eficiencia',
+        '650000': 'Tecnología bifacial, genera por ambos lados'
+    };
+    panelInfo.textContent = infoTexts[valor] || 'Panel solar fotovoltaico';
+    
+    // Validar si se puede habilitar el botón calcular
+    validarYHabilitarBotonCalcular();
 }
 
 function inicializarMapa() {
@@ -364,14 +381,20 @@ async function confirmarUbicacion() {
     // Cerrar modal
     cerrarMapa();
     
-    // Obtener datos solares
-    const statusDiv = document.getElementById('locationStatus');
-    const statusIcon = statusDiv.querySelector('.status-icon');
-    const statusText = statusDiv.querySelector('.status-text');
+    // Obtener referencias al botón
+    const button = document.getElementById('openMapButton');
+    const buttonIcon = document.getElementById('buttonIcon');
+    const buttonText = document.getElementById('buttonText');
     
-    statusDiv.style.display = 'flex';
-    statusIcon.innerHTML = '<div class="spinner"></div>';
-    statusText.textContent = `Obteniendo datos...`;
+    // Mostrar spinner en el botón (mantener color primario)
+    buttonIcon.innerHTML = '<div class="spinner"></div>';
+    buttonText.textContent = 'Obteniendo datos...';
+    button.disabled = true;
+    // Asegurar que mantenga el estilo primario durante la carga
+    if (!button.classList.contains('btn-success')) {
+        button.style.background = '';
+        button.style.boxShadow = '';
+    }
     
     // Guardar coordenadas
     ubicacionActual.lat = selectedLat;
@@ -379,29 +402,40 @@ async function confirmarUbicacion() {
     
     try {
         // Primero obtener el nombre del lugar
-        await obtenerNombreLugar(selectedLat, selectedLon, statusText);
+        await obtenerNombreLugar(selectedLat, selectedLon, buttonText);
         
-        // Luego obtener datos solares
-        await obtenerDatosSolaresNASA(selectedLat, selectedLon, statusDiv, statusIcon, statusText);
+        // Luego obtener datos solares (solo guarda datos, no calcula)
+        await obtenerDatosSolaresNASA(selectedLat, selectedLon, buttonIcon, buttonText);
         
-        // Si estamos en modo ubicación, calcular automáticamente
-        if (modoActual === 'ubicacion') {
-            statusText.textContent = 'Calculando sistema solar...';
-            
-            // Esperar un momento para que el usuario vea el mensaje
-            setTimeout(() => {
-                // Simular el evento submit
-                const formData = new FormData(document.getElementById('simulatorForm'));
-                const mockEvent = { preventDefault: () => {} };
-                calcularDimensionamiento(mockEvent);
-                
-                statusDiv.style.display = 'none';
-            }, 1000);
-        }
+        // Mostrar mensaje de confirmación en el botón (mantener color primario amarillo)
+        const nombreUbicacion = ubicacionActual.nombre || `${selectedLat.toFixed(2)}°, ${selectedLon.toFixed(2)}°`;
+        buttonIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        buttonText.textContent = `Datos obtenidos para ${nombreUbicacion}`;
+        buttonText.style.whiteSpace = 'normal';
+        buttonText.style.wordWrap = 'break-word';
+        buttonText.style.overflow = 'visible';
+        // Mantener color primario amarillo (no cambiar a verde)
+        button.classList.remove('btn-success');
+        button.style.background = '';
+        button.style.boxShadow = '';
+        button.disabled = false;
+        
+        // Validar si ahora se puede habilitar el botón calcular
+        validarYHabilitarBotonCalcular();
+        
     } catch (error) {
         console.error('Error:', error);
         mostrarNotificacion('⚠️ Error obteniendo datos. Intenta de nuevo.', 'error');
-        statusDiv.style.display = 'none';
+        // Restaurar botón a estado inicial
+        buttonIcon.innerHTML = '<svg class="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M1 6v16l7-4 8 4 7-4V2l-7 4-8-4-7 4zm7-4v16m8-12v16"/></svg>';
+        buttonText.textContent = 'Seleccionar Ubicación en el Mapa';
+        buttonText.style.whiteSpace = 'normal';
+        buttonText.style.wordWrap = 'break-word';
+        buttonText.style.overflow = 'visible';
+        button.classList.remove('btn-success');
+        button.style.background = '';
+        button.style.boxShadow = '';
+        button.disabled = false;
     }
 }
 
@@ -409,9 +443,9 @@ async function confirmarUbicacion() {
 // Obtener nombre del lugar (Geocodificación Inversa)
 // ============================================
 
-async function obtenerNombreLugar(lat, lon, statusText) {
+async function obtenerNombreLugar(lat, lon, buttonText) {
     try {
-        statusText.textContent = `Obteniendo nombre de la ubicación...`;
+        buttonText.textContent = 'Obteniendo nombre de la ubicación...';
         
         // Usar Nominatim API (OpenStreetMap) para geocodificación inversa
         const url = `https://nominatim.openstreetmap.org/reverse?` +
@@ -456,12 +490,12 @@ async function obtenerNombreLugar(lat, lon, statusText) {
         ubicacionActual.nombre = nombreLugar;
         console.log('📍 Ubicación identificada:', nombreLugar);
         
-        statusText.textContent = `📍 ${nombreLugar} - Obteniendo datos solares...`;
+        buttonText.textContent = `${nombreLugar} - Obteniendo datos solares...`;
         
     } catch (error) {
         console.warn('No se pudo obtener el nombre del lugar:', error);
         ubicacionActual.nombre = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
-        statusText.textContent = `Obteniendo datos solares de ${ubicacionActual.nombre}...`;
+        buttonText.textContent = `Obteniendo datos solares...`;
     }
 }
 
@@ -534,13 +568,15 @@ async function obtenerDatosUbicacion() {
 // Obtener datos solares de NASA POWER API
 // ============================================
 
-async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusText) {
+async function obtenerDatosSolaresNASA(lat, lon, buttonIcon, buttonText) {
     try {
         // API de NASA POWER - Datos solares mensuales
         // Documentación: https://power.larc.nasa.gov/docs/services/api/
         
-        statusIcon.innerHTML = '<div class="spinner"></div>';
-        statusText.textContent = 'Obteniendo datos solares...';
+        // El spinner ya está mostrado en el botón, solo actualizamos el texto si es necesario
+        if (buttonText) {
+            buttonText.textContent = 'Obteniendo datos solares...';
+        }
         
         // Parámetros solares:
         // ALLSKY_SFC_SW_DWN: Irradiancia solar (kWh/m²/día)
@@ -576,7 +612,7 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
         // Convertir objeto de meses a array
         const mesesKeys = Object.keys(irradiance).sort();
         
-        // Rellenar formulario
+        // Rellenar formulario (guardar datos internamente)
         for (let i = 0; i < 12; i++) {
             const mesKey = mesesKeys[i];
             
@@ -590,20 +626,18 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
             }
         }
         
-        // Éxito - ocultar automáticamente sin mensaje
-        setTimeout(() => statusDiv.style.display = 'none', 800);
+        // Datos guardados - NO calcular automáticamente
+        // El mensaje de confirmación se mostrará en confirmarUbicacion()
+        console.log('✅ Datos climáticos guardados internamente');
         
     } catch (error) {
         console.error('Error consultando NASA POWER:', error);
         
         // Intentar con API alternativa (Open-Meteo)
         try {
-            await obtenerDatosSolaresOpenMeteo(lat, lon, statusDiv, statusIcon, statusText);
+            await obtenerDatosSolaresOpenMeteo(lat, lon, buttonIcon, buttonText);
         } catch (fallbackError) {
-            statusIcon.textContent = '❌';
-            statusText.textContent = 'No se pudieron obtener datos solares';
-            mostrarNotificacion('⚠️ Error obteniendo datos. Usa datos de ejemplo o ingrésalos manualmente.', 'error');
-            setTimeout(() => statusDiv.style.display = 'none', 4000);
+            throw new Error('No se pudieron obtener datos solares');
         }
     }
 }
@@ -612,10 +646,12 @@ async function obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusTe
 // API Alternativa: Open-Meteo
 // ============================================
 
-async function obtenerDatosSolaresOpenMeteo(lat, lon, statusDiv, statusIcon, statusText) {
+async function obtenerDatosSolaresOpenMeteo(lat, lon, buttonIcon, buttonText) {
     try {
-        statusIcon.innerHTML = '<div class="spinner"></div>';
-        statusText.textContent = 'Obteniendo datos solares...';
+        // El spinner ya está mostrado en el botón, solo actualizamos el texto si es necesario
+        if (buttonText) {
+            buttonText.textContent = 'Obteniendo datos solares (Open-Meteo)...';
+        }
         
         // Open-Meteo Archive API para datos históricos
         const endDate = new Date();
@@ -670,8 +706,8 @@ async function obtenerDatosSolaresOpenMeteo(lat, lon, statusDiv, statusIcon, sta
             }
         }
         
-        // Éxito - ocultar automáticamente sin mensaje
-        setTimeout(() => statusDiv.style.display = 'none', 800);
+        // Datos guardados - NO calcular automáticamente
+        console.log('✅ Datos climáticos guardados internamente (Open-Meteo)');
         
     } catch (error) {
         console.error('Error consultando Open-Meteo:', error);
@@ -680,10 +716,96 @@ async function obtenerDatosSolaresOpenMeteo(lat, lon, statusDiv, statusIcon, sta
 }
 
 // ============================================
+// Validar y Habilitar Botón Calcular
+// ============================================
+
+function validarYHabilitarBotonCalcular() {
+    const btnCalcular = document.getElementById('btnCalcularFinal');
+    let puedeCalcular = true;
+    
+    // 1. Validar campos de Parámetros del Sistema (4 campos)
+    const inclinacion = document.getElementById('inclinacion').value;
+    const consumo = document.getElementById('consumo').value;
+    const precio_kwh = document.getElementById('precio_kwh').value;
+    const tipo_panel = document.getElementById('tipo_panel').value;
+    
+    if (!inclinacion || inclinacion === '' || isNaN(parseFloat(inclinacion))) {
+        puedeCalcular = false;
+    }
+    if (!consumo || consumo === '' || isNaN(parseFloat(consumo)) || parseFloat(consumo) <= 0) {
+        puedeCalcular = false;
+    }
+    if (!precio_kwh || precio_kwh === '' || isNaN(parseFloat(precio_kwh)) || parseFloat(precio_kwh) <= 0) {
+        puedeCalcular = false;
+    }
+    if (!tipo_panel || tipo_panel === '') {
+        puedeCalcular = false;
+    }
+    
+    // 2. Validar datos climáticos según el modo
+    if (modoActual === 'ubicacion') {
+        // En modo ubicación: verificar que el botón muestre "Datos obtenidos para..."
+        const buttonText = document.getElementById('buttonText');
+        if (!buttonText || !buttonText.textContent.includes('Datos obtenidos para')) {
+            puedeCalcular = false;
+        }
+    } else if (modoActual === 'manual') {
+        // En modo manual: verificar que todos los 12 meses estén completos
+        for (let i = 1; i <= 12; i++) {
+            const psh = document.getElementById(`psh_${i}`).value;
+            const temp = document.getElementById(`temp_${i}`).value;
+            
+            if (!psh || psh === '' || isNaN(parseFloat(psh)) || parseFloat(psh) < 0) {
+                puedeCalcular = false;
+                break;
+            }
+            if (!temp || temp === '' || isNaN(parseFloat(temp))) {
+                puedeCalcular = false;
+                break;
+            }
+        }
+    }
+    
+    // 3. Habilitar o deshabilitar el botón
+    if (puedeCalcular) {
+        btnCalcular.disabled = false;
+        btnCalcular.style.opacity = '1';
+        btnCalcular.style.cursor = 'pointer';
+    } else {
+        btnCalcular.disabled = true;
+        btnCalcular.style.opacity = '0.6';
+        btnCalcular.style.cursor = 'not-allowed';
+    }
+}
+
+// ============================================
+// Agregar Validación en Tiempo Real
+// ============================================
+
+function agregarValidacionTiempoReal() {
+    // Campos de Parámetros del Sistema
+    document.getElementById('inclinacion').addEventListener('input', validarYHabilitarBotonCalcular);
+    document.getElementById('inclinacion').addEventListener('change', validarYHabilitarBotonCalcular);
+    document.getElementById('consumo').addEventListener('input', validarYHabilitarBotonCalcular);
+    document.getElementById('consumo').addEventListener('change', validarYHabilitarBotonCalcular);
+    document.getElementById('precio_kwh').addEventListener('input', validarYHabilitarBotonCalcular);
+    document.getElementById('precio_kwh').addEventListener('change', validarYHabilitarBotonCalcular);
+    document.getElementById('tipo_panel').addEventListener('change', validarYHabilitarBotonCalcular);
+    
+    // Campos de datos manuales (modo experto)
+    for (let i = 1; i <= 12; i++) {
+        document.getElementById(`psh_${i}`).addEventListener('input', validarYHabilitarBotonCalcular);
+        document.getElementById(`psh_${i}`).addEventListener('change', validarYHabilitarBotonCalcular);
+        document.getElementById(`temp_${i}`).addEventListener('input', validarYHabilitarBotonCalcular);
+        document.getElementById(`temp_${i}`).addEventListener('change', validarYHabilitarBotonCalcular);
+    }
+}
+
+// ============================================
 // Función principal: Calcular Dimensionamiento
 // ============================================
 
-function calcularDimensionamiento(e) {
+async function calcularDimensionamiento(e) {
     e.preventDefault();
     
     console.log('🔄 Iniciando cálculo de dimensionamiento...');
@@ -697,22 +819,75 @@ function calcularDimensionamiento(e) {
         return;
     }
     
-    // 3. Calcular generación mensual usando modelo OLS
-    const generacionMensual = calcularGeneracionMensual(datos);
+    // 3. Mostrar estado de carga en el botón
+    const btnCalcular = document.getElementById('btnCalcularFinal');
+    const btnIcon = btnCalcular.querySelector('.btn-icon');
+    const btnText = btnCalcular.querySelector('span');
     
-    // 4. Calcular dimensionamiento
-    const resultados = calcularResultados(datos, generacionMensual);
+    // Guardar estado original
+    const originalHTML = btnIcon.innerHTML;
+    const originalText = btnText.textContent;
     
-    // 5. Mostrar resultados
-    mostrarResultados(resultados, generacionMensual);
+    // Cambiar a estado de carga
+    btnCalcular.disabled = true;
+    btnCalcular.style.opacity = '0.8';
+    btnCalcular.style.cursor = 'wait';
     
-    // 6. Scroll a resultados
-    document.getElementById('resultsContainer').scrollIntoView({ 
-        behavior: 'smooth', 
-        block: 'nearest' 
-    });
+    // Crear spinner SVG animado
+    btnIcon.innerHTML = `
+        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3"/>
+        <path d="M12 2 A10 10 0 0 1 22 12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round">
+            <animateTransform attributeName="transform" type="rotate" from="0 12 12" to="360 12 12" dur="0.8s" repeatCount="indefinite"/>
+        </path>
+    `;
+    btnIcon.style.display = 'block';
+    btnText.textContent = 'Calculando...';
     
-    console.log('✅ Cálculo completado:', resultados);
+    // Simular tiempo de procesamiento (2-2.5 segundos)
+    const tiempoCarga = 2000 + Math.random() * 500; // Entre 2 y 2.5 segundos
+    
+    try {
+        // Esperar tiempo de carga simulado
+        await new Promise(resolve => setTimeout(resolve, tiempoCarga));
+        
+        // 4. Calcular generación mensual usando modelo OLS
+        const generacionMensual = calcularGeneracionMensual(datos);
+        
+        // 5. Calcular dimensionamiento
+        const resultados = calcularResultados(datos, generacionMensual);
+        
+        // 6. Mostrar resultados
+        mostrarResultados(resultados, generacionMensual);
+        
+        // 7. Restaurar botón
+        btnIcon.innerHTML = originalHTML;
+        btnText.textContent = originalText;
+        btnCalcular.disabled = false;
+        btnCalcular.style.opacity = '1';
+        btnCalcular.style.cursor = 'pointer';
+        
+        // 8. Scroll a resultados
+        setTimeout(() => {
+            document.getElementById('resultsContainer').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'nearest' 
+            });
+        }, 100);
+        
+        console.log('✅ Cálculo completado:', resultados);
+        
+    } catch (error) {
+        console.error('❌ Error en el cálculo:', error);
+        
+        // Restaurar botón en caso de error
+        btnIcon.innerHTML = originalHTML;
+        btnText.textContent = originalText;
+        btnCalcular.disabled = false;
+        btnCalcular.style.opacity = '1';
+        btnCalcular.style.cursor = 'pointer';
+        
+        mostrarNotificacion('⚠️ Error al calcular el dimensionamiento. Por favor intenta nuevamente.', 'error');
+    }
 }
 
 // ============================================
@@ -957,17 +1132,30 @@ function generarGraficaMensual(generacionMensual, numPaneles) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 8,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             return `${context.parsed.y} kWh`;
                         }
+                    },
+                    titleFont: {
+                        size: window.innerWidth < 768 ? 11 : 13
+                    },
+                    bodyFont: {
+                        size: window.innerWidth < 768 ? 11 : 12
                     }
                 }
             },
@@ -976,13 +1164,31 @@ function generarGraficaMensual(generacionMensual, numPaneles) {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Energía Generada (kWh)'
+                        text: 'Energía Generada (kWh)',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 12
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 11
+                        }
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Mes'
+                        text: 'Mes',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 12
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 9 : 10
+                        },
+                        maxRotation: window.innerWidth < 768 ? 45 : 0,
+                        minRotation: window.innerWidth < 768 ? 45 : 0
                     }
                 }
             }
@@ -1060,17 +1266,30 @@ function generarGraficaFinanciera(resultados) {
         },
         options: {
             responsive: true,
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
                 legend: {
                     display: true,
-                    position: 'top'
+                    position: 'top',
+                    labels: {
+                        boxWidth: 12,
+                        padding: 8,
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 12
+                        }
+                    }
                 },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
                             return `${context.dataset.label}: $${formatNumber(Math.abs(context.parsed.y))}`;
                         }
+                    },
+                    titleFont: {
+                        size: window.innerWidth < 768 ? 11 : 13
+                    },
+                    bodyFont: {
+                        size: window.innerWidth < 768 ? 11 : 12
                     }
                 }
             },
@@ -1078,18 +1297,32 @@ function generarGraficaFinanciera(resultados) {
                 y: {
                     title: {
                         display: true,
-                        text: 'Dinero ($)'
+                        text: 'Dinero ($)',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 12
+                        }
                     },
                     ticks: {
                         callback: function(value) {
                             return '$' + formatNumber(value);
+                        },
+                        font: {
+                            size: window.innerWidth < 768 ? 10 : 11
                         }
                     }
                 },
                 x: {
                     title: {
                         display: true,
-                        text: 'Tiempo'
+                        text: 'Tiempo',
+                        font: {
+                            size: window.innerWidth < 768 ? 11 : 12
+                        }
+                    },
+                    ticks: {
+                        font: {
+                            size: window.innerWidth < 768 ? 9 : 10
+                        }
                     }
                 }
             }

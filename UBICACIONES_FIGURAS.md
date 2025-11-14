@@ -98,7 +98,7 @@ La ecuación implementada en JavaScript para cada mes...
 
 **Texto de referencia en el paper**:
 ```
-La comparación con benchmarks de la industria muestra que nuestro modelo con R² de 0,970 y RMSE de 5,8 W supera a PVWatts de NREL que presenta R² entre 0,92 y 0,95 con RMSE de aproximadamente 8 a 12 W, y a SolarGIS que muestra R² entre 0,90 y 0,93 con RMSE de aproximadamente 10 a 15 W.
+La comparación con benchmarks de la industria muestra que nuestro modelo con R² de 0,970 y RMSE de 5,8 W presenta métricas superiores a herramientas reconocidas. Según estudios de validación, PVWatts de NREL reporta una precisión típica del 4-7% para sistemas residenciales en Estados Unidos, mientras que PVGIS, herramienta similar a SolarGIS basada en datos satelitales, presenta una precisión del 3-5% para instalaciones en Europa. SolarGIS ha demostrado un error cuadrático medio normalizado (nRMSE) de 14,09% en la estimación de irradiancia global horizontal. Nuestro modelo, con un MAPE de 3,5% y RMSE de 5,8 W, muestra un rendimiento comparable o superior a estas herramientas establecidas.
 
 [INSERTAR FIGURA 5 AQUÍ]
 ```
