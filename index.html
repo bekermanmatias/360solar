@@ -291,9 +291,18 @@
                                 </button>
                                 <button type="button" class="mode-btn" id="modeManual">
                                     <div class="mode-icon">
-                                        <svg viewBox="0 0 24 24" fill="none">
-                                            <rect x="2" y="4" width="20" height="16" rx="2"/>
-                                            <path d="M6 8h.01M10 8h.01M14 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M6 16h.01M10 16h.01M14 16h.01M18 16h.01"/>
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="2" y="4" width="20" height="16" rx="2" ry="2"/>
+                                            <line x1="6" y1="8" x2="6" y2="8"/>
+                                            <line x1="10" y1="8" x2="10" y2="8"/>
+                                            <line x1="14" y1="8" x2="14" y2="8"/>
+                                            <line x1="18" y1="8" x2="18" y2="8"/>
+                                            <line x1="6" y1="12" x2="6" y2="12"/>
+                                            <line x1="10" y1="12" x2="10" y2="12"/>
+                                            <line x1="14" y1="12" x2="14" y2="12"/>
+                                            <line x1="18" y1="12" x2="18" y2="12"/>
+                                            <line x1="6" y1="16" x2="8" y2="16"/>
+                                            <line x1="10" y1="16" x2="18" y2="16"/>
                                         </svg>
                                     </div>
                                     <div class="mode-title">Modo Experto</div>
@@ -441,8 +450,11 @@
                             <div class="form-grid-2">
                                 <div class="form-group">
                                     <label for="inclinacion">Inclinación de Paneles (°)</label>
-                                    <input type="number" id="inclinacion" value="25" min="0" max="90" step="1" required>
-                                    <small>Recomendado: 20-30° para Argentina</small>
+                                    <select id="inclinacion" required>
+                                        <option value="20">20°</option>
+                                        <option value="45" selected>45°</option>
+                                    </select>
+                                    <small>Opciones disponibles: 20° o 45°</small>
                                 </div>
 
                                 <div class="form-group">
@@ -458,19 +470,15 @@
                                 </div>
 
                                 <div class="form-group">
-                                    <label for="tipo_panel">Tipo de Panel Solar</label>
-                                    <select id="tipo_panel" onchange="actualizarPrecioPanel()" required>
-                                        <option value="300000" data-potencia="300">Estándar 300W - $300.000</option>
-                                        <option value="350000" data-potencia="350">Premium 350W - $350.000</option>
-                                        <option value="380000" data-potencia="350" selected>High Efficiency 350W - $380.000</option>
-                                        <option value="420000" data-potencia="400">Premium Plus 400W - $420.000</option>
-                                        <option value="480000" data-potencia="450">Tier 1 - 450W - $480.000</option>
-                                        <option value="650000" data-potencia="550">Bifacial 550W - $650.000</option>
-                                    </select>
-                                    <small id="panel-info">Alta eficiencia, garantía 25 años</small>
+                                    <label>Panel Solar (Referencia)</label>
+                                    <div class="panel-estandar-display">
+                                        <div class="panel-estandar-title">190W - $380.000</div>
+                                    </div>
+                                    <small>Panel estándar</small>
                                 </div>
                                 
                                 <input type="hidden" id="costo_panel" value="380000">
+                                <input type="hidden" id="tipo_panel" value="estandar">
                             </div>
                         </div>
 
@@ -536,7 +544,7 @@
                             <div class="result-content">
                                 <div class="result-label">Paneles Recomendados</div>
                                 <div class="result-value">8</div>
-                                <div class="result-sublabel">High Efficiency 350W • 2.8 kW</div>
+                                <div class="result-sublabel">Panel de Referencia 190W • 2.8 kW</div>
                             </div>
                         </div>
 
@@ -762,7 +770,7 @@
                     <!-- Charts -->
                     <div class="charts-container">
                         <div class="chart-wrapper">
-                            <h4 class="chart-title">Generación Mensual Estimada</h4>
+                            <h4 class="chart-title">Generación vs Consumo Mensual</h4>
                             <canvas id="monthlyChart"></canvas>
                         </div>
                         

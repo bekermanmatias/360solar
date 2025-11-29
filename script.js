@@ -29,7 +29,7 @@ const MODELO_OLS = {
     // Constantes físicas
     constantes: {
         irradiancia_std: 1000,         // W/m² (STC - Standard Test Conditions)
-        potencia_panel_nominal: 350,   // Watts por panel (típico)
+        potencia_panel_nominal: 190,   // Watts por panel (según dataset experimental)
         performance_ratio: 0.85,       // PR típico (pérdidas del sistema)
         dias_mes_promedio: 30.4,
         factor_co2: 0.5               // kg CO₂ por kWh evitado
@@ -49,6 +49,76 @@ const MESES = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
 ];
+
+// ============================================
+// Modelo por Clusters (P = β₁ · G) según paper
+// ============================================
+//
+// Este modelo reemplaza el uso de temperatura e inclinación como variables libres
+// en la regresión. Ahora:
+//   - T_mes y θ_user solo sirven para elegir uno de los 6 clusters.
+//   - La relación física se modela como P = β₁ · G, con β₁ fijo por cluster.
+//
+// Clusters (Sección 3.1 y Tabla 4.1 del paper):
+//   Cluster 1: 10°C, 20°  → β₁ = 0.1908
+//   Cluster 2: 20°C, 20°  → β₁ = 0.1836
+//   Cluster 3: 30°C, 20°  → β₁ = 0.1764
+//   Cluster 4: 10°C, 45°  → β₁ = 0.1813
+//   Cluster 5: 20°C, 45°  → β₁ = 0.1744
+//   Cluster 6: 30°C, 45°  → β₁ = 0.1676
+//
+const MODELO_CLUSTER = {
+    betas: {
+        '10_20': 0.1908,
+        '20_20': 0.1836,
+        '30_20': 0.1764,
+        '10_45': 0.1813,
+        '20_45': 0.1744,
+        '30_45': 0.1676
+    },
+    metricas: {
+        r2: 1.0
+    },
+    constantes: {
+        irradiancia_ref_Wm2: 1000,     // G_ref aproximado (STC)
+        potencia_panel_nominal: 190,   // W/panel (según dataset: β₁ promedio ≈ 0.19 → 190W)
+        performance_ratio: 0.85,       // η_sistema del paper
+        dias_mes_promedio: 30.4,
+        factor_co2: 0.5,
+        // Modelo de costos BOS (Balance of System)
+        costo_base_bos: 1500000,       // Costo fijo: inversor, tablero, instalación base
+        costo_por_panel: 200000        // Costo por panel (panel + instalación incremental)
+    }
+};
+
+/**
+ * Discretiza la temperatura mensual y la inclinación del usuario
+ * al cluster más cercano, devolviendo el β₁ correspondiente.
+ *
+ * - Temperatura: se aproxima a {10, 20, 30}°C por vecindad
+ * - Inclinación: se aproxima a 20° o 45° (umbral 32.5°)
+ */
+function seleccionarClusterBeta1(temperaturaMes, inclinacionUser) {
+    let tempCluster;
+    if (temperaturaMes <= 15) {
+        tempCluster = 10;
+    } else if (temperaturaMes <= 25) {
+        tempCluster = 20;
+    } else {
+        tempCluster = 30;
+    }
+
+    const angleCluster = inclinacionUser < 32.5 ? 20 : 45;
+    const key = `${tempCluster}_${angleCluster}`;
+    const beta = MODELO_CLUSTER.betas[key];
+
+    if (beta === undefined) {
+        console.warn('Cluster no encontrado, usando 20°C, 20° por defecto');
+        return MODELO_CLUSTER.betas['20_20'];
+    }
+
+    return beta;
+}
 
 // ============================================
 // Variables globales para gráficas y ubicación
@@ -181,7 +251,6 @@ function initializeApp() {
     });
     
     console.log('✅ Solar360 Simulator inicializado');
-    console.log('📊 Modelo OLS cargado:', MODELO_OLS);
 }
 
 // ============================================
@@ -279,33 +348,12 @@ function cerrarMapa() {
 }
 
 // ============================================
-// Actualizar Precio de Panel
+// Actualizar Precio de Panel (simplificado - panel estándar único)
 // ============================================
 
 function actualizarPrecioPanel() {
-    const selectPanel = document.getElementById('tipo_panel');
-    const costoPanel = document.getElementById('costo_panel');
-    const panelInfo = document.getElementById('panel-info');
-    
-    const selectedOption = selectPanel.options[selectPanel.selectedIndex];
-    const valor = selectedOption.value;
-    
-    // Actualizar costo del panel
-    costoPanel.value = valor;
-    
-    // Actualizar información según el tipo de panel
-    const potencia = selectedOption.getAttribute('data-potencia');
-    const infoTexts = {
-        '300000': 'Estándar, ideal para presupuestos ajustados',
-        '350000': 'Óptimo balance precio-rendimiento',
-        '380000': 'Alta eficiencia, garantía 25 años',
-        '420000': 'Mayor potencia, menos paneles necesarios',
-        '480000': 'Tier 1, máxima calidad y eficiencia',
-        '650000': 'Tecnología bifacial, genera por ambos lados'
-    };
-    panelInfo.textContent = infoTexts[valor] || 'Panel solar fotovoltaico';
-    
-    // Validar si se puede habilitar el botón calcular
+    // Panel estándar fijo según modelo experimental
+    // No hay selector, solo validación
     validarYHabilitarBotonCalcular();
 }
 
@@ -723,22 +771,19 @@ function validarYHabilitarBotonCalcular() {
     const btnCalcular = document.getElementById('btnCalcularFinal');
     let puedeCalcular = true;
     
-    // 1. Validar campos de Parámetros del Sistema (4 campos)
+    // 1. Validar campos de Parámetros del Sistema
     const inclinacion = document.getElementById('inclinacion').value;
     const consumo = document.getElementById('consumo').value;
     const precio_kwh = document.getElementById('precio_kwh').value;
-    const tipo_panel = document.getElementById('tipo_panel').value;
     
-    if (!inclinacion || inclinacion === '' || isNaN(parseFloat(inclinacion))) {
+    // Inclinación: solo acepta 20° o 45°
+    if (!inclinacion || inclinacion === '' || (inclinacion !== '20' && inclinacion !== '45')) {
         puedeCalcular = false;
     }
     if (!consumo || consumo === '' || isNaN(parseFloat(consumo)) || parseFloat(consumo) <= 0) {
         puedeCalcular = false;
     }
     if (!precio_kwh || precio_kwh === '' || isNaN(parseFloat(precio_kwh)) || parseFloat(precio_kwh) <= 0) {
-        puedeCalcular = false;
-    }
-    if (!tipo_panel || tipo_panel === '') {
         puedeCalcular = false;
     }
     
@@ -784,13 +829,11 @@ function validarYHabilitarBotonCalcular() {
 
 function agregarValidacionTiempoReal() {
     // Campos de Parámetros del Sistema
-    document.getElementById('inclinacion').addEventListener('input', validarYHabilitarBotonCalcular);
     document.getElementById('inclinacion').addEventListener('change', validarYHabilitarBotonCalcular);
     document.getElementById('consumo').addEventListener('input', validarYHabilitarBotonCalcular);
     document.getElementById('consumo').addEventListener('change', validarYHabilitarBotonCalcular);
     document.getElementById('precio_kwh').addEventListener('input', validarYHabilitarBotonCalcular);
     document.getElementById('precio_kwh').addEventListener('change', validarYHabilitarBotonCalcular);
-    document.getElementById('tipo_panel').addEventListener('change', validarYHabilitarBotonCalcular);
     
     // Campos de datos manuales (modo experto)
     for (let i = 1; i <= 12; i++) {
@@ -918,7 +961,8 @@ function obtenerDatosFormulario() {
 // ============================================
 
 function validarDatos(datos) {
-    if (isNaN(datos.inclinacion) || datos.inclinacion < 0 || datos.inclinacion > 90) {
+    // Inclinación: solo acepta 20° o 45° (valores del modelo experimental)
+    if (isNaN(datos.inclinacion) || (datos.inclinacion !== 20 && datos.inclinacion !== 45)) {
         return false;
     }
     
@@ -940,47 +984,37 @@ function validarDatos(datos) {
 // ============================================
 
 function calcularGeneracionMensual(datos) {
-    const { coeficientes, constantes } = MODELO_OLS;
+    const { constantes } = MODELO_CLUSTER;
     const generacion = [];
-    
+
     for (let mes = 0; mes < 12; mes++) {
-        // Calcular potencia estimada usando el modelo OLS
-        // P_gen = β₀ + β₁·I + β₂·T + β₃·θ
-        
-        const irradiancia = constantes.irradiancia_std; // 1000 W/m² (STC)
-        const temperatura = datos.temperatura[mes];
-        const inclinacion = datos.inclinacion;
-        
-        // Potencia instantánea por panel (Watts)
-        const potencia_instantanea = 
-            coeficientes.intercepto +
-            coeficientes.irradiance_Wm2 * irradiancia +
-            coeficientes.temperatura_C * temperatura +
-            coeficientes.inclinacion * inclinacion;
-        
-        // Ajustar a potencia nominal del panel
-        // El modelo predice para condiciones del dataset, ajustamos a panel real
-        const factor_escala = constantes.potencia_panel_nominal / 200; // Normalizar
-        const potencia_ajustada = potencia_instantanea * factor_escala;
-        
-        // Energía diaria por panel (Wh/día)
-        // E_dia = P × PSH × PR
+        const temperaturaMes = datos.temperatura[mes];
+        const inclinacionUser = datos.inclinacion;
         const psh = datos.psh[mes];
-        const energia_diaria = potencia_ajustada * psh * constantes.performance_ratio;
-        
+
+        // Selección de cluster → β₁ (según T_mes y θ_user)
+        const beta1 = seleccionarClusterBeta1(temperaturaMes, inclinacionUser);
+
+        // Potencia instantánea por panel (W) para G_ref
+        const P_panel = beta1 * constantes.irradiancia_ref_Wm2;
+
+        // Energía diaria neta por panel (Wh/día) con PR
+        const energia_diaria_Wh = P_panel * psh * constantes.performance_ratio;
+
         // Energía mensual por panel (kWh/mes)
-        const energia_mensual = (energia_diaria * constantes.dias_mes_promedio) / 1000;
-        
+        const energia_mensual_kWh = (energia_diaria_Wh * constantes.dias_mes_promedio) / 1000;
+
         generacion.push({
             mes: MESES[mes],
             psh: psh,
-            temperatura: temperatura,
-            potencia_instantanea: potencia_ajustada,
-            energia_diaria: energia_diaria,
-            energia_mensual: energia_mensual
+            temperatura: temperaturaMes,
+            beta1_cluster: beta1,
+            potencia_instantanea: P_panel,
+            energia_diaria: energia_diaria_Wh,
+            energia_mensual: energia_mensual_kWh
         });
     }
-    
+
     return generacion;
 }
 
@@ -1000,8 +1034,11 @@ function calcularResultados(datos, generacionMensual) {
     const energia_anual_total = energia_anual_por_panel * num_paneles;
     const energia_mensual_promedio = energia_anual_total / 12;
     
-    // Costos
-    const costo_total = num_paneles * datos.costo_panel;
+    // Costos con modelo BOS (Balance of System)
+    // Costo Total = Costo Base (BOS) + (N × Costo por Panel)
+    const costo_base = MODELO_CLUSTER.constantes.costo_base_bos;
+    const costo_paneles = num_paneles * MODELO_CLUSTER.constantes.costo_por_panel;
+    const costo_total = costo_base + costo_paneles;
     
     // Ahorros
     const ahorro_anual = energia_anual_total * datos.precio_kwh;
@@ -1011,19 +1048,20 @@ function calcularResultados(datos, generacionMensual) {
     const roi_anos = costo_total / ahorro_anual;
     
     // Impacto ambiental (CO₂ evitado)
-    const co2_anual = energia_anual_total * MODELO_OLS.constantes.factor_co2;
+    const co2_anual = energia_anual_total * MODELO_CLUSTER.constantes.factor_co2;
     
     // Cobertura del consumo (%)
     const cobertura = (energia_anual_total / energia_anual_requerida) * 100;
     
-    // Bandas de incertidumbre (±RMSE)
-    const rmse = MODELO_OLS.metricas.rmse;
-    const incertidumbre_anual = (rmse * 12 * 30.4 * num_paneles) / 1000; // kWh
+    // Bandas de incertidumbre (±σ)
+    // En el paper R² = 1.0, por lo que la varianza residual es prácticamente nula.
+    // Aquí mantenemos la estructura pero con incertidumbre muy baja (≈0).
+    const incertidumbre_anual = 0; // kWh, puede ajustarse si se calibra con nuevos datos
     const rango_inferior = Math.max(0, energia_anual_total - incertidumbre_anual);
     const rango_superior = energia_anual_total + incertidumbre_anual;
     
     // Potencia total instalada
-    const potencia_total_kw = (num_paneles * MODELO_OLS.constantes.potencia_panel_nominal) / 1000;
+    const potencia_total_kw = (num_paneles * MODELO_CLUSTER.constantes.potencia_panel_nominal) / 1000;
     
     return {
         num_paneles,
@@ -1031,6 +1069,9 @@ function calcularResultados(datos, generacionMensual) {
         energia_anual_total,
         energia_mensual_promedio,
         costo_total,
+        costo_base,
+        costo_paneles,
+        costo_por_panel: MODELO_CLUSTER.constantes.costo_por_panel,
         ahorro_anual,
         ahorro_mensual,
         roi_anos,
@@ -1061,12 +1102,8 @@ function mostrarResultados(resultados, generacionMensual) {
     resultsContainer.style.display = 'flex';
     resultsContainer.classList.add('show');
     
-    // Obtener información del tipo de panel seleccionado
-    const selectPanel = document.getElementById('tipo_panel');
-    const selectedOption = selectPanel.options[selectPanel.selectedIndex];
-    const tipoPanelTexto = selectedOption.value === 'custom' 
-        ? 'Personalizado' 
-        : selectedOption.text.split(' - ')[0]; // "High Efficiency 350W"
+    // Panel estándar según modelo experimental
+    const tipoPanelTexto = 'Panel de Referencia 190W';
     
     // Actualizar valores con tipo de panel
     document.getElementById('numPaneles').textContent = resultados.num_paneles;
@@ -1081,7 +1118,7 @@ function mostrarResultados(resultados, generacionMensual) {
     document.getElementById('costoTotal').textContent = 
         `$${formatNumber(resultados.costo_total)}`;
     document.getElementById('costoPorPanel').textContent = 
-        `${resultados.num_paneles} paneles × $${formatNumber(resultados.costo_total / resultados.num_paneles)}`;
+        `Base: $${formatNumber(resultados.costo_base)} + ${resultados.num_paneles} paneles × $${formatNumber(resultados.costo_por_panel)}`;
     
     document.getElementById('ahorroAnual').textContent = 
         `$${formatNumber(resultados.ahorro_anual)}`;
@@ -1099,7 +1136,8 @@ function mostrarResultados(resultados, generacionMensual) {
         `${resultados.cobertura.toFixed(0)}%`;
     
     // Generar gráficas
-    generarGraficaMensual(generacionMensual, resultados.num_paneles);
+    const consumoMensual = parseFloat(document.getElementById('consumo').value);
+    generarGraficaMensual(generacionMensual, resultados.num_paneles, consumoMensual);
     generarGraficaFinanciera(resultados);
 }
 
@@ -1107,7 +1145,7 @@ function mostrarResultados(resultados, generacionMensual) {
 // Generar Gráfica de Generación Mensual
 // ============================================
 
-function generarGraficaMensual(generacionMensual, numPaneles) {
+function generarGraficaMensual(generacionMensual, numPaneles, consumoMensual) {
     const ctx = document.getElementById('monthlyChart');
     
     // Destruir gráfica anterior si existe
@@ -1115,20 +1153,39 @@ function generarGraficaMensual(generacionMensual, numPaneles) {
         monthlyChart.destroy();
     }
     
-    const energias = generacionMensual.map(mes => (mes.energia_mensual * numPaneles).toFixed(1));
+    const energias = generacionMensual.map(mes => parseFloat((mes.energia_mensual * numPaneles).toFixed(1)));
+    const consumos = new Array(12).fill(consumoMensual); // Consumo constante para todos los meses
     
     monthlyChart = new Chart(ctx, {
         type: 'bar',
         data: {
             labels: MESES,
-            datasets: [{
-                label: 'Generación (kWh)',
-                data: energias,
-                backgroundColor: 'rgba(253, 184, 19, 0.8)',
-                borderColor: 'rgba(253, 184, 19, 1)',
-                borderWidth: 2,
-                borderRadius: 8
-            }]
+            datasets: [
+                {
+                    label: 'Generación (kWh)',
+                    data: energias,
+                    backgroundColor: 'rgba(253, 184, 19, 0.8)',
+                    borderColor: 'rgba(253, 184, 19, 1)',
+                    borderWidth: 2,
+                    borderRadius: 8
+                },
+                {
+                    label: 'Consumo (kWh)',
+                    type: 'line',
+                    data: consumos,
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                    borderWidth: 3,
+                    borderDash: [5, 5],
+                    fill: false,
+                    pointRadius: 4,
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: 'rgba(231, 76, 60, 1)',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    tension: 0
+                }
+            ]
         },
         options: {
             responsive: true,
@@ -1148,7 +1205,23 @@ function generarGraficaMensual(generacionMensual, numPaneles) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.parsed.y} kWh`;
+                            const valor = context.parsed.y;
+                            let label = `${context.dataset.label}: ${valor} kWh`;
+                            
+                            // Si es el dataset de generación, calcular excedente/déficit
+                            if (context.datasetIndex === 0) {
+                                const consumo = consumoMensual;
+                                const diferencia = valor - consumo;
+                                if (diferencia > 0) {
+                                    label += ` (Excedente: +${diferencia.toFixed(1)} kWh)`;
+                                } else if (diferencia < 0) {
+                                    label += ` (Déficit: ${diferencia.toFixed(1)} kWh)`;
+                                } else {
+                                    label += ` (Equilibrado)`;
+                                }
+                            }
+                            
+                            return label;
                         }
                     },
                     titleFont: {
@@ -1164,7 +1237,7 @@ function generarGraficaMensual(generacionMensual, numPaneles) {
                     beginAtZero: true,
                     title: {
                         display: true,
-                        text: 'Energía Generada (kWh)',
+                        text: 'Energía (kWh)',
                         font: {
                             size: window.innerWidth < 768 ? 11 : 12
                         }
@@ -1430,9 +1503,7 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
     const consumo = parseFloat(document.getElementById('consumo').value);
     const precioKwh = parseFloat(document.getElementById('precio_kwh').value);
 
-    const selectPanel = document.getElementById('tipo_panel');
-    const tipoPanel = selectPanel.options[selectPanel.selectedIndex].text;
-    const costoPanel = parseFloat(document.getElementById('costo_panel').value);
+    const tipoPanel = 'Panel de Referencia 190W - $380.000';
 
     const ubicacionTexto = ubicacionActual.nombre || 'Ubicación personalizada';
     const coordenadas = ubicacionActual.lat && ubicacionActual.lon
@@ -1481,7 +1552,9 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
                 <table>
                     <tbody>
                         <tr><td>Inversión total estimada</td><td>$${formatNumber(r.costo_total.toFixed(0))}</td></tr>
-                        <tr><td>Costo por panel</td><td>$${formatNumber(costoPanel.toFixed(0))}</td></tr>
+                        <tr><td>Costo base (BOS)</td><td>$${formatNumber(r.costo_base.toFixed(0))}</td></tr>
+                        <tr><td>Costo por panel</td><td>$${formatNumber(r.costo_por_panel.toFixed(0))}</td></tr>
+                        <tr><td>Total paneles (${r.num_paneles} × $${formatNumber(r.costo_por_panel.toFixed(0))})</td><td>$${formatNumber(r.costo_paneles.toFixed(0))}</td></tr>
                         <tr><td>Ahorro mensual</td><td>$${formatNumber(r.ahorro_mensual.toFixed(0))}</td></tr>
                         <tr><td>Ahorro anual</td><td>$${formatNumber(r.ahorro_anual.toFixed(0))}</td></tr>
                         <tr><td>Retorno de inversión</td><td>${r.roi_anos.toFixed(1)} años</td></tr>
@@ -1502,7 +1575,7 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
             </section>
 
             <section class="print-section">
-                <h2>☀ Datos NASA POWER (Mensual)</h2>
+                <h2>☀ Datos Climáticos Mensuales</h2>
                 <table class="print-table-monthly">
                     <thead>
                         <tr>
@@ -1517,7 +1590,7 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
                         ${generarTablaMensualBoleta()}
                     </tbody>
                 </table>
-                <p class="print-footnote">Fuente: NASA POWER (datos satelitales históricos para la ubicación seleccionada)</p>
+                <p class="print-footnote">Datos climáticos históricos para la ubicación seleccionada</p>
             </section>
 
             <section class="print-section">
@@ -1531,10 +1604,11 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
 
             ${imagenGeneracion ? `
             <section class="print-section print-chart-section">
-                <h2>📈 Generación Mensual Estimada</h2>
+                <h2>📈 Generación vs Consumo Mensual</h2>
                 <div class="print-chart-container">
-                    <img src="${imagenGeneracion}" alt="Gráfico de Generación Mensual" class="print-chart-image" />
+                    <img src="${imagenGeneracion}" alt="Gráfico de Generación vs Consumo Mensual" class="print-chart-image" />
                 </div>
+                <p class="print-footnote">Barras amarillas: Generación. Línea roja: Consumo. Permite visualizar excedentes y déficits mensuales.</p>
             </section>
             ` : ''}
 
@@ -1550,11 +1624,10 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
             <section class="print-section">
                 <h2>🔧 Especificaciones Técnicas</h2>
                 <ul class="print-list">
-                    <li>Modelo de cálculo: Regresión OLS (R² = ${MODELO_OLS.metricas.r2.toFixed(3)})</li>
-                    <li>Performance Ratio (PR): ${(MODELO_OLS.constantes.performance_ratio * 100).toFixed(0)}%</li>
+                    <li>Eficiencia del sistema: ${(MODELO_CLUSTER.constantes.performance_ratio * 100).toFixed(0)}%</li>
                     <li>Degradación anual estimada: 0.5%</li>
                     <li>Vida útil esperada del sistema: 25-30 años</li>
-                    <li>Rango de incertidumbre anual: ±${formatNumber(r.incertidumbre_anual.toFixed(0))} kWh</li>
+                    <li>Garantía de rendimiento: 25 años</li>
                 </ul>
             </section>
 
@@ -1646,9 +1719,7 @@ document.head.appendChild(style);
 console.log(`
 ╔═══════════════════════════════════════════════╗
 ║  Solar360 - Simulador FV                      ║
-║  Modelo: Regresión por Mínimos Cuadrados    ║
-║  R² = ${MODELO_OLS.metricas.r2.toFixed(3)} (${(MODELO_OLS.metricas.r2*100).toFixed(1)}% explicado)         ║
-║  RMSE = ±${MODELO_OLS.metricas.rmse.toFixed(1)}W                              ║
+║  Sistema de cálculo optimizado                ║
 ╚═══════════════════════════════════════════════╝
 `);
 

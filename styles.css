@@ -975,6 +975,8 @@ section:last-of-type::after {
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    line-height: 1.5;
+    height: 2.5rem;
 }
 
 .form-group select {
@@ -1008,6 +1010,36 @@ section:last-of-type::after {
     font-size: 0.65rem;
     color: var(--text-light);
     margin-top: 0.1rem;
+}
+
+.panel-estandar-display {
+    padding: 0.5rem;
+    border: 2px solid #e8ecef;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-family: inherit;
+    background: white;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    cursor: default;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    line-height: 1.5;
+}
+
+.panel-estandar-title {
+    font-weight: normal;
+    color: var(--text-dark);
+    line-height: 1.5;
+    width: 100%;
+    font-size: 0.8rem;
+}
+
+.panel-estandar-details {
+    font-size: 0.75rem;
+    color: var(--text-light);
 }
 
 .button-group {
