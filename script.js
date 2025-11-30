@@ -1503,7 +1503,7 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
     const consumo = parseFloat(document.getElementById('consumo').value);
     const precioKwh = parseFloat(document.getElementById('precio_kwh').value);
 
-    const tipoPanel = 'Panel de Referencia 190W - $380.000';
+    const tipoPanel = 'Panel de Referencia 190W - $200.000';
 
     const ubicacionTexto = ubicacionActual.nombre || 'Ubicación personalizada';
     const coordenadas = ubicacionActual.lat && ubicacionActual.lon
