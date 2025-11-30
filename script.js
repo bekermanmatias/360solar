@@ -60,21 +60,26 @@ const MESES = [
 //   - La relación física se modela como P = β₁ · G, con β₁ fijo por cluster.
 //
 // Clusters (Sección 3.1 y Tabla 4.1 del paper):
-//   Cluster 1: 10°C, 20°  → β₁ = 0.1908
-//   Cluster 2: 20°C, 20°  → β₁ = 0.1836
-//   Cluster 3: 30°C, 20°  → β₁ = 0.1764
-//   Cluster 4: 10°C, 45°  → β₁ = 0.1813
-//   Cluster 5: 20°C, 45°  → β₁ = 0.1744
-//   Cluster 6: 30°C, 45°  → β₁ = 0.1676
+//   Calculados mediante OLS sobre csv/01 - Generacion FV .csv
+//   Cluster 1: 10°C, 20°  → β₁ = 0.190800 (N=705 datos, R²=1.0)
+//   Cluster 2: 20°C, 20°  → β₁ = 0.183600 (N=703 datos, R²=1.0)
+//   Cluster 3: 30°C, 20°  → β₁ = 0.176400 (N=701 datos, R²=1.0)
+//   Cluster 4: 10°C, 45°  → β₁ = 0.181260 (N=713 datos, R²=1.0)
+//   Cluster 5: 20°C, 45°  → β₁ = 0.174420 (N=714 datos, R²=1.0)
+//   Cluster 6: 30°C, 45°  → β₁ = 0.167580 (N=722 datos, R²=1.0)
 //
 const MODELO_CLUSTER = {
+    // Coeficientes β₁ calculados mediante Mínimos Cuadrados Ordinarios (OLS)
+    // sobre el dataset experimental: csv/01 - Generacion FV .csv
+    // Modelo: P = β₁ · G (sin intercepto, β₀ ≈ 0)
+    // R² = 1.0 para todos los clusters (ajuste perfecto)
     betas: {
-        '10_20': 0.1908,
-        '20_20': 0.1836,
-        '30_20': 0.1764,
-        '10_45': 0.1813,
-        '20_45': 0.1744,
-        '30_45': 0.1676
+        '10_20': 0.190800,  // T=10°C, θ=20° | N=705 datos
+        '20_20': 0.183600,  // T=20°C, θ=20° | N=703 datos
+        '30_20': 0.176400,  // T=30°C, θ=20° | N=701 datos
+        '10_45': 0.181260,  // T=10°C, θ=45° | N=713 datos
+        '20_45': 0.174420,  // T=20°C, θ=45° | N=714 datos
+        '30_45': 0.167580   // T=30°C, θ=45° | N=722 datos
     },
     metricas: {
         r2: 1.0
@@ -1281,8 +1286,8 @@ function generarGraficaFinanciera(resultados) {
         financialChart.destroy();
     }
     
-    // Calcular flujo de caja acumulado (5 años)
-    const anos = 5;
+    // Calcular flujo de caja acumulado (10 años)
+    const anos = 10;
     const labels = [];
     const costos = [];
     const ahorros = [];
@@ -1312,7 +1317,7 @@ function generarGraficaFinanciera(resultados) {
             datasets: [
                 {
                     label: 'Inversión Inicial',
-                    data: [costos[0], null, null, null, null, null],
+                    data: [costos[0], ...Array(anos).fill(null)],
                     backgroundColor: 'rgba(231, 76, 60, 0.2)',
                     borderColor: 'rgba(231, 76, 60, 1)',
                     borderWidth: 2,
@@ -1320,7 +1325,7 @@ function generarGraficaFinanciera(resultados) {
                 },
                 {
                     label: 'Ahorros Acumulados',
-                    data: [null, ahorros[1], ahorros[2], ahorros[3], ahorros[4], ahorros[5]],
+                    data: [null, ...ahorros.slice(1)],
                     backgroundColor: 'rgba(46, 204, 113, 0.2)',
                     borderColor: 'rgba(46, 204, 113, 1)',
                     borderWidth: 2,
@@ -1460,7 +1465,8 @@ function imprimirReporte() {
     let imagenGeneracion = '';
     let imagenFinanciera = '';
 
-    // Esperar un momento para asegurar que los gráficos estén renderizados
+    // Esperar un momento para asegurar que los gráficos estén completamente renderizados
+    // (especialmente importante para el gráfico de 10 años)
     setTimeout(() => {
         try {
             if (monthlyChart && typeof monthlyChart.toBase64Image === 'function') {
@@ -1472,6 +1478,8 @@ function imprimirReporte() {
 
         try {
             if (financialChart && typeof financialChart.toBase64Image === 'function') {
+                // Forzar actualización del gráfico antes de capturar
+                financialChart.update('none');
                 imagenFinanciera = financialChart.toBase64Image('image/png', 1.0);
             }
         } catch (e) {
@@ -1485,8 +1493,8 @@ function imprimirReporte() {
         setTimeout(() => {
             window.print();
             printReport.style.display = 'none';
-        }, 200);
-    }, 100);
+        }, 300);
+    }, 200);
 }
 
 function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
@@ -1614,7 +1622,7 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
 
             ${imagenFinanciera ? `
             <section class="print-section print-chart-section">
-                <h2>💰 Análisis Financiero (5 años)</h2>
+                <h2>💰 Análisis Financiero (10 años)</h2>
                 <div class="print-chart-container">
                     <img src="${imagenFinanciera}" alt="Gráfico de Análisis Financiero" class="print-chart-image" />
                 </div>
