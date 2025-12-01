@@ -153,6 +153,7 @@ let marker = null;
 let selectedLat = null;
 let selectedLon = null;
 let modoActual = 'ubicacion'; // 'ubicacion' o 'manual'
+let modoDimensionamiento = 'porcentaje'; // 'porcentaje' o 'paneles'
 
 // ============================================
 // Funciones de Selección de Modo
@@ -205,6 +206,9 @@ function initializeApp() {
     document.getElementById('openMapButton').addEventListener('click', abrirMapa);
     document.getElementById('simulatorForm').addEventListener('submit', calcularDimensionamiento);
     
+    // Inicializar sección de dimensionamiento
+    inicializarDimensionamiento();
+    
     // Agregar validación en tiempo real a todos los campos
     agregarValidacionTiempoReal();
     
@@ -256,6 +260,186 @@ function initializeApp() {
     });
     
     console.log('✅ Solar360 Simulator inicializado');
+}
+
+// ============================================
+// Inicializar Sección de Dimensionamiento
+// ============================================
+
+function inicializarDimensionamiento() {
+    // Hacer las tarjetas clicables
+    document.querySelectorAll('.dimensionamiento-option-card').forEach(card => {
+        card.addEventListener('click', function(e) {
+            // No activar si se hace clic en un input o botón dentro
+            if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('input')) {
+                return;
+            }
+            
+            const mode = this.dataset.mode;
+            const radio = document.getElementById(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
+            if (radio) {
+                radio.checked = true;
+                cambiarModoDimensionamiento(mode);
+            }
+        });
+    });
+    
+    // Radio buttons para cambiar modo
+    const radioPorcentaje = document.getElementById('modePorcentaje');
+    const radioPaneles = document.getElementById('modePaneles');
+    
+    if (radioPorcentaje) {
+        radioPorcentaje.addEventListener('change', function() {
+            if (this.checked) cambiarModoDimensionamiento('porcentaje');
+        });
+    }
+    
+    if (radioPaneles) {
+        radioPaneles.addEventListener('change', function() {
+            if (this.checked) cambiarModoDimensionamiento('paneles');
+        });
+    }
+    
+    // Slider de porcentaje
+    const sliderPorcentaje = document.getElementById('porcentaje_cobertura');
+    if (sliderPorcentaje) {
+        sliderPorcentaje.addEventListener('input', actualizarDisplayCobertura);
+        sliderPorcentaje.addEventListener('change', actualizarDisplayCobertura);
+    }
+    
+    // Botones rápidos de porcentaje
+    document.querySelectorAll('.cobertura-badge').forEach(badge => {
+        badge.addEventListener('click', function() {
+            const valor = parseInt(this.dataset.value);
+            if (sliderPorcentaje) {
+                sliderPorcentaje.value = valor;
+                actualizarDisplayCobertura();
+            }
+            // Actualizar estado activo
+            document.querySelectorAll('.cobertura-badge').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Botones +/- de paneles
+    const btnMenos = document.getElementById('btnMenosPanel');
+    const btnMas = document.getElementById('btnMasPanel');
+    const inputPaneles = document.getElementById('num_paneles_manual');
+    
+    if (btnMenos) {
+        btnMenos.addEventListener('click', function() {
+            const valor = parseInt(inputPaneles.value) || 1;
+            if (valor > 1) {
+                inputPaneles.value = valor - 1;
+                actualizarPanelesPreview();
+            }
+        });
+    }
+    
+    if (btnMas) {
+        btnMas.addEventListener('click', function() {
+            const valor = parseInt(inputPaneles.value) || 1;
+            inputPaneles.value = valor + 1;
+            actualizarPanelesPreview();
+        });
+    }
+    
+    if (inputPaneles) {
+        inputPaneles.addEventListener('input', function() {
+            if (this.value < 1) this.value = 1;
+            actualizarPanelesPreview();
+        });
+        inputPaneles.addEventListener('change', actualizarPanelesPreview);
+    }
+    
+    // Botones rápidos de paneles
+    document.querySelectorAll('.paneles-quick-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const cantidad = parseInt(this.dataset.paneles);
+            if (inputPaneles) {
+                inputPaneles.value = cantidad;
+                actualizarPanelesPreview();
+            }
+            // Actualizar estado activo
+            document.querySelectorAll('.paneles-quick-btn').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+        });
+    });
+    
+    // Inicializar display
+    actualizarDisplayCobertura();
+    
+    // Marcar la tarjeta activa inicialmente
+    const cardPorcentaje = document.querySelector('.dimensionamiento-option-card[data-mode="porcentaje"]');
+    if (cardPorcentaje) {
+        cardPorcentaje.classList.add('active');
+    }
+}
+
+function cambiarModoDimensionamiento(mode) {
+    modoDimensionamiento = mode;
+    
+    const controlPorcentaje = document.getElementById('controlPorcentaje');
+    const controlPaneles = document.getElementById('controlPaneles');
+    const cardPorcentaje = document.querySelector('.dimensionamiento-option-card[data-mode="porcentaje"]');
+    const cardPaneles = document.querySelector('.dimensionamiento-option-card[data-mode="paneles"]');
+    
+    if (mode === 'porcentaje') {
+        if (controlPorcentaje) controlPorcentaje.style.display = 'block';
+        if (controlPaneles) controlPaneles.style.display = 'none';
+        if (cardPorcentaje) cardPorcentaje.classList.add('active');
+        if (cardPaneles) cardPaneles.classList.remove('active');
+    } else {
+        if (controlPorcentaje) controlPorcentaje.style.display = 'none';
+        if (controlPaneles) controlPaneles.style.display = 'block';
+        if (cardPorcentaje) cardPorcentaje.classList.remove('active');
+        if (cardPaneles) cardPaneles.classList.add('active');
+        actualizarPanelesPreview();
+    }
+}
+
+function actualizarDisplayCobertura() {
+    const slider = document.getElementById('porcentaje_cobertura');
+    const display = document.getElementById('cobertura_value');
+    
+    if (slider && display) {
+        const valor = parseInt(slider.value);
+        display.textContent = `${valor}%`;
+    }
+}
+
+function actualizarPanelesPreview() {
+    const inputPaneles = document.getElementById('num_paneles_manual');
+    const previewValue = document.getElementById('panelesPreviewValue');
+    
+    if (!inputPaneles || !previewValue) return;
+    
+    const numPaneles = parseInt(inputPaneles.value) || 1;
+    
+    // Obtener datos temporales para calcular
+    try {
+        const datosTemp = obtenerDatosFormulario();
+        
+        // Verificar que tengamos datos climáticos
+        if (!datosTemp.psh || datosTemp.psh.length === 0 || datosTemp.psh.some(p => !p || isNaN(p))) {
+            previewValue.textContent = 'Completa los datos climáticos';
+            return;
+        }
+        
+        // Calcular generación mensual
+        const generacionMensual = calcularGeneracionMensual(datosTemp);
+        const energiaAnualPorPanel = generacionMensual.reduce((sum, mes) => sum + mes.energia_mensual, 0);
+        const energiaAnualTotal = energiaAnualPorPanel * numPaneles;
+        
+        // Calcular cobertura
+        const consumoMensual = parseFloat(document.getElementById('consumo').value) || 350;
+        const energiaAnualRequerida = consumoMensual * 12;
+        const cobertura = (energiaAnualTotal / energiaAnualRequerida) * 100;
+        
+        previewValue.textContent = `${Math.min(cobertura, 100).toFixed(0)}%`;
+    } catch (error) {
+        previewValue.textContent = 'Completa los datos climáticos';
+    }
 }
 
 // ============================================
@@ -905,7 +1089,7 @@ async function calcularDimensionamiento(e) {
         const resultados = calcularResultados(datos, generacionMensual);
         
         // 6. Mostrar resultados
-        mostrarResultados(resultados, generacionMensual);
+        mostrarResultados(resultados, generacionMensual, datos);
         
         // 7. Restaurar botón
         btnIcon.innerHTML = originalHTML;
@@ -945,9 +1129,18 @@ async function calcularDimensionamiento(e) {
 function obtenerDatosFormulario() {
     const datos = {
         inclinacion: parseFloat(document.getElementById('inclinacion').value),
+        consumo: parseFloat(document.getElementById('consumo').value),
         consumo_mensual: parseFloat(document.getElementById('consumo').value),
         precio_kwh: parseFloat(document.getElementById('precio_kwh').value),
         costo_panel: parseFloat(document.getElementById('costo_panel').value),
+        modo: modoActual,
+        modo_dimensionamiento: modoDimensionamiento,
+        porcentaje_cobertura: modoDimensionamiento === 'porcentaje' 
+            ? parseFloat(document.getElementById('porcentaje_cobertura')?.value || 100) 
+            : null,
+        num_paneles_fijo: modoDimensionamiento === 'paneles'
+            ? parseInt(document.getElementById('num_paneles_manual')?.value || 1)
+            : null,
         psh: [],
         temperatura: []
     };
@@ -1031,9 +1224,23 @@ function calcularResultados(datos, generacionMensual) {
     // Energía total anual por panel
     const energia_anual_por_panel = generacionMensual.reduce((sum, mes) => sum + mes.energia_mensual, 0);
     
-    // Número de paneles necesarios
+    // Energía anual requerida
     const energia_anual_requerida = datos.consumo_mensual * 12;
-    const num_paneles = Math.ceil(energia_anual_requerida / energia_anual_por_panel);
+    
+    // Calcular número de paneles según el modo de dimensionamiento
+    let num_paneles;
+    let porcentaje_objetivo = null;
+    
+    if (datos.modo_dimensionamiento === 'paneles' && datos.num_paneles_fijo) {
+        // Modo: Elegir cantidad de paneles
+        num_paneles = datos.num_paneles_fijo;
+    } else {
+        // Modo: Reducir factura por porcentaje
+        const porcentaje = datos.porcentaje_cobertura || 100;
+        porcentaje_objetivo = porcentaje;
+        const energia_objetivo = energia_anual_requerida * (porcentaje / 100);
+        num_paneles = Math.ceil(energia_objetivo / energia_anual_por_panel);
+    }
     
     // Energía total del sistema
     const energia_anual_total = energia_anual_por_panel * num_paneles;
@@ -1084,7 +1291,10 @@ function calcularResultados(datos, generacionMensual) {
         cobertura,
         rango_inferior,
         rango_superior,
-        incertidumbre_anual
+        incertidumbre_anual,
+        modo_dimensionamiento: datos.modo_dimensionamiento || 'porcentaje',
+        porcentaje_objetivo: porcentaje_objetivo,
+        energia_anual_requerida
     };
 }
 
@@ -1092,10 +1302,15 @@ function calcularResultados(datos, generacionMensual) {
 // Mostrar Resultados en la UI
 // ============================================
 
-function mostrarResultados(resultados, generacionMensual) {
+function mostrarResultados(resultados, generacionMensual, datos = null) {
     // Guardar resultados para la impresión
     ultimosResultados = resultados;
     ultimaGeneracionMensual = generacionMensual;
+    
+    // Obtener datos del formulario si no se pasaron
+    if (!datos) {
+        datos = obtenerDatosFormulario();
+    }
     
     // Ocultar preview y mostrar resultados reales
     const resultsPreview = document.getElementById('resultsPreview');
@@ -1109,41 +1324,243 @@ function mostrarResultados(resultados, generacionMensual) {
     
     // Panel estándar según modelo experimental
     const tipoPanelTexto = 'Panel de Referencia 190W';
+    const consumoMensual = parseFloat(document.getElementById('consumo').value);
     
-    // Actualizar valores con tipo de panel
-    document.getElementById('numPaneles').textContent = resultados.num_paneles;
-    document.getElementById('potenciaTotal').textContent = 
+    // ============================================
+    // VISTA SIMPLE - KPIs Principales
+    // ============================================
+    
+    // KPI 1: Inversión Total
+    const kpiInversion = document.getElementById('kpiInversion');
+    const kpiInversionDetail = document.getElementById('kpiInversionDetail');
+    if (kpiInversion) kpiInversion.textContent = `$${formatNumber(resultados.costo_total)}`;
+    if (kpiInversionDetail) kpiInversionDetail.textContent = 
+        `Base: $${formatNumber(resultados.costo_base)} + ${resultados.num_paneles} paneles`;
+    
+    // KPI 2: Ahorro Mensual
+    const kpiAhorroMensual = document.getElementById('kpiAhorroMensual');
+    const kpiAhorroAnual = document.getElementById('kpiAhorroAnual');
+    if (kpiAhorroMensual) kpiAhorroMensual.textContent = `$${formatNumber(resultados.ahorro_mensual)}`;
+    if (kpiAhorroAnual) kpiAhorroAnual.textContent = 
+        `$${formatNumber(resultados.ahorro_anual)}/año`;
+    
+    // KPI 3: Sistema Ideal
+    const kpiSistema = document.getElementById('kpiSistema');
+    const kpiSistemaDetail = document.getElementById('kpiSistemaDetail');
+    if (kpiSistema) kpiSistema.textContent = 
+        `${resultados.num_paneles} Paneles + Inversor`;
+    if (kpiSistemaDetail) kpiSistemaDetail.textContent = 
         `${tipoPanelTexto} • ${resultados.potencia_total_kw.toFixed(2)} kW`;
     
-    document.getElementById('energiaAnual').textContent = 
+    // KPI 4: Impacto Ambiental (equivalente a árboles)
+    const arbolesEquiv = Math.round(resultados.co2_anual / 20); // 1 árbol ≈ 20 kg CO₂/año
+    const kpiImpacto = document.getElementById('kpiImpacto');
+    const kpiImpactoDetail = document.getElementById('kpiImpactoDetail');
+    if (kpiImpacto) kpiImpacto.textContent = 
+        `${formatNumber(resultados.co2_anual)} kg CO₂`;
+    if (kpiImpactoDetail) kpiImpactoDetail.textContent = 
+        `Equivale a plantar ${arbolesEquiv} árboles`;
+    
+    // ============================================
+    // VISTA DETALLADA - Pestaña Finanzas
+    // ============================================
+    
+    // ROI
+    const detailROI = document.getElementById('detailROI');
+    if (detailROI) {
+        if (resultados.roi_anos === Infinity || isNaN(resultados.roi_anos)) {
+            detailROI.textContent = 'N/A';
+        } else {
+            detailROI.textContent = `${resultados.roi_anos.toFixed(1)} años`;
+        }
+    }
+    
+    // Desglose de costos
+    const detailCostoBase = document.getElementById('detailCostoBase');
+    const detailCostoPaneles = document.getElementById('detailCostoPaneles');
+    const detailCostoTotal = document.getElementById('detailCostoTotal');
+    if (detailCostoBase) detailCostoBase.textContent = `$${formatNumber(resultados.costo_base)}`;
+    if (detailCostoPaneles) detailCostoPaneles.textContent = 
+        `$${formatNumber(resultados.costo_paneles)} (${resultados.num_paneles} paneles)`;
+    if (detailCostoTotal) detailCostoTotal.textContent = `$${formatNumber(resultados.costo_total)}`;
+    
+    // Ahorro a 25 años
+    const ahorro25Anos = resultados.ahorro_anual * 25;
+    const detailAhorro25Anos = document.getElementById('detailAhorro25Anos');
+    if (detailAhorro25Anos) detailAhorro25Anos.textContent = `$${formatNumber(ahorro25Anos)}`;
+    
+    // ============================================
+    // VISTA DETALLADA - Pestaña Energía
+    // ============================================
+    
+    // Tabla mensual
+    llenarTablaMensual(generacionMensual, resultados.num_paneles, consumoMensual);
+    
+    // Resumen de energía
+    const summaryGeneracionAnual = document.getElementById('summaryGeneracionAnual');
+    const summaryCobertura = document.getElementById('summaryCobertura');
+    if (summaryGeneracionAnual) summaryGeneracionAnual.textContent = 
         `${formatNumber(resultados.energia_anual_total)} kWh`;
-    document.getElementById('energiaMensual').textContent = 
-        `~${formatNumber(resultados.energia_mensual_promedio)} kWh/mes`;
     
-    document.getElementById('costoTotal').textContent = 
-        `$${formatNumber(resultados.costo_total)}`;
-    document.getElementById('costoPorPanel').textContent = 
-        `Base: $${formatNumber(resultados.costo_base)} + ${resultados.num_paneles} paneles × $${formatNumber(resultados.costo_por_panel)}`;
+    // Cobertura
+    let coberturaTexto;
+    if (resultados.modo_dimensionamiento === 'paneles') {
+        coberturaTexto = `${resultados.cobertura.toFixed(0)}%`;
+    } else {
+        const porcentajeSeleccionado = resultados.porcentaje_objetivo || 100;
+        coberturaTexto = porcentajeSeleccionado < 100 
+            ? `${resultados.cobertura.toFixed(0)}% (objetivo: ${porcentajeSeleccionado}%)`
+            : `${resultados.cobertura.toFixed(0)}%`;
+    }
+    if (summaryCobertura) summaryCobertura.textContent = coberturaTexto;
     
-    document.getElementById('ahorroAnual').textContent = 
-        `$${formatNumber(resultados.ahorro_anual)}`;
-    document.getElementById('ahorroMensual').textContent = 
-        `~$${formatNumber(resultados.ahorro_mensual)}/mes`;
+    // Excedentes (si hay)
+    const energiaAnualRequerida = consumoMensual * 12;
+    const excedentesAnuales = resultados.energia_anual_total - energiaAnualRequerida;
+    const summaryExcedentes = document.getElementById('summaryExcedentes');
+    const summaryExcedentesValue = document.getElementById('summaryExcedentesValue');
+    if (summaryExcedentes && summaryExcedentesValue) {
+        if (excedentesAnuales > 0) {
+            summaryExcedentes.style.display = 'block';
+            summaryExcedentesValue.textContent = `${formatNumber(excedentesAnuales)} kWh`;
+        } else {
+            summaryExcedentes.style.display = 'none';
+        }
+    }
     
-    document.getElementById('roi').textContent = 
-        `${resultados.roi_anos.toFixed(1)} años`;
+    // ============================================
+    // VISTA DETALLADA - Pestaña Equipamiento
+    // ============================================
     
-    document.getElementById('co2Anual').textContent = 
-        `${formatNumber(resultados.co2_anual)} kg`;
+    const equipPanelModelo = document.getElementById('equipPanelModelo');
+    const equipPanelCantidad = document.getElementById('equipPanelCantidad');
+    const equipPanelPotencia = document.getElementById('equipPanelPotencia');
+    const equipPanelPrecio = document.getElementById('equipPanelPrecio');
+    if (equipPanelModelo) equipPanelModelo.textContent = tipoPanelTexto;
+    if (equipPanelCantidad) equipPanelCantidad.textContent = resultados.num_paneles;
+    if (equipPanelPotencia) equipPanelPotencia.textContent = resultados.potencia_total_kw.toFixed(2);
+    if (equipPanelPrecio) equipPanelPrecio.textContent = `$${formatNumber(resultados.costo_por_panel)}`;
     
-    // Cobertura del consumo
-    document.getElementById('cobertura').textContent = 
-        `${resultados.cobertura.toFixed(0)}%`;
+    // Superficie necesaria (aprox. 1.6 m² por panel de 190W)
+    const superficieNecesaria = resultados.num_paneles * 1.6;
+    const equipSuperficie = document.getElementById('equipSuperficie');
+    if (equipSuperficie) equipSuperficie.textContent = 
+        `${superficieNecesaria.toFixed(1)} m² (aprox.)`;
     
-    // Generar gráficas
-    const consumoMensual = parseFloat(document.getElementById('consumo').value);
-    generarGraficaMensual(generacionMensual, resultados.num_paneles, consumoMensual);
-    generarGraficaFinanciera(resultados);
+    // Inclinación
+    const inclinacion = document.getElementById('inclinacion').value;
+    const equipInclinacion = document.getElementById('equipInclinacion');
+    if (equipInclinacion) equipInclinacion.textContent = `${inclinacion}°`;
+    
+    // ============================================
+    // Inicializar eventos del botón y pestañas
+    // ============================================
+    inicializarVistaDetallada();
+}
+
+// ============================================
+// Funciones para Vista Detallada
+// ============================================
+
+function inicializarVistaDetallada() {
+    // Botón para expandir/colapsar vista detallada
+    const btnVerAnalisis = document.getElementById('btnVerAnalisis');
+    const vistaDetallada = document.getElementById('resultsDetailedView');
+    const iconAnalisis = document.getElementById('iconAnalisis');
+    
+    if (btnVerAnalisis && vistaDetallada) {
+        btnVerAnalisis.addEventListener('click', function() {
+            const isExpanded = vistaDetallada.style.display !== 'none';
+            
+            if (isExpanded) {
+                // Colapsar
+                vistaDetallada.style.display = 'none';
+                btnVerAnalisis.classList.remove('expanded');
+            } else {
+                // Expandir
+                vistaDetallada.style.display = 'block';
+                btnVerAnalisis.classList.add('expanded');
+                
+                // Generar gráficas solo cuando se expande (lazy loading)
+                if (ultimosResultados && ultimaGeneracionMensual) {
+                    const consumoMensual = parseFloat(document.getElementById('consumo').value);
+                    setTimeout(() => {
+                        generarGraficaMensual(ultimaGeneracionMensual, ultimosResultados.num_paneles, consumoMensual);
+                        generarGraficaFinanciera(ultimosResultados);
+                    }, 100);
+                }
+                
+                // Scroll suave a la vista expandida
+                setTimeout(() => {
+                    vistaDetallada.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }, 200);
+            }
+        });
+    }
+    
+    // Manejar pestañas
+    document.querySelectorAll('.result-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            const tabName = this.dataset.tab;
+            cambiarPestaña(tabName);
+        });
+    });
+}
+
+function cambiarPestaña(tabName) {
+    // Remover active de todas las pestañas
+    document.querySelectorAll('.result-tab').forEach(tab => {
+        tab.classList.remove('active');
+    });
+    
+    // Ocultar todos los panes
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+    });
+    
+    // Activar pestaña seleccionada
+    const tab = document.querySelector(`.result-tab[data-tab="${tabName}"]`);
+    const pane = document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    
+    if (tab) tab.classList.add('active');
+    if (pane) pane.classList.add('active');
+    
+    // Si es la pestaña de energía o finanzas, asegurar que los gráficos estén renderizados
+    if ((tabName === 'energia' || tabName === 'finanzas') && ultimosResultados && ultimaGeneracionMensual) {
+        setTimeout(() => {
+            const consumoMensual = parseFloat(document.getElementById('consumo').value);
+            if (tabName === 'energia') {
+                generarGraficaMensual(ultimaGeneracionMensual, ultimosResultados.num_paneles, consumoMensual);
+            } else if (tabName === 'finanzas') {
+                generarGraficaFinanciera(ultimosResultados);
+            }
+        }, 100);
+    }
+}
+
+function llenarTablaMensual(generacionMensual, numPaneles, consumoMensual) {
+    const tbody = document.getElementById('monthlyTableBody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    generacionMensual.forEach((mes, index) => {
+        const generacionTotal = mes.energia_mensual * numPaneles;
+        const balance = generacionTotal - consumoMensual;
+        const balanceClass = balance >= 0 ? 'positive' : 'negative';
+        const balanceText = balance >= 0 
+            ? `+${balance.toFixed(1)} kWh` 
+            : `${balance.toFixed(1)} kWh`;
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${mes.mes}</strong></td>
+            <td>${generacionTotal.toFixed(1)}</td>
+            <td>${consumoMensual.toFixed(1)}</td>
+            <td class="balance-${balanceClass}">${balanceText}</td>
+        `;
+        tbody.appendChild(row);
+    });
 }
 
 // ============================================

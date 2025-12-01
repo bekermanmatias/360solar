@@ -9,6 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     
     <!-- Leaflet CSS y JS para el mapa -->
@@ -462,6 +463,90 @@
                             </div>
                         </div>
 
+                        <!-- Modo de Dimensionamiento -->
+                        <div class="form-section dimensionamiento-section">
+                            <h4 class="form-section-title">
+                                <i class="fas fa-sliders-h section-icon"></i>
+                                ¿Cómo quieres dimensionar tu sistema?
+                            </h4>
+                            
+                            <div class="dimensionamiento-options">
+                                <!-- Opción 1: Reducir Factura por Porcentaje -->
+                                <div class="dimensionamiento-option-card" data-mode="porcentaje">
+                                    <div class="option-header">
+                                        <div class="option-icon">
+                                            <i class="fas fa-percentage"></i>
+                                        </div>
+                                        <div class="option-title">
+                                            <h5>Reducir mi Factura</h5>
+                                            <p>Elige qué porcentaje de tu consumo quieres cubrir</p>
+                                        </div>
+                                        <div class="option-radio">
+                                            <input type="radio" name="dimensionamiento_mode" id="modePorcentaje" value="porcentaje" checked>
+                                            <label for="modePorcentaje"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="option-content" id="controlPorcentaje">
+                                        <div class="cobertura-control">
+                                            <div class="cobertura-display">
+                                                <span class="cobertura-label">Cobertura deseada:</span>
+                                                <span class="cobertura-value" id="cobertura_value">100%</span>
+                                            </div>
+                                            <input type="range" id="porcentaje_cobertura" min="25" max="100" step="5" value="100" class="cobertura-slider">
+                                            <div class="cobertura-badges">
+                                                <button type="button" class="cobertura-badge" data-value="50">50%</button>
+                                                <button type="button" class="cobertura-badge" data-value="75">75%</button>
+                                                <button type="button" class="cobertura-badge active" data-value="100">100%</button>
+                                            </div>
+                                            <small class="cobertura-help">Reduce tu factura eléctrica en el porcentaje seleccionado</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Opción 2: Elegir Cantidad de Paneles -->
+                                <div class="dimensionamiento-option-card" data-mode="paneles">
+                                    <div class="option-header">
+                                        <div class="option-icon">
+                                            <i class="fas fa-solar-panel"></i>
+                                        </div>
+                                        <div class="option-title">
+                                            <h5>Elegir Cantidad de Paneles</h5>
+                                            <p>Selecciona cuántos paneles quieres instalar</p>
+                                        </div>
+                                        <div class="option-radio">
+                                            <input type="radio" name="dimensionamiento_mode" id="modePaneles" value="paneles">
+                                            <label for="modePaneles"></label>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="option-content" id="controlPaneles" style="display: none;">
+                                        <div class="paneles-control">
+                                            <div class="paneles-input-wrapper">
+                                                <button type="button" class="paneles-btn-minus" id="btnMenosPanel">−</button>
+                                                <input type="number" id="num_paneles_manual" min="1" value="1" step="1" class="paneles-input">
+                                                <button type="button" class="paneles-btn-plus" id="btnMasPanel">+</button>
+                                            </div>
+                                            <div class="paneles-quick-select">
+                                                <span class="paneles-quick-label">Rápido:</span>
+                                                <button type="button" class="paneles-quick-btn" data-paneles="1">1</button>
+                                                <button type="button" class="paneles-quick-btn" data-paneles="2">2</button>
+                                                <button type="button" class="paneles-quick-btn" data-paneles="4">4</button>
+                                                <button type="button" class="paneles-quick-btn" data-paneles="6">6</button>
+                                                <button type="button" class="paneles-quick-btn" data-paneles="8">8</button>
+                                                <button type="button" class="paneles-quick-btn" data-paneles="10">10</button>
+                                            </div>
+                                            <div class="paneles-preview" id="panelesPreview">
+                                                <span class="paneles-preview-label">Cobertura estimada:</span>
+                                                <span class="paneles-preview-value" id="panelesPreviewValue">-</span>
+                                            </div>
+                                            <small class="paneles-help">El sistema calculará qué porcentaje de tu consumo cubrirás</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Botón Calcular - AL FINAL -->
                         <div class="form-section" style="padding-top: 0.5rem; border-top: 1px solid #e8e8e8; margin-top: 0.5rem;">
                             <button type="submit" id="btnCalcularFinal" class="btn btn-primary btn-block btn-calculate-minimal" disabled style="padding: 0.7rem 1.25rem; font-size: 0.9rem; font-weight: 600; width: 100%; border: none; border-radius: 8px; color: white; cursor: not-allowed; transition: all 0.2s ease; min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 0.5rem; opacity: 0.6;">
@@ -612,7 +697,7 @@
                     </div>
                 </div>
 
-                <!-- Results -->
+                <!-- Results - Vista Simple (Progressive Disclosure) -->
                 <div id="resultsContainer" class="simulator-card results-card" style="display: none;">
                     <div class="results-header">
                         <h3 class="card-title">
@@ -639,124 +724,244 @@
                         </div>
                     </div>
                     
-                    <div class="results-summary">
-                        <!-- Grande Izquierda: Paneles -->
-                        <div class="result-card result-primary">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="5"/>
-                                    <line x1="12" y1="1" x2="12" y2="3"/>
-                                    <line x1="12" y1="21" x2="12" y2="23"/>
-                                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-                                    <line x1="1" y1="12" x2="3" y2="12"/>
-                                    <line x1="21" y1="12" x2="23" y2="12"/>
-                                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-                                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-                                </svg>
+                    <!-- Vista Simple: 4 KPIs Principales -->
+                    <div class="results-simple-view">
+                        <div class="kpi-grid">
+                            <!-- KPI 1: Inversión Total -->
+                            <div class="kpi-card kpi-inversion">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-wallet"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Inversión Total</div>
+                                    <div class="kpi-value" id="kpiInversion">-</div>
+                                    <div class="kpi-sublabel" id="kpiInversionDetail">-</div>
+                                </div>
                             </div>
-                            <div class="result-content">
-                                <div class="result-label">Paneles Recomendados</div>
-                                <div class="result-value" id="numPaneles">-</div>
-                                <div class="result-sublabel" id="potenciaTotal">-</div>
+
+                            <!-- KPI 2: Ahorro Mensual -->
+                            <div class="kpi-card kpi-ahorro">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-piggy-bank"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Ahorro Estimado (Mes 1)</div>
+                                    <div class="kpi-value" id="kpiAhorroMensual">-</div>
+                                    <div class="kpi-sublabel" id="kpiAhorroAnual">-</div>
+                                </div>
+                            </div>
+
+                            <!-- KPI 3: Sistema Ideal -->
+                            <div class="kpi-card kpi-sistema">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-solar-panel"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Tu Sistema Ideal</div>
+                                    <div class="kpi-value" id="kpiSistema">-</div>
+                                    <div class="kpi-sublabel" id="kpiSistemaDetail">-</div>
+                                </div>
+                            </div>
+
+                            <!-- KPI 4: Impacto Ambiental -->
+                            <div class="kpi-card kpi-impacto">
+                                <div class="kpi-icon">
+                                    <i class="fas fa-leaf"></i>
+                                </div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Impacto Ambiental</div>
+                                    <div class="kpi-value" id="kpiImpacto">-</div>
+                                    <div class="kpi-sublabel" id="kpiImpactoDetail">-</div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Fila Superior Derecha (3 tarjetas) -->
-                        <div class="result-card result-featured">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
-                                </svg>
-                            </div>
-                            <div class="result-content">
-                                <div class="result-label">Ahorro Anual</div>
-                                <div class="result-value" id="ahorroAnual">-</div>
-                                <div class="result-sublabel" id="ahorroMensual">-</div>
-                            </div>
-                        </div>
-
-                        <div class="result-card result-featured">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
-                                </svg>
-                            </div>
-                            <div class="result-content">
-                                <div class="result-label">Impacto Ambiental</div>
-                                <div class="result-value" id="co2Anual">-</div>
-                                <div class="result-sublabel">CO₂ evitado</div>
-                            </div>
-                        </div>
-
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
-                                </svg>
-                            </div>
-                            <div class="result-content">
-                                <div class="result-label">Generación</div>
-                                <div class="result-value" id="energiaAnual">-</div>
-                                <div class="result-sublabel" id="energiaMensual">-</div>
-                            </div>
-                        </div>
-
-                        <!-- Fila Inferior Derecha (3 tarjetas) -->
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
-                                    <line x1="1" y1="10" x2="23" y2="10"/>
-                                </svg>
-                            </div>
-                            <div class="result-content">
-                                <div class="result-label">Inversión</div>
-                                <div class="result-value" id="costoTotal">-</div>
-                                <div class="result-sublabel" id="costoPorPanel">-</div>
-                            </div>
-                        </div>
-
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <circle cx="12" cy="12" r="10"/>
-                                    <path d="M16 12l-4-4-4 4M12 16V8"/>
-                                </svg>
-                            </div>
-                            <div class="result-content">
-                                <div class="result-label">ROI</div>
-                                <div class="result-value" id="roi">-</div>
-                                <div class="result-sublabel">Recuperación</div>
-                            </div>
-                        </div>
-
-                        <div class="result-card">
-                            <div class="result-icon">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M3 3v18h18"/>
-                                    <path d="M18 17V9M13 17V5M8 17v-3"/>
-                                </svg>
-                            </div>
-                            <div class="result-content">
-                                <div class="result-label">Cobertura</div>
-                                <div class="result-value" id="cobertura">-</div>
-                                <div class="result-sublabel">Del consumo</div>
-                            </div>
-                        </div>
+                        <!-- Botón CTA para ver análisis detallado -->
+                        <button type="button" class="btn-ver-analisis" id="btnVerAnalisis">
+                            <i class="fas fa-chart-line"></i>
+                            <span>Ver Análisis Financiero y Técnico Detallado</span>
+                            <i class="fas fa-chevron-down" id="iconAnalisis"></i>
+                        </button>
                     </div>
 
-                    <!-- Charts -->
-                    <div class="charts-container">
-                        <div class="chart-wrapper">
-                            <h4 class="chart-title">Generación vs Consumo Mensual</h4>
-                            <canvas id="monthlyChart"></canvas>
+                    <!-- Vista Detallada (Expandible) -->
+                    <div class="results-detailed-view" id="resultsDetailedView" style="display: none;">
+                        <!-- Pestañas -->
+                        <div class="results-tabs">
+                            <button class="result-tab active" data-tab="finanzas">
+                                <i class="fas fa-dollar-sign"></i>
+                                Finanzas
+                            </button>
+                            <button class="result-tab" data-tab="energia">
+                                <i class="fas fa-bolt"></i>
+                                Energía
+                            </button>
+                            <button class="result-tab" data-tab="equipamiento">
+                                <i class="fas fa-tools"></i>
+                                Equipamiento
+                            </button>
                         </div>
-                        
-                        <div class="chart-wrapper">
-                            <h4 class="chart-title">Análisis Financiero (10 años)</h4>
-                            <canvas id="financialChart"></canvas>
+
+                        <!-- Contenido de Pestañas -->
+                        <div class="tab-content">
+                            <!-- Pestaña Finanzas -->
+                            <div class="tab-pane active" id="tabFinanzas">
+                                <div class="tab-section">
+                                    <h4 class="tab-section-title">Análisis Financiero</h4>
+                                    <div class="financial-chart-container">
+                                        <canvas id="financialChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="financial-details-grid">
+                                    <div class="financial-detail-card">
+                                        <div class="detail-label">ROI Exacto</div>
+                                        <div class="detail-value" id="detailROI">-</div>
+                                        <div class="detail-desc">Tiempo de recuperación</div>
+                                    </div>
+
+                                    <div class="financial-detail-card">
+                                        <div class="detail-label">Desglose de Costos</div>
+                                        <div class="cost-breakdown">
+                                            <div class="cost-item">
+                                                <span class="cost-label">Costo Fijo (Instalación/Inversor)</span>
+                                                <span class="cost-value" id="detailCostoBase">-</span>
+                                            </div>
+                                            <div class="cost-item">
+                                                <span class="cost-label">Paneles</span>
+                                                <span class="cost-value" id="detailCostoPaneles">-</span>
+                                            </div>
+                                            <div class="cost-item cost-total">
+                                                <span class="cost-label">Total</span>
+                                                <span class="cost-value" id="detailCostoTotal">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="financial-detail-card highlight">
+                                        <div class="detail-label">Ahorro Acumulado a 25 años</div>
+                                        <div class="detail-value large" id="detailAhorro25Anos">-</div>
+                                        <div class="detail-desc">Proyección a largo plazo</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pestaña Energía -->
+                            <div class="tab-pane" id="tabEnergia">
+                                <div class="tab-section">
+                                    <h4 class="tab-section-title">Generación vs Consumo Mensual</h4>
+                                    <div class="energy-chart-container">
+                                        <canvas id="monthlyChart"></canvas>
+                                    </div>
+                                </div>
+
+                                <div class="tab-section">
+                                    <h4 class="tab-section-title">Tabla Mensual Detallada</h4>
+                                    <div class="monthly-table-container">
+                                        <table class="monthly-detail-table" id="monthlyDetailTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>Mes</th>
+                                                    <th>Generación (kWh)</th>
+                                                    <th>Consumo (kWh)</th>
+                                                    <th>Balance</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="monthlyTableBody">
+                                                <!-- Se llena dinámicamente -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="energy-summary-cards">
+                                    <div class="summary-card">
+                                        <div class="summary-label">Generación Anual</div>
+                                        <div class="summary-value" id="summaryGeneracionAnual">-</div>
+                                    </div>
+                                    <div class="summary-card">
+                                        <div class="summary-label">Cobertura del Consumo</div>
+                                        <div class="summary-value" id="summaryCobertura">-</div>
+                                    </div>
+                                    <div class="summary-card highlight" id="summaryExcedentes" style="display: none;">
+                                        <div class="summary-label">Excedentes Anuales</div>
+                                        <div class="summary-value" id="summaryExcedentesValue">-</div>
+                                        <div class="summary-desc">Para vender a la red</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pestaña Equipamiento -->
+                            <div class="tab-pane" id="tabEquipamiento">
+                                <div class="equipment-grid">
+                                    <div class="equipment-card">
+                                        <div class="equipment-image">
+                                            <i class="fas fa-solar-panel" style="font-size: 4rem; color: var(--primary-color);"></i>
+                                        </div>
+                                        <div class="equipment-content">
+                                            <h4 class="equipment-title">Panel Solar</h4>
+                                            <div class="equipment-spec">
+                                                <strong>Modelo:</strong> <span id="equipPanelModelo">Panel de Referencia 190W</span>
+                                            </div>
+                                            <div class="equipment-spec">
+                                                <strong>Cantidad:</strong> <span id="equipPanelCantidad">-</span> paneles
+                                            </div>
+                                            <div class="equipment-spec">
+                                                <strong>Potencia Total:</strong> <span id="equipPanelPotencia">-</span> kW
+                                            </div>
+                                            <div class="equipment-spec">
+                                                <strong>Precio Unitario:</strong> <span id="equipPanelPrecio">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="equipment-card">
+                                        <div class="equipment-image">
+                                            <i class="fas fa-microchip" style="font-size: 4rem; color: var(--primary-color);"></i>
+                                        </div>
+                                        <div class="equipment-content">
+                                            <h4 class="equipment-title">Inversor Grid-Tie</h4>
+                                            <div class="equipment-spec">
+                                                <strong>Modelo:</strong> <span>Inversor 360solar</span>
+                                            </div>
+                                            <div class="equipment-spec">
+                                                <strong>Tipo:</strong> <span>Grid-Tie (Conectado a red)</span>
+                                            </div>
+                                            <div class="equipment-spec">
+                                                <strong>Funcionalidad:</strong> <span>Gestión autónoma de energía</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="equipment-card full-width">
+                                        <div class="equipment-content">
+                                            <h4 class="equipment-title">Especificaciones de Instalación</h4>
+                                            <div class="installation-specs">
+                                                <div class="spec-row">
+                                                    <span class="spec-label">Superficie Necesaria (aprox.):</span>
+                                                    <span class="spec-value" id="equipSuperficie">-</span>
+                                                </div>
+                                                <div class="spec-row">
+                                                    <span class="spec-label">Inclinación Recomendada:</span>
+                                                    <span class="spec-value" id="equipInclinacion">-</span>
+                                                </div>
+                                                <div class="spec-row">
+                                                    <span class="spec-label">Orientación:</span>
+                                                    <span class="spec-value">Norte (Hemisferio Sur)</span>
+                                                </div>
+                                                <div class="spec-row">
+                                                    <span class="spec-label">Vida Útil Estimada:</span>
+                                                    <span class="spec-value">25-30 años</span>
+                                                </div>
+                                                <div class="spec-row">
+                                                    <span class="spec-label">Garantía de Rendimiento:</span>
+                                                    <span class="spec-value">25 años</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
