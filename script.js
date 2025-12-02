@@ -350,6 +350,8 @@ function actualizarWizardUI() {
             wizardNav.style.display = 'none';
         } else {
             wizardNav.style.display = 'flex';
+            wizardNav.style.visibility = 'visible';
+            wizardNav.style.opacity = '1';
             
             // Para el paso 1, agregar clase especial
             if (currentWizardStep === 1) {
@@ -357,7 +359,10 @@ function actualizarWizardUI() {
                 if (btnPrev) {
                     btnPrev.style.display = 'none'; // Ocultar botón Atrás en paso 1
                 }
-                if (btnNext) btnNext.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+                if (btnNext) {
+                    btnNext.style.display = 'flex';
+                    btnNext.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+                }
             } else {
                 if (wizardContent) wizardContent.classList.remove('step-map-active');
                 if (btnPrev) {
@@ -365,6 +370,7 @@ function actualizarWizardUI() {
                 }
                 if (btnPrev) btnPrev.innerHTML = '<i class="fas fa-arrow-left"></i> Anterior';
                 if (btnNext) {
+                    btnNext.style.display = 'flex';
                     if (currentWizardStep === totalWizardSteps - 1) {
                         btnNext.textContent = 'Finalizar';
                     } else {
@@ -394,7 +400,9 @@ function actualizarWizardVisual() {
         visualContent.className = 'modal-wizard-visual intro-overlay';
         visualContent.innerHTML = `
             <div class="intro-content">
-                <div class="intro-logo">SOLAR360</div>
+                <div class="intro-logo">
+                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                </div>
                 <h1 class="intro-title">Calculadora<br>Paneles<br>Solares</h1>
                 <p class="intro-description">
                     Haz tu cálculo de paneles solares para saber cuánto puedes ahorrar con la energía solar en tu consumo eléctrico y emisiones de CO2.
@@ -406,7 +414,9 @@ function actualizarWizardVisual() {
         visualContent.className = 'modal-wizard-visual wizard-step-instructions';
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">SOLAR360</div>
+                <div class="wizard-logo">
+                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                </div>
                 <h2 class="wizard-instructions-title">Ingresa tu dirección</h2>
                 <p class="wizard-instructions-question">¿Dónde te gustaría instalar el Sistema Fotovoltaico?</p>
                 <div class="wizard-progress">
@@ -427,7 +437,9 @@ function actualizarWizardVisual() {
         visualContent.className = 'modal-wizard-visual wizard-step-instructions';
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">SOLAR360</div>
+                <div class="wizard-logo">
+                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                </div>
                 <h2 class="wizard-instructions-title">Datos de tu Factura</h2>
                 <p class="wizard-instructions-question">Ingresa la información de consumo y precio de tu factura eléctrica</p>
                 <div class="wizard-progress">
@@ -443,7 +455,9 @@ function actualizarWizardVisual() {
         visualContent.className = 'modal-wizard-visual wizard-step-instructions';
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">SOLAR360</div>
+                <div class="wizard-logo">
+                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                </div>
                 <h2 class="wizard-instructions-title">Dimensiona tu Sistema</h2>
                 <p class="wizard-instructions-question">Elige cómo quieres dimensionar tu sistema solar: por porcentaje de cobertura o por cantidad de paneles</p>
                 <div class="wizard-progress">
@@ -459,7 +473,9 @@ function actualizarWizardVisual() {
         visualContent.className = 'modal-wizard-visual wizard-step-instructions';
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">SOLAR360</div>
+                <div class="wizard-logo">
+                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                </div>
                 <h2 class="wizard-instructions-title">Ángulo de Instalación</h2>
                 <p class="wizard-instructions-question">Selecciona el ángulo de inclinación de tus paneles. El ángulo influye en la eficiencia de generación de energía</p>
                 <div class="wizard-progress">
@@ -475,7 +491,9 @@ function actualizarWizardVisual() {
         visualContent.className = 'modal-wizard-visual wizard-step-instructions';
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">SOLAR360</div>
+                <div class="wizard-logo">
+                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                </div>
                 <h2 class="wizard-instructions-title">Tus Resultados</h2>
                 <p class="wizard-instructions-question">Aquí está el análisis completo de tu sistema solar. Revisa los detalles y ajusta según necesites.</p>
                 <div class="wizard-progress">
@@ -4383,7 +4401,7 @@ function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera = '') {
     return `
         <div class="print-wrapper">
             <header class="print-header">
-                <h1>☀ SOLAR360</h1>
+                <h1>Solar360</h1>
                 <p class="print-subtitle">Resumen de Dimensionamiento Solar</p>
                 <p class="print-date">${fechaFormateada} • ${horaFormateada}</p>
             </header>
