@@ -16,7 +16,7 @@ const MODELO_OLS = {
         temperatura_C: 0.12,           // β₂ (efecto positivo moderado)
         inclinacion: 0.05              // β₃ (efecto menor)
     },
-    
+
     // Métricas del modelo
     metricas: {
         r2: 0.97,                      // R² > 0.95 (excelente ajuste)
@@ -25,7 +25,7 @@ const MODELO_OLS = {
         mae: 4.2,
         mape: 3.5                      // Error porcentual
     },
-    
+
     // Constantes físicas
     constantes: {
         irradiancia_std: 1000,         // W/m² (STC - Standard Test Conditions)
@@ -143,7 +143,7 @@ let ubicacionActual = {
 // Inicialización
 // ============================================
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     initializeApp();
 });
 
@@ -161,30 +161,30 @@ let modoDimensionamiento = 'porcentaje'; // 'porcentaje' o 'paneles'
 
 function seleccionarModoUbicacion() {
     modoActual = 'ubicacion';
-    
+
     // Actualizar botones
     document.getElementById('modeUbicacion').classList.add('mode-active');
     document.getElementById('modeManual').classList.remove('mode-active');
-    
+
     // Mostrar/ocultar secciones
     document.getElementById('seccionUbicacion').style.display = 'block';
     document.getElementById('seccionManual').style.display = 'none';
-    
+
     // Validar si se puede habilitar el botón calcular
     validarYHabilitarBotonCalcular();
 }
 
 function seleccionarModoManual() {
     modoActual = 'manual';
-    
+
     // Actualizar botones
     document.getElementById('modeManual').classList.add('mode-active');
     document.getElementById('modeUbicacion').classList.remove('mode-active');
-    
+
     // Mostrar/ocultar secciones
     document.getElementById('seccionUbicacion').style.display = 'none';
     document.getElementById('seccionManual').style.display = 'block';
-    
+
     // Validar si se puede habilitar el botón calcular
     validarYHabilitarBotonCalcular();
 }
@@ -205,48 +205,57 @@ function initializeApp() {
     document.getElementById('modeManual').addEventListener('click', seleccionarModoManual);
     document.getElementById('openMapButton').addEventListener('click', abrirMapa);
     document.getElementById('simulatorForm').addEventListener('submit', calcularDimensionamiento);
-    
+
     // Modal Simulador
     const btnAbrirSimulador = document.getElementById('btnAbrirSimulador');
     const btnCerrarSimulador = document.getElementById('btnCerrarSimulador');
     const modalSimulador = document.getElementById('modalSimulador');
-    
+    const navSimulador = document.getElementById('navSimulador');
+
     if (btnAbrirSimulador) {
         btnAbrirSimulador.addEventListener('click', abrirModalSimulador);
     }
-    
+
+    // Abrir modal desde el menú de navegación
+    if (navSimulador) {
+        navSimulador.addEventListener('click', function (e) {
+            e.preventDefault();
+            abrirModalSimulador();
+        });
+    }
+
     if (btnCerrarSimulador) {
         btnCerrarSimulador.addEventListener('click', cerrarModalSimulador);
     }
-    
+
     // Cerrar modal al hacer clic fuera
     if (modalSimulador) {
-        modalSimulador.addEventListener('click', function(e) {
+        modalSimulador.addEventListener('click', function (e) {
             if (e.target === modalSimulador) {
                 cerrarModalSimulador();
             }
         });
     }
-    
+
     // Cerrar modal con ESC
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && modalSimulador && modalSimulador.classList.contains('active')) {
             cerrarModalSimulador();
         }
     });
-    
+
     // Inicializar wizard del modal
     inicializarWizardModal();
-    
+
     // Inicializar sección de dimensionamiento
     inicializarDimensionamiento();
-    
+
     // Agregar validación en tiempo real a todos los campos
     agregarValidacionTiempoReal();
-    
+
     // Validar estado inicial del botón
     validarYHabilitarBotonCalcular();
-    
+
     // Smooth scroll para navegación
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
@@ -257,17 +266,17 @@ function initializeApp() {
             }
         });
     });
-    
+
     // Mobile menu toggle
     const mobileToggle = document.querySelector('.mobile-menu-toggle');
     const navMenu = document.querySelector('.nav-menu');
-    
+
     if (mobileToggle) {
         mobileToggle.addEventListener('click', () => {
             navMenu.classList.toggle('active');
         });
     }
-    
+
     // Cerrar modal al hacer click fuera
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('mapModal');
@@ -275,13 +284,13 @@ function initializeApp() {
             cerrarMapa();
         }
     });
-    
+
     // Scroll Spy - Activar sección actual en el menú
     initScrollSpy();
-    
+
     // Header scroll effect
-    initHeaderScroll();
-    
+    // initHeaderScroll(); // Deshabilitado - el header mantiene el mismo estilo siempre
+
     // Listener para redimensionar gráficos cuando cambie el tamaño de la ventana
     let resizeTimeout;
     window.addEventListener('resize', () => {
@@ -290,7 +299,7 @@ function initializeApp() {
             redimensionarGraficos();
         }, 250);
     });
-    
+
     console.log('✅ Solar360 Simulator inicializado');
 }
 
@@ -334,16 +343,26 @@ function actualizarWizardUI() {
             step.classList.remove('active');
         }
     });
-    
+
     // Actualizar contenido visual de la izquierda
     actualizarWizardVisual();
-    
+
     // Actualizar botones de navegación
     const btnPrev = document.getElementById('btnWizardPrev');
     const btnNext = document.getElementById('btnWizardNext');
     const wizardNav = document.getElementById('wizardNavigation');
     const wizardContent = document.querySelector('.modal-wizard-content');
-    
+    const btnCerrar = document.getElementById('btnCerrarSimulador');
+
+    // Mostrar/ocultar botón de cerrar (X)
+    if (btnCerrar) {
+        if (currentWizardStep === 0) {
+            btnCerrar.style.display = 'none'; // Ocultar en pantalla de introducción
+        } else {
+            btnCerrar.style.display = 'flex'; // Mostrar en los 5 pasos del wizard
+        }
+    }
+
     // Mostrar/ocultar navegación según el paso
     if (wizardNav) {
         if (currentWizardStep === 0) {
@@ -352,7 +371,7 @@ function actualizarWizardUI() {
             wizardNav.style.display = 'flex';
             wizardNav.style.visibility = 'visible';
             wizardNav.style.opacity = '1';
-            
+
             // Para el paso 1, agregar clase especial
             if (currentWizardStep === 1) {
                 if (wizardContent) wizardContent.classList.add('step-map-active');
@@ -380,7 +399,7 @@ function actualizarWizardUI() {
             }
         }
     }
-    
+
     if (btnPrev) {
         if (currentWizardStep === 1) {
             btnPrev.style.display = 'none'; // Ocultar completamente en paso 1
@@ -394,7 +413,7 @@ function actualizarWizardUI() {
 function actualizarWizardVisual() {
     const visualContent = document.getElementById('wizardVisualContent');
     if (!visualContent) return;
-    
+
     if (currentWizardStep === 0) {
         // Pantalla de introducción
         visualContent.className = 'modal-wizard-visual intro-overlay';
@@ -427,7 +446,7 @@ function actualizarWizardVisual() {
                 </div>
             </div>
         `;
-        
+
         // Inicializar mapa cuando se muestra el paso 1
         setTimeout(() => {
             inicializarWizardMapa();
@@ -504,7 +523,7 @@ function actualizarWizardVisual() {
                 </div>
             </div>
         `;
-        
+
         // Inicializar resultados detallados si ya están calculados
         if (window.wizardResultados) {
             setTimeout(() => {
@@ -531,19 +550,19 @@ let wizardData = {
     ubicacionNombre: '',
     psh: null, // Array de 12 meses
     temperatura: null, // Array de 12 meses
-    
+
     // Paso 2: Factura
     moneda: 'ARS',
     modoConsumo: 'aproximado', // 'aproximado' o 'especifico'
     consumoMensual: null,
     consumoMensualArray: [], // Array de 12 meses si es específico
     precioKwh: null,
-    
+
     // Paso 3: Dimensionamiento
     modoDimensionamiento: 'porcentaje', // 'porcentaje' o 'paneles'
     porcentajeCobertura: 100,
     numPaneles: null,
-    
+
     // Paso 4: Ángulo
     inclinacion: 20 // 20 o 45
 };
@@ -551,7 +570,7 @@ let wizardData = {
 function inicializarWizardMapa() {
     const mapContainer = document.getElementById('wizardMap');
     if (!mapContainer || wizardMap) return; // Ya está inicializado
-    
+
     // Crear mapa centrado en Argentina con zoom inicial
     wizardMap = L.map('wizardMap', {
         zoomControl: false, // Lo agregaremos manualmente después
@@ -560,7 +579,7 @@ function inicializarWizardMapa() {
         zoomSnap: 0.5, // Permitir zoom intermedio
         zoomDelta: 0.5 // Incremento de zoom más suave
     }).setView([-38.4161, -63.6167], 5);
-    
+
     // Inicializar con vista de mapa (no satélite)
     // Usar CartoDB Positron que tiene mejor cobertura en zoom alto
     L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
@@ -569,37 +588,37 @@ function inicializarWizardMapa() {
         maxZoom: 22, // Zoom máximo muy alto
         minZoom: 3
     }).addTo(wizardMap);
-    
+
     // Evento de click en el mapa
-    wizardMap.on('click', function(e) {
+    wizardMap.on('click', function (e) {
         const lat = e.latlng.lat;
         const lon = e.latlng.lng;
-        
+
         // Eliminar marcador anterior si existe
         if (wizardMapMarker) {
             wizardMap.removeLayer(wizardMapMarker);
         }
-        
+
         // Agregar nuevo marcador
         wizardMapMarker = L.marker([lat, lon]).addTo(wizardMap);
-        
+
         // Intentar obtener el nombre del lugar mediante geocodificación inversa
         obtenerNombreDesdeCoordenadas(lat, lon);
     });
-    
+
     // Inicializar búsqueda
     inicializarBusquedaMapa();
-    
+
     // Inicializar toggles de vista
     inicializarTogglesMapa();
-    
+
     // Agregar controles de zoom con límites aumentados
     L.control.zoom({
         position: 'bottomright',
         zoomInTitle: 'Acercar',
         zoomOutTitle: 'Alejar'
     }).addTo(wizardMap);
-    
+
     // Ajustar tamaño del mapa después de inicializar
     setTimeout(() => {
         wizardMap.invalidateSize();
@@ -613,28 +632,28 @@ function inicializarBusquedaMapa() {
     const searchInput = document.getElementById('wizardMapSearch');
     const searchBtn = document.querySelector('.wizard-map-search-btn');
     const suggestionsContainer = document.getElementById('wizardMapSearchSuggestions');
-    
+
     console.log('🔍 Inicializando búsqueda:', { searchInput, searchBtn, suggestionsContainer });
-    
+
     if (!searchInput || !searchBtn) {
         console.error('❌ No se encontraron elementos de búsqueda');
         return;
     }
-    
+
     if (!suggestionsContainer) {
         console.error('❌ No se encontró el contenedor de sugerencias');
         return;
     }
-    
+
     // Autocompletado mientras se escribe
-    searchInput.addEventListener('input', function(e) {
+    searchInput.addEventListener('input', function (e) {
         const query = e.target.value.trim();
-        
+
         // Limpiar timeout anterior
         if (searchTimeout) {
             clearTimeout(searchTimeout);
         }
-        
+
         // Ocultar sugerencias si está vacío o tiene menos de 3 caracteres
         if (!query || query.length < 3) {
             if (suggestionsContainer) {
@@ -644,18 +663,18 @@ function inicializarBusquedaMapa() {
             selectedSuggestionIndex = -1;
             return;
         }
-        
+
         // Esperar 300ms antes de buscar (debounce) - solo si tiene 3 o más caracteres
         searchTimeout = setTimeout(() => {
             buscarSugerencias(query);
         }, 300);
     });
-    
+
     // Navegación con teclado
-    searchInput.addEventListener('keydown', function(e) {
+    searchInput.addEventListener('keydown', function (e) {
         const suggestions = suggestionsContainer?.querySelectorAll('.wizard-map-search-suggestion');
         if (!suggestions || suggestions.length === 0) return;
-        
+
         if (e.key === 'ArrowDown') {
             e.preventDefault();
             selectedSuggestionIndex = Math.min(selectedSuggestionIndex + 1, suggestions.length - 1);
@@ -678,12 +697,12 @@ function inicializarBusquedaMapa() {
             selectedSuggestionIndex = -1;
         }
     });
-    
+
     // Buscar al hacer clic en el botón
     searchBtn.addEventListener('click', buscarDireccion);
-    
+
     // Cerrar sugerencias al hacer clic fuera
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (!searchInput.contains(e.target) && !suggestionsContainer?.contains(e.target)) {
             if (suggestionsContainer) {
                 suggestionsContainer.classList.remove('active');
@@ -695,67 +714,67 @@ function inicializarBusquedaMapa() {
 function buscarSugerencias(query) {
     const suggestionsContainer = document.getElementById('wizardMapSearchSuggestions');
     const searchInput = document.getElementById('wizardMapSearch');
-    
+
     console.log('🔍 Buscando sugerencias para:', query, { suggestionsContainer, searchInput });
-    
+
     if (!suggestionsContainer || !searchInput) {
         console.error('❌ No se encontraron elementos necesarios');
         return;
     }
-    
+
     // Validar que tenga al menos 3 caracteres
     if (!query || query.length < 3) {
         suggestionsContainer.classList.remove('active');
         suggestionsContainer.innerHTML = '';
         return;
     }
-    
+
     console.log('✅ Mostrando indicador de carga');
     // Mostrar indicador de carga
     suggestionsContainer.innerHTML = '<div class="wizard-map-search-suggestion" style="text-align: center; color: #999; font-style: italic; pointer-events: none;">Buscando...</div>';
     suggestionsContainer.classList.add('active');
-    
+
     // Forzar visibilidad
     suggestionsContainer.style.display = 'block';
-    
+
     // Usar Nominatim para obtener sugerencias
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=8&countrycodes=ar&addressdetails=1`;
-    
+
     fetch(url)
         .then(response => response.json())
         .then(data => {
             console.log('📥 Respuesta recibida:', data);
             suggestionsContainer.innerHTML = '';
             selectedSuggestionIndex = -1;
-            
+
             if (data && data.length > 0) {
                 console.log(`✅ Encontradas ${data.length} sugerencias`);
                 data.forEach((result, index) => {
                     const suggestion = document.createElement('div');
                     suggestion.className = 'wizard-map-search-suggestion';
-                    
+
                     // Formatear el nombre de la dirección de manera más legible
                     const displayName = formatearNombreDireccion(result.display_name);
                     suggestion.dataset.lat = result.lat;
                     suggestion.dataset.lon = result.lon;
                     suggestion.dataset.name = result.display_name;
-                    
+
                     // Resaltar la parte que coincide con la búsqueda
                     const highlightedName = resaltarCoincidencia(displayName, query);
                     suggestion.innerHTML = highlightedName;
-                    
+
                     suggestion.addEventListener('click', () => {
                         seleccionarSugerencia(suggestion);
                     });
-                    
+
                     suggestion.addEventListener('mouseenter', () => {
                         selectedSuggestionIndex = index;
                         actualizarSugerenciaSeleccionada(suggestionsContainer.querySelectorAll('.wizard-map-search-suggestion'));
                     });
-                    
+
                     suggestionsContainer.appendChild(suggestion);
                 });
-                
+
                 suggestionsContainer.classList.add('active');
                 suggestionsContainer.style.display = 'block';
                 console.log('✅ Sugerencias mostradas');
@@ -800,7 +819,7 @@ function actualizarSugerenciaSeleccionada(suggestions) {
         if (index === selectedSuggestionIndex) {
             suggestion.classList.add('active');
             suggestion.scrollIntoView({ block: 'nearest' });
-            
+
             // Mostrar preview en el mapa cuando se navega con las flechas
             const lat = parseFloat(suggestion.dataset.lat);
             const lon = parseFloat(suggestion.dataset.lon);
@@ -813,24 +832,24 @@ function actualizarSugerenciaSeleccionada(suggestions) {
 
 function mostrarPreviewEnMapa(lat, lon, nombre) {
     if (!wizardMap) return;
-    
+
     // Eliminar marcador de preview anterior si existe
     if (wizardMapMarker && wizardMapMarker.options.isPreview) {
         wizardMap.removeLayer(wizardMapMarker);
         wizardMapMarker = null;
     }
-    
+
     // Centrar mapa en la ubicación (con animación suave)
     wizardMap.setView([lat, lon], Math.max(wizardMap.getZoom(), 13), {
         animate: true,
         duration: 0.3
     });
-    
+
     // Agregar marcador temporal de preview
     const previewMarker = L.marker([lat, lon], {
         isPreview: true
     }).addTo(wizardMap);
-    
+
     // Guardar referencia temporal
     wizardMapMarker = previewMarker;
 }
@@ -839,32 +858,32 @@ function seleccionarSugerencia(suggestionElement) {
     const lat = parseFloat(suggestionElement.dataset.lat);
     const lon = parseFloat(suggestionElement.dataset.lon);
     const name = suggestionElement.dataset.name;
-    
+
     const searchInput = document.getElementById('wizardMapSearch');
     if (searchInput) {
         searchInput.value = name; // Solo mostrar el nombre, nunca coordenadas
     }
-    
+
     const suggestionsContainer = document.getElementById('wizardMapSearchSuggestions');
     if (suggestionsContainer) {
         suggestionsContainer.classList.remove('active');
     }
-    
+
     // Centrar mapa en la ubicación seleccionada
     if (wizardMap) {
         wizardMap.setView([lat, lon], 15, {
             animate: true,
             duration: 0.5
         });
-        
+
         // Eliminar marcador anterior
         if (wizardMapMarker) {
             wizardMap.removeLayer(wizardMapMarker);
         }
-        
+
         // Agregar nuevo marcador definitivo (sin flag de preview)
         wizardMapMarker = L.marker([lat, lon]).addTo(wizardMap);
-        
+
         // Guardar ubicación seleccionada
         ubicacionSeleccionada = {
             lat: lat,
@@ -872,26 +891,26 @@ function seleccionarSugerencia(suggestionElement) {
             nombre: name
         };
     }
-    
+
     selectedSuggestionIndex = -1;
 }
 
 function obtenerNombreDesdeCoordenadas(lat, lon) {
     // Geocodificación inversa para obtener el nombre del lugar
     const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1`;
-    
+
     fetch(url)
         .then(response => response.json())
         .then(data => {
             if (data && data.display_name) {
                 const nombre = data.display_name;
-                
+
                 // Actualizar campo de búsqueda con el nombre del lugar
                 const searchInput = document.getElementById('wizardMapSearch');
                 if (searchInput) {
                     searchInput.value = nombre;
                 }
-                
+
                 // Guardar ubicación seleccionada con nombre
                 ubicacionSeleccionada = {
                     lat: lat,
@@ -921,26 +940,26 @@ function obtenerNombreDesdeCoordenadas(lat, lon) {
 function buscarDireccion() {
     const searchInput = document.getElementById('wizardMapSearch');
     if (!searchInput || !wizardMap) return;
-    
+
     const query = searchInput.value.trim();
     if (!query) return;
-    
+
     // Cerrar sugerencias si están abiertas
     const suggestionsContainer = document.getElementById('wizardMapSearchSuggestions');
     if (suggestionsContainer) {
         suggestionsContainer.classList.remove('active');
     }
-    
+
     // Mostrar indicador de carga
     const searchBtn = document.querySelector('.wizard-map-search-btn');
     if (searchBtn) {
         searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         searchBtn.disabled = true;
     }
-    
+
     // Usar Nominatim para geocodificación
     const url = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&limit=1&countrycodes=ar&addressdetails=1`;
-    
+
     fetch(url)
         .then(response => response.json())
         .then(data => {
@@ -949,28 +968,28 @@ function buscarDireccion() {
                 const lat = parseFloat(result.lat);
                 const lon = parseFloat(result.lon);
                 const nombre = result.display_name || query;
-                
+
                 // Centrar mapa en la ubicación encontrada
                 wizardMap.setView([lat, lon], 15, {
                     animate: true,
                     duration: 0.5
                 });
-                
+
                 // Eliminar marcador anterior
                 if (wizardMapMarker) {
                     wizardMap.removeLayer(wizardMapMarker);
                 }
-                
+
                 // Agregar nuevo marcador
                 wizardMapMarker = L.marker([lat, lon]).addTo(wizardMap);
-                
+
                 // Guardar ubicación seleccionada
                 ubicacionSeleccionada = {
                     lat: lat,
                     lon: lon,
                     nombre: nombre
                 };
-                
+
                 // Actualizar campo de búsqueda solo con el nombre (nunca coordenadas)
                 searchInput.value = nombre;
             } else {
@@ -992,23 +1011,23 @@ function buscarDireccion() {
 
 function inicializarTogglesMapa() {
     const toggles = document.querySelectorAll('.wizard-map-toggle');
-    
+
     toggles.forEach(toggle => {
-        toggle.addEventListener('click', function() {
+        toggle.addEventListener('click', function () {
             // Remover active de todos
             toggles.forEach(t => t.classList.remove('active'));
             // Agregar active al clickeado
             this.classList.add('active');
-            
+
             const view = this.dataset.view;
-            
+
             // Remover todas las capas de tiles
-            wizardMap.eachLayer(function(layer) {
+            wizardMap.eachLayer(function (layer) {
                 if (layer instanceof L.TileLayer) {
                     wizardMap.removeLayer(layer);
                 }
             });
-            
+
             // Agregar nueva capa según la vista
             if (view === 'satellite') {
                 // Usar una capa de satélite con zoom máximo aumentado
@@ -1033,46 +1052,95 @@ function inicializarTogglesMapa() {
 async function confirmarUbicacionWizard() {
     if (ubicacionSeleccionada) {
         console.log('📍 Ubicación confirmada:', ubicacionSeleccionada);
-        
+
         // Guardar ubicación en wizardData
         wizardData.lat = ubicacionSeleccionada.lat;
         wizardData.lon = ubicacionSeleccionada.lon;
         wizardData.ubicacionNombre = ubicacionSeleccionada.nombre || 'Ubicación seleccionada';
-        
-        // Mostrar estado de carga en el botón Siguiente
+
+        // Crear overlay de carga
+        const wizardStep1 = document.getElementById('wizardStep1');
+        const loadingOverlay = document.createElement('div');
+        loadingOverlay.id = 'wizardLoadingOverlay';
+        loadingOverlay.style.cssText = `
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+        loadingOverlay.innerHTML = `
+            <div style="text-align: center;">
+                <div style="margin-bottom: 1.5rem;">
+                    <svg width="60" height="60" viewBox="0 0 50 50" style="animation: spin 1s linear infinite;">
+                        <circle cx="25" cy="25" r="20" stroke="#FDB813" stroke-width="4" fill="none" stroke-dasharray="31.4 31.4" stroke-linecap="round">
+                            <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/>
+                        </circle>
+                    </svg>
+                </div>
+                <p style="font-size: 1.1rem; font-weight: 600; color: #2c3e50; margin: 0;">Obteniendo datos climáticos...</p>
+                <p style="font-size: 0.9rem; color: #7f8c8d; margin-top: 0.5rem;">Por favor espera un momento</p>
+            </div>
+        `;
+
+        if (wizardStep1) {
+            wizardStep1.appendChild(loadingOverlay);
+        }
+
+        // Deshabilitar botón Siguiente
         const btnNext = document.getElementById('btnWizardNext');
         if (btnNext) {
             btnNext.disabled = true;
-            btnNext.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Obteniendo datos climáticos...';
+            btnNext.style.opacity = '0.5';
+            btnNext.style.cursor = 'not-allowed';
         }
-        
+
         try {
             // Obtener datos climáticos de la API
             await obtenerDatosClimaticosWizard(ubicacionSeleccionada.lat, ubicacionSeleccionada.lon);
-            
+
+            // Remover overlay
+            if (loadingOverlay && loadingOverlay.parentNode) {
+                loadingOverlay.remove();
+            }
+
             // Restaurar botón
             if (btnNext) {
                 btnNext.disabled = false;
-                btnNext.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+                btnNext.style.opacity = '1';
+                btnNext.style.cursor = 'pointer';
             }
-            
-            mostrarNotificacion('✅ Datos climáticos obtenidos correctamente', 'success');
+
+            // NO mostrar notificación verde
             return true;
         } catch (error) {
             console.error('❌ Error obteniendo datos climáticos:', error);
-            
+
+            // Remover overlay
+            if (loadingOverlay && loadingOverlay.parentNode) {
+                loadingOverlay.remove();
+            }
+
             // Restaurar botón
             if (btnNext) {
                 btnNext.disabled = false;
-                btnNext.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
+                btnNext.style.opacity = '1';
+                btnNext.style.cursor = 'pointer';
             }
-            
+
             mostrarNotificacion('⚠️ Error obteniendo datos climáticos. Usando valores por defecto.', 'warning');
-            
+
             // Usar datos de ejemplo
             wizardData.psh = DATOS_EJEMPLO.psh;
             wizardData.temperatura = DATOS_EJEMPLO.temperatura;
-            
+
             return true; // Permitir continuar con datos de ejemplo
         }
     }
@@ -1083,72 +1151,72 @@ async function obtenerDatosClimaticosWizard(lat, lon) {
     try {
         // Intentar primero con NASA POWER API
         const year = new Date().getFullYear() - 1;
-        
+
         const url = `https://power.larc.nasa.gov/api/temporal/monthly/point?` +
-                    `parameters=ALLSKY_SFC_SW_DWN,T2M` +
-                    `&community=RE` +
-                    `&longitude=${lon}` +
-                    `&latitude=${lat}` +
-                    `&start=${year}` +
-                    `&end=${year}` +
-                    `&format=JSON`;
-        
+            `parameters=ALLSKY_SFC_SW_DWN,T2M` +
+            `&community=RE` +
+            `&longitude=${lon}` +
+            `&latitude=${lat}` +
+            `&start=${year}` +
+            `&end=${year}` +
+            `&format=JSON`;
+
         console.log('🌐 Consultando NASA POWER API...');
-        
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         console.log('✅ Datos recibidos de NASA POWER:', data);
-        
+
         // Extraer datos mensuales
         const pshData = data.properties.parameter.ALLSKY_SFC_SW_DWN;
         const tempData = data.properties.parameter.T2M;
-        
+
         // Convertir objeto a array [ene, feb, mar, ...]
         wizardData.psh = Object.values(pshData);
         wizardData.temperatura = Object.values(tempData);
-        
+
         console.log('📊 Datos climáticos procesados:');
         console.log('   PSH:', wizardData.psh);
         console.log('   Temperatura:', wizardData.temperatura);
-        
+
     } catch (error) {
         console.warn('⚠️ NASA POWER falló, intentando Open-Meteo...');
-        
+
         // Intentar con Open-Meteo como fallback
         const endDate = new Date();
         const startDate = new Date();
         startDate.setFullYear(startDate.getFullYear() - 1);
-        
+
         const url = `https://archive-api.open-meteo.com/v1/archive?` +
-                    `latitude=${lat}` +
-                    `&longitude=${lon}` +
-                    `&start_date=${startDate.toISOString().split('T')[0]}` +
-                    `&end_date=${endDate.toISOString().split('T')[0]}` +
-                    `&daily=shortwave_radiation_sum,temperature_2m_mean` +
-                    `&timezone=auto`;
-        
+            `latitude=${lat}` +
+            `&longitude=${lon}` +
+            `&start_date=${startDate.toISOString().split('T')[0]}` +
+            `&end_date=${endDate.toISOString().split('T')[0]}` +
+            `&daily=shortwave_radiation_sum,temperature_2m_mean` +
+            `&timezone=auto`;
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`Open-Meteo API Error: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         // Procesar datos diarios a mensuales
         const radiation = data.daily.shortwave_radiation_sum;
         const temperature = data.daily.temperature_2m_mean;
         const dates = data.daily.time;
-        
+
         // Agrupar por mes
         const monthlyData = {};
-        
+
         dates.forEach((date, index) => {
             const month = new Date(date).getMonth();
             if (!monthlyData[month]) {
@@ -1164,16 +1232,16 @@ async function obtenerDatosClimaticosWizard(lat, lon) {
                 monthlyData[month].temperature.push(temperature[index]);
             }
         });
-        
+
         // Calcular promedios mensuales
         wizardData.psh = [];
         wizardData.temperatura = [];
-        
+
         for (let i = 0; i < 12; i++) {
             if (monthlyData[i]) {
                 const avgRad = monthlyData[i].radiation.reduce((a, b) => a + b, 0) / monthlyData[i].radiation.length;
                 const avgTemp = monthlyData[i].temperature.reduce((a, b) => a + b, 0) / monthlyData[i].temperature.length;
-                
+
                 // Convertir MJ/m² a kWh/m²/día
                 wizardData.psh.push(avgRad / 3.6);
                 wizardData.temperatura.push(avgTemp);
@@ -1182,29 +1250,29 @@ async function obtenerDatosClimaticosWizard(lat, lon) {
                 wizardData.temperatura.push(DATOS_EJEMPLO.temperatura[i]);
             }
         }
-        
+
         console.log('✅ Datos obtenidos de Open-Meteo');
     }
 }
 
 function goToWizardStep(step) {
     if (step < 0 || step >= totalWizardSteps) return;
-    
+
     // Validar paso actual antes de avanzar
     if (step > currentWizardStep && !validarPasoActual()) {
         return;
     }
-    
+
     // Limpiar mapa si se sale del paso 1
     if (currentWizardStep === 1 && step !== 1 && wizardMap) {
         wizardMap.remove();
         wizardMap = null;
         wizardMapMarker = null;
     }
-    
+
     currentWizardStep = step;
     actualizarWizardUI();
-    
+
     // Inicializar controles específicos del paso
     if (step === 3) {
         // Inicializar dimensionamiento cuando se entra al paso 3
@@ -1222,7 +1290,7 @@ function goToWizardStep(step) {
             inicializarWizardResultadosDetallados();
         }, 100);
     }
-    
+
     // Scroll al inicio del contenido
     const content = document.querySelector('.modal-wizard-content');
     if (content) {
@@ -1232,7 +1300,7 @@ function goToWizardStep(step) {
 
 function validarPasoActual() {
     // Validar cada paso antes de avanzar
-    switch(currentWizardStep) {
+    switch (currentWizardStep) {
         case 1:
             // Validar ubicación seleccionada
             return ubicacionSeleccionada !== null;
@@ -1253,7 +1321,7 @@ function validarPasoActual() {
 function validarPaso3() {
     const modoPorcentaje = document.getElementById('modePorcentaje');
     const modoPaneles = document.getElementById('modePaneles');
-    
+
     if (modoPorcentaje && modoPorcentaje.checked) {
         wizardData.modoDimensionamiento = 'porcentaje';
         const sliderPorcentaje = document.getElementById('wizardPorcentajeCobertura');
@@ -1261,22 +1329,32 @@ function validarPaso3() {
             wizardData.porcentajeCobertura = parseInt(sliderPorcentaje.value);
         }
         console.log('✅ Dimensionamiento por porcentaje:', wizardData.porcentajeCobertura + '%');
+        return true;
     } else if (modoPaneles && modoPaneles.checked) {
         wizardData.modoDimensionamiento = 'paneles';
         const inputPaneles = document.getElementById('wizardNumPaneles');
-        if (inputPaneles && inputPaneles.value) {
-            wizardData.numPaneles = parseInt(inputPaneles.value);
-            console.log('✅ Dimensionamiento por paneles:', wizardData.numPaneles);
+
+        if (inputPaneles) {
+            const numPaneles = parseInt(inputPaneles.value);
+            console.log('🔍 Validando paneles - Input value:', inputPaneles.value, 'Parsed:', numPaneles);
+
+            if (inputPaneles.value && !isNaN(numPaneles) && numPaneles > 0) {
+                wizardData.numPaneles = numPaneles;
+                console.log('✅ Dimensionamiento por paneles:', wizardData.numPaneles);
+                return true;
+            } else {
+                mostrarNotificacion('⚠️ Por favor, ingresa un número válido de paneles', 'error');
+                return false;
+            }
         } else {
-            mostrarNotificacion('⚠️ Por favor, selecciona el número de paneles', 'error');
+            console.error('❌ No se encontró el input wizardNumPaneles');
+            mostrarNotificacion('⚠️ Error: campo de paneles no encontrado', 'error');
             return false;
         }
     } else {
         mostrarNotificacion('⚠️ Por favor, selecciona un modo de dimensionamiento', 'error');
         return false;
     }
-    
-    return true;
 }
 
 function validarPaso4() {
@@ -1300,14 +1378,14 @@ function inicializarWizardModal() {
     const btnPrev = document.getElementById('btnWizardPrev');
     const btnNext = document.getElementById('btnWizardNext');
     const btnIniciar = document.getElementById('btnIniciarSimulador');
-    
+
     // Botón INICIO de la pantalla de introducción
     if (btnIniciar) {
         btnIniciar.addEventListener('click', () => {
             goToWizardStep(1);
         });
     }
-    
+
     if (btnPrev) {
         btnPrev.addEventListener('click', () => {
             if (currentWizardStep > 0) {
@@ -1315,7 +1393,7 @@ function inicializarWizardModal() {
             }
         });
     }
-    
+
     if (btnNext) {
         btnNext.addEventListener('click', async () => {
             if (currentWizardStep === 4) {
@@ -1344,16 +1422,16 @@ function inicializarWizardModal() {
             }
         });
     }
-    
+
     // Inicializar funcionalidad del paso 2
     inicializarPaso2();
-    
+
     // Inicializar funcionalidad del paso 3
     inicializarPaso3Wizard();
-    
+
     // Inicializar funcionalidad del paso 4
     inicializarPaso4Wizard();
-    
+
     // Inicializar UI
     actualizarWizardUI();
 }
@@ -1362,23 +1440,23 @@ function inicializarPaso2() {
     // Selector de moneda
     const currencyARS = document.getElementById('currencyARS');
     const currencyUSD = document.getElementById('currencyUSD');
-    
+
     if (currencyARS) {
         currencyARS.addEventListener('click', () => cambiarMoneda('ARS'));
     }
-    
+
     if (currencyUSD) {
         currencyUSD.addEventListener('click', () => cambiarMoneda('USD'));
     }
-    
+
     // Selector de modo de consumo
     const modeAproximado = document.getElementById('modeAproximado');
     const modeEspecifico = document.getElementById('modeEspecifico');
-    
+
     if (modeAproximado) {
         modeAproximado.addEventListener('click', () => cambiarModoConsumo('aproximado'));
     }
-    
+
     if (modeEspecifico) {
         modeEspecifico.addEventListener('click', () => cambiarModoConsumo('especifico'));
     }
@@ -1387,21 +1465,21 @@ function inicializarPaso2() {
 function cambiarMoneda(moneda) {
     monedaSeleccionada = moneda;
     wizardData.moneda = moneda; // Guardar en wizardData
-    
+
     const currencyARS = document.getElementById('currencyARS');
     const currencyUSD = document.getElementById('currencyUSD');
     const priceCurrencyDisplay = document.getElementById('priceCurrencyDisplay');
     const precioKwhHelp = document.getElementById('precioKwhHelp');
-    
+
     // Actualizar botones de moneda
     if (currencyARS) currencyARS.classList.toggle('active', moneda === 'ARS');
     if (currencyUSD) currencyUSD.classList.toggle('active', moneda === 'USD');
-    
+
     // Actualizar display de moneda en precio
     if (priceCurrencyDisplay) {
         priceCurrencyDisplay.textContent = moneda;
     }
-    
+
     // Actualizar texto de ayuda según moneda
     if (precioKwhHelp) {
         if (moneda === 'ARS') {
@@ -1415,21 +1493,21 @@ function cambiarMoneda(moneda) {
 function cambiarModoConsumo(modo) {
     modoConsumo = modo;
     wizardData.modoConsumo = modo; // Guardar en wizardData
-    
+
     const modeAproximado = document.getElementById('modeAproximado');
     const modeEspecifico = document.getElementById('modeEspecifico');
     const consumoAproximadoSection = document.getElementById('consumoAproximadoSection');
     const consumoEspecificoSection = document.getElementById('consumoEspecificoSection');
-    
+
     // Actualizar botones
     if (modeAproximado) modeAproximado.classList.toggle('active', modo === 'aproximado');
     if (modeEspecifico) modeEspecifico.classList.toggle('active', modo === 'especifico');
-    
+
     // Mostrar/ocultar secciones
     if (consumoAproximadoSection) {
         consumoAproximadoSection.style.display = modo === 'aproximado' ? 'block' : 'none';
     }
-    
+
     if (consumoEspecificoSection) {
         consumoEspecificoSection.style.display = modo === 'especifico' ? 'block' : 'none';
     }
@@ -1449,7 +1527,7 @@ function validarPaso2() {
         const inputsMensuales = document.querySelectorAll('.monthly-input');
         let tieneValores = false;
         const consumoArray = [];
-        
+
         inputsMensuales.forEach(input => {
             const valor = parseFloat(input.value);
             if (input.value && valor > 0) {
@@ -1459,45 +1537,45 @@ function validarPaso2() {
                 consumoArray.push(0);
             }
         });
-        
+
         if (!tieneValores) {
             mostrarNotificacion('⚠️ Por favor, ingresa al menos un valor de consumo mensual', 'error');
             return false;
         }
-        
+
         // Guardar en wizardData
         wizardData.consumoMensualArray = consumoArray;
         wizardData.consumoMensual = consumoArray.reduce((a, b) => a + b, 0) / 12; // Promedio
     }
-    
+
     const precioKwh = document.getElementById('precioKwh');
     if (!precioKwh || !precioKwh.value || parseFloat(precioKwh.value) <= 0) {
         mostrarNotificacion('⚠️ Por favor, ingresa un precio por kWh válido', 'error');
         return false;
     }
-    
+
     // Guardar en wizardData
     wizardData.precioKwh = parseFloat(precioKwh.value);
-    
+
     console.log('✅ Datos de factura guardados:', {
         moneda: wizardData.moneda,
         modoConsumo: wizardData.modoConsumo,
         consumoMensual: wizardData.consumoMensual,
         precioKwh: wizardData.precioKwh
     });
-    
+
     return true;
 }
 
 function inicializarPaso3Wizard() {
     // Hacer las tarjetas clicables
     document.querySelectorAll('#wizardStep3 .dimensionamiento-option-card').forEach(card => {
-        card.addEventListener('click', function(e) {
+        card.addEventListener('click', function (e) {
             // No activar si se hace clic en un input o botón dentro
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('input')) {
                 return;
             }
-            
+
             const mode = this.dataset.mode;
             const radio = document.getElementById(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
             if (radio) {
@@ -1506,54 +1584,54 @@ function inicializarPaso3Wizard() {
             }
         });
     });
-    
+
     // Event listeners para los radio buttons
     const radioPorcentaje = document.getElementById('modePorcentaje');
     const radioPaneles = document.getElementById('modePaneles');
-    
+
     if (radioPorcentaje) {
-        radioPorcentaje.addEventListener('change', function() {
+        radioPorcentaje.addEventListener('change', function () {
             if (this.checked) cambiarModoDimensionamientoWizard('porcentaje');
         });
     }
-    
+
     if (radioPaneles) {
-        radioPaneles.addEventListener('change', function() {
+        radioPaneles.addEventListener('change', function () {
             if (this.checked) cambiarModoDimensionamientoWizard('paneles');
         });
     }
-    
+
     // Slider de porcentaje
     const sliderPorcentaje = document.getElementById('wizardPorcentajeCobertura');
     if (sliderPorcentaje) {
-        sliderPorcentaje.addEventListener('input', function() {
+        sliderPorcentaje.addEventListener('input', function () {
             document.getElementById('wizardPorcentajeDisplay').textContent = this.value + '%';
         });
     }
-    
+
     // Botones +/- para paneles
     const btnMenos = document.querySelector('#wizardControlPaneles .paneles-btn-minus');
     const btnMas = document.querySelector('#wizardControlPaneles .paneles-btn-plus');
     const inputPaneles = document.getElementById('wizardNumPaneles');
-    
+
     if (btnMenos) {
-        btnMenos.addEventListener('click', function() {
+        btnMenos.addEventListener('click', function () {
             const valor = parseInt(inputPaneles.value) || 1;
             if (valor > 1) {
                 inputPaneles.value = valor - 1;
             }
         });
     }
-    
+
     if (btnMas) {
-        btnMas.addEventListener('click', function() {
+        btnMas.addEventListener('click', function () {
             const valor = parseInt(inputPaneles.value) || 1;
             inputPaneles.value = valor + 1;
         });
     }
-    
+
     if (inputPaneles) {
-        inputPaneles.addEventListener('input', function() {
+        inputPaneles.addEventListener('input', function () {
             if (this.value < 1) this.value = 1;
         });
     }
@@ -1563,17 +1641,17 @@ function inicializarPaso4Wizard() {
     // Event listeners para los radio buttons de ángulo
     const radio20 = document.getElementById('wizardAngulo20');
     const radio45 = document.getElementById('wizardAngulo45');
-    
+
     if (radio20) {
-        radio20.addEventListener('change', function() {
+        radio20.addEventListener('change', function () {
             if (this.checked) {
                 console.log('Ángulo seleccionado: 20°');
             }
         });
     }
-    
+
     if (radio45) {
-        radio45.addEventListener('change', function() {
+        radio45.addEventListener('change', function () {
             if (this.checked) {
                 console.log('Ángulo seleccionado: 45°');
             }
@@ -1588,7 +1666,7 @@ function inicializarPaso4Wizard() {
 async function calcularResultadosWizard() {
     console.log('🔄 Calculando resultados del wizard...');
     console.log('📊 Datos recopilados:', wizardData);
-    
+
     try {
         // Preparar objeto de datos para las funciones de cálculo existentes
         const datos = {
@@ -1605,20 +1683,20 @@ async function calcularResultadosWizard() {
             porcentaje_cobertura: wizardData.porcentajeCobertura,
             num_paneles: wizardData.numPaneles
         };
-        
+
         // Calcular generación mensual usando el modelo existente
         const generacionMensual = calcularGeneracionMensual(datos);
         console.log('✅ Generación mensual calculada:', generacionMensual);
-        
+
         // Calcular resultados finales
         const resultados = calcularResultados(datos, generacionMensual);
         console.log('✅ Resultados calculados:', resultados);
-        
+
         // Mostrar resultados en el paso 5
         mostrarResultadosWizard(resultados, generacionMensual, datos);
-        
+
         console.log('✅ Cálculo completado exitosamente');
-        
+
     } catch (error) {
         console.error('❌ Error al calcular resultados:', error);
         mostrarNotificacion('⚠️ Error al calcular los resultados. Por favor intenta nuevamente.', 'error');
@@ -1632,12 +1710,12 @@ async function calcularResultadosWizard() {
 function inicializarDimensionamiento() {
     // Hacer las tarjetas clicables
     document.querySelectorAll('.dimensionamiento-option-card').forEach(card => {
-        card.addEventListener('click', function(e) {
+        card.addEventListener('click', function (e) {
             // No activar si se hace clic en un input o botón dentro
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON' || e.target.closest('button') || e.target.closest('input')) {
                 return;
             }
-            
+
             const mode = this.dataset.mode;
             const radio = document.getElementById(`mode${mode.charAt(0).toUpperCase() + mode.slice(1)}`);
             if (radio) {
@@ -1646,33 +1724,33 @@ function inicializarDimensionamiento() {
             }
         });
     });
-    
+
     // Radio buttons para cambiar modo
     const radioPorcentaje = document.getElementById('modePorcentaje');
     const radioPaneles = document.getElementById('modePaneles');
-    
+
     if (radioPorcentaje) {
-        radioPorcentaje.addEventListener('change', function() {
+        radioPorcentaje.addEventListener('change', function () {
             if (this.checked) cambiarModoDimensionamiento('porcentaje');
         });
     }
-    
+
     if (radioPaneles) {
-        radioPaneles.addEventListener('change', function() {
+        radioPaneles.addEventListener('change', function () {
             if (this.checked) cambiarModoDimensionamiento('paneles');
         });
     }
-    
+
     // Slider de porcentaje
     const sliderPorcentaje = document.getElementById('porcentaje_cobertura');
     if (sliderPorcentaje) {
         sliderPorcentaje.addEventListener('input', actualizarDisplayCobertura);
         sliderPorcentaje.addEventListener('change', actualizarDisplayCobertura);
     }
-    
+
     // Botones rápidos de porcentaje
     document.querySelectorAll('.cobertura-badge').forEach(badge => {
-        badge.addEventListener('click', function() {
+        badge.addEventListener('click', function () {
             const valor = parseInt(this.dataset.value);
             if (sliderPorcentaje) {
                 sliderPorcentaje.value = valor;
@@ -1683,14 +1761,14 @@ function inicializarDimensionamiento() {
             this.classList.add('active');
         });
     });
-    
+
     // Botones +/- de paneles
     const btnMenos = document.getElementById('btnMenosPanel');
     const btnMas = document.getElementById('btnMasPanel');
     const inputPaneles = document.getElementById('num_paneles_manual');
-    
+
     if (btnMenos) {
-        btnMenos.addEventListener('click', function() {
+        btnMenos.addEventListener('click', function () {
             const valor = parseInt(inputPaneles.value) || 1;
             if (valor > 1) {
                 inputPaneles.value = valor - 1;
@@ -1698,26 +1776,26 @@ function inicializarDimensionamiento() {
             }
         });
     }
-    
+
     if (btnMas) {
-        btnMas.addEventListener('click', function() {
+        btnMas.addEventListener('click', function () {
             const valor = parseInt(inputPaneles.value) || 1;
             inputPaneles.value = valor + 1;
             actualizarPanelesPreview();
         });
     }
-    
+
     if (inputPaneles) {
-        inputPaneles.addEventListener('input', function() {
+        inputPaneles.addEventListener('input', function () {
             if (this.value < 1) this.value = 1;
             actualizarPanelesPreview();
         });
         inputPaneles.addEventListener('change', actualizarPanelesPreview);
     }
-    
+
     // Botones rápidos de paneles
     document.querySelectorAll('.paneles-quick-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const cantidad = parseInt(this.dataset.paneles);
             if (inputPaneles) {
                 inputPaneles.value = cantidad;
@@ -1728,10 +1806,10 @@ function inicializarDimensionamiento() {
             this.classList.add('active');
         });
     });
-    
+
     // Inicializar display
     actualizarDisplayCobertura();
-    
+
     // Marcar la tarjeta activa inicialmente
     const cardPorcentaje = document.querySelector('.dimensionamiento-option-card[data-mode="porcentaje"]');
     if (cardPorcentaje) {
@@ -1741,12 +1819,12 @@ function inicializarDimensionamiento() {
 
 function cambiarModoDimensionamiento(mode) {
     modoDimensionamiento = mode;
-    
+
     const controlPorcentaje = document.getElementById('controlPorcentaje');
     const controlPaneles = document.getElementById('controlPaneles');
     const cardPorcentaje = document.querySelector('.dimensionamiento-option-card[data-mode="porcentaje"]');
     const cardPaneles = document.querySelector('.dimensionamiento-option-card[data-mode="paneles"]');
-    
+
     if (mode === 'porcentaje') {
         if (controlPorcentaje) controlPorcentaje.style.display = 'block';
         if (controlPaneles) controlPaneles.style.display = 'none';
@@ -1764,7 +1842,7 @@ function cambiarModoDimensionamiento(mode) {
 function actualizarDisplayCobertura() {
     const slider = document.getElementById('porcentaje_cobertura');
     const display = document.getElementById('cobertura_value');
-    
+
     if (slider && display) {
         const valor = parseInt(slider.value);
         display.textContent = `${valor}%`;
@@ -1774,31 +1852,31 @@ function actualizarDisplayCobertura() {
 function actualizarPanelesPreview() {
     const inputPaneles = document.getElementById('num_paneles_manual');
     const previewValue = document.getElementById('panelesPreviewValue');
-    
+
     if (!inputPaneles || !previewValue) return;
-    
+
     const numPaneles = parseInt(inputPaneles.value) || 1;
-    
+
     // Obtener datos temporales para calcular
     try {
         const datosTemp = obtenerDatosFormulario();
-        
+
         // Verificar que tengamos datos climáticos
         if (!datosTemp.psh || datosTemp.psh.length === 0 || datosTemp.psh.some(p => !p || isNaN(p))) {
             previewValue.textContent = 'Completa los datos climáticos';
             return;
         }
-        
+
         // Calcular generación mensual
         const generacionMensual = calcularGeneracionMensual(datosTemp);
         const energiaAnualPorPanel = generacionMensual.reduce((sum, mes) => sum + mes.energia_mensual, 0);
         const energiaAnualTotal = energiaAnualPorPanel * numPaneles;
-        
+
         // Calcular cobertura
         const consumoMensual = parseFloat(document.getElementById('consumo').value) || 350;
         const energiaAnualRequerida = consumoMensual * 12;
         const cobertura = (energiaAnualTotal / energiaAnualRequerida) * 100;
-        
+
         previewValue.textContent = `${Math.min(cobertura, 100).toFixed(0)}%`;
     } catch (error) {
         previewValue.textContent = 'Completa los datos climáticos';
@@ -1811,12 +1889,12 @@ function actualizarPanelesPreview() {
 
 function cambiarModoDimensionamientoWizard(mode) {
     wizardData.modoDimensionamiento = mode; // Guardar en wizardData
-    
+
     const controlPorcentaje = document.getElementById('wizardControlPorcentaje');
     const controlPaneles = document.getElementById('wizardControlPaneles');
     const cardPorcentaje = document.querySelector('#wizardStep3 .dimensionamiento-option-card[data-mode="porcentaje"]');
     const cardPaneles = document.querySelector('#wizardStep3 .dimensionamiento-option-card[data-mode="paneles"]');
-    
+
     if (mode === 'porcentaje') {
         if (controlPorcentaje) controlPorcentaje.style.display = 'block';
         if (controlPaneles) controlPaneles.style.display = 'none';
@@ -1834,7 +1912,7 @@ function cambiarModoDimensionamientoWizard(mode) {
 function actualizarDisplayCoberturaWizard() {
     const slider = document.getElementById('wizardPorcentajeCobertura');
     const display = document.getElementById('wizardCoberturaValue');
-    
+
     if (slider && display) {
         const valor = parseInt(slider.value);
         display.textContent = `${valor}%`;
@@ -1844,19 +1922,19 @@ function actualizarDisplayCoberturaWizard() {
 function actualizarPanelesPreviewWizard() {
     const inputPaneles = document.getElementById('wizardNumPanelesManual');
     const previewValue = document.getElementById('wizardPanelesPreviewValue');
-    
+
     if (!inputPaneles || !previewValue) return;
-    
+
     const numPaneles = parseInt(inputPaneles.value) || 1;
-    
+
     // Obtener datos del wizard para calcular
     try {
         // Obtener consumo del paso 2
         const consumoAproximado = document.getElementById('consumoAproximado');
         const consumoMensualInputs = document.querySelectorAll('#wizardStep2 .monthly-input');
-        
+
         let consumoMensual = 350; // Default
-        
+
         if (consumoAproximado && consumoAproximado.value) {
             consumoMensual = parseFloat(consumoAproximado.value);
         } else if (consumoMensualInputs.length > 0) {
@@ -1874,24 +1952,24 @@ function actualizarPanelesPreviewWizard() {
                 consumoMensual = total / count;
             }
         }
-        
+
         // Obtener datos climáticos de la ubicación seleccionada
         if (!ubicacionSeleccionada || !ubicacionSeleccionada.psh) {
             previewValue.textContent = 'Completa los pasos anteriores';
             return;
         }
-        
+
         // Calcular generación mensual (simplificado)
         const pshPromedio = ubicacionSeleccionada.psh.reduce((a, b) => a + b, 0) / 12;
         const potenciaPanel = 190; // W
         const energiaMensualPorPanel = (potenciaPanel * pshPromedio * 30) / 1000; // kWh
         const energiaAnualPorPanel = energiaMensualPorPanel * 12;
         const energiaAnualTotal = energiaAnualPorPanel * numPaneles;
-        
+
         // Calcular cobertura
         const energiaAnualRequerida = consumoMensual * 12;
         const cobertura = (energiaAnualTotal / energiaAnualRequerida) * 100;
-        
+
         previewValue.textContent = `${Math.min(cobertura, 100).toFixed(0)}%`;
     } catch (error) {
         previewValue.textContent = 'Completa los pasos anteriores';
@@ -1902,59 +1980,59 @@ function inicializarWizardDimensionamiento() {
     // Radio buttons para cambiar modo
     const radioPorcentaje = document.getElementById('wizardModePorcentaje');
     const radioPaneles = document.getElementById('wizardModePaneles');
-    
+
     if (radioPorcentaje) {
-        radioPorcentaje.addEventListener('change', function() {
+        radioPorcentaje.addEventListener('change', function () {
             if (this.checked) cambiarModoDimensionamientoWizard('porcentaje');
         });
     }
-    
+
     if (radioPaneles) {
-        radioPaneles.addEventListener('change', function() {
+        radioPaneles.addEventListener('change', function () {
             if (this.checked) cambiarModoDimensionamientoWizard('paneles');
         });
     }
-    
+
     // Slider de porcentaje
     const sliderPorcentaje = document.getElementById('wizardPorcentajeCobertura');
     if (sliderPorcentaje) {
         sliderPorcentaje.addEventListener('input', actualizarDisplayCoberturaWizard);
         sliderPorcentaje.addEventListener('change', actualizarDisplayCoberturaWizard);
     }
-    
+
     // Botones +/- de paneles
     const btnMenos = document.getElementById('wizardBtnMenosPanel');
     const btnMas = document.getElementById('wizardBtnMasPanel');
     const inputPaneles = document.getElementById('wizardNumPanelesManual');
-    
+
     if (btnMenos) {
-        btnMenos.addEventListener('click', function() {
+        btnMenos.addEventListener('click', function () {
             const valor = parseInt(inputPaneles.value) || 1;
             if (valor > 1) {
                 inputPaneles.value = valor - 1;
             }
         });
     }
-    
+
     if (btnMas) {
-        btnMas.addEventListener('click', function() {
+        btnMas.addEventListener('click', function () {
             const valor = parseInt(inputPaneles.value) || 1;
             inputPaneles.value = valor + 1;
         });
     }
-    
+
     if (inputPaneles) {
-        inputPaneles.addEventListener('input', function() {
+        inputPaneles.addEventListener('input', function () {
             if (this.value < 1) this.value = 1;
         });
     }
-    
+
     // Click en las tarjetas para cambiar modo
     document.querySelectorAll('#wizardStep3 .dimensionamiento-option-card').forEach(card => {
-        card.addEventListener('click', function(e) {
+        card.addEventListener('click', function (e) {
             // No cambiar si se hace click en un input o botón dentro
             if (e.target.closest('input, button, .option-content')) return;
-            
+
             const mode = this.dataset.mode;
             if (mode === 'porcentaje' && radioPorcentaje) {
                 radioPorcentaje.checked = true;
@@ -1965,10 +2043,10 @@ function inicializarWizardDimensionamiento() {
             }
         });
     });
-    
+
     // Inicializar display
     actualizarDisplayCoberturaWizard();
-    
+
     // Marcar la tarjeta activa inicialmente
     const cardPorcentaje = document.querySelector('#wizardStep3 .dimensionamiento-option-card[data-mode="porcentaje"]');
     if (cardPorcentaje) {
@@ -1984,25 +2062,25 @@ function inicializarWizardAngulo() {
     // Radio buttons para cambiar ángulo
     const radio20 = document.getElementById('wizardAngulo20');
     const radio45 = document.getElementById('wizardAngulo45');
-    
+
     if (radio20) {
-        radio20.addEventListener('change', function() {
+        radio20.addEventListener('change', function () {
             if (this.checked) cambiarAnguloWizard(20);
         });
     }
-    
+
     if (radio45) {
-        radio45.addEventListener('change', function() {
+        radio45.addEventListener('change', function () {
             if (this.checked) cambiarAnguloWizard(45);
         });
     }
-    
+
     // Click en las tarjetas para cambiar ángulo
     document.querySelectorAll('#wizardStep4 .angulo-option-card').forEach(card => {
-        card.addEventListener('click', function(e) {
+        card.addEventListener('click', function (e) {
             // No cambiar si se hace click en un input dentro
             if (e.target.closest('input')) return;
-            
+
             const angulo = parseInt(this.dataset.angulo);
             if (angulo === 20 && radio20) {
                 radio20.checked = true;
@@ -2013,7 +2091,7 @@ function inicializarWizardAngulo() {
             }
         });
     });
-    
+
     // Marcar la tarjeta activa inicialmente (45° por defecto)
     const card45 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="45"]');
     if (card45) {
@@ -2024,7 +2102,7 @@ function inicializarWizardAngulo() {
 function cambiarAnguloWizard(angulo) {
     const card20 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="20"]');
     const card45 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="45"]');
-    
+
     if (angulo === 20) {
         if (card20) card20.classList.add('active');
         if (card45) card45.classList.remove('active');
@@ -2043,13 +2121,13 @@ function mostrarResultadosWizard(resultados, generacionMensual, datos) {
     // Mostrar Panorama General (Solapa 1)
     const moneda = wizardData.moneda || 'ARS';
     const simbolo = moneda === 'USD' ? '$' : '$';
-    
+
     // 1. Ahorro Mensual Estimado
     const panoramaAhorroMensual = document.getElementById('wizardPanoramaAhorroMensual');
     if (panoramaAhorroMensual) {
         panoramaAhorroMensual.textContent = `${simbolo}${formatearNumero(resultados.ahorro_mensual, moneda)}`;
     }
-    
+
     // 2. Tiempo de Repago (ROI)
     const panoramaROI = document.getElementById('wizardPanoramaROI');
     if (panoramaROI) {
@@ -2059,7 +2137,7 @@ function mostrarResultadosWizard(resultados, generacionMensual, datos) {
             panoramaROI.textContent = `${resultados.roi_anos.toFixed(1)} años`;
         }
     }
-    
+
     // 3. % de Autoconsumo
     const panoramaAutoconsumo = document.getElementById('wizardPanoramaAutoconsumo');
     if (panoramaAutoconsumo) {
@@ -2068,7 +2146,7 @@ function mostrarResultadosWizard(resultados, generacionMensual, datos) {
         const porcentajeCobertura = Math.min(100, (energiaAnual / consumoAnual) * 100);
         panoramaAutoconsumo.textContent = `${porcentajeCobertura.toFixed(0)}%`;
     }
-    
+
     // Veredicto Rápido
     const veredictoRapido = document.getElementById('wizardVeredictoRapido');
     if (veredictoRapido) {
@@ -2083,29 +2161,29 @@ function mostrarResultadosWizard(resultados, generacionMensual, datos) {
         }
         veredictoRapido.textContent = veredicto;
     }
-    
+
     // Guardar resultados para la vista detallada
     window.wizardResultados = resultados;
     window.wizardGeneracionMensual = generacionMensual;
     window.wizardDatos = datos;
-    
+
     console.log('📊 Guardando datos globales para pestañas:', {
         resultados: window.wizardResultados,
         generacionMensual: window.wizardGeneracionMensual,
         datos: window.wizardDatos
     });
-    
+
     // Llenar datos de otras solapas (solo texto, no gráficos)
     llenarDatosAnalisisEnergetico(resultados, generacionMensual, datos);
     llenarDatosInstalacion(resultados, datos);
-    
+
     // Los gráficos se generarán cuando el usuario haga clic en cada pestaña
     // (Chart.js necesita que el canvas esté visible)
 }
 
 function llenarDatosAnalisisEnergetico(resultados, generacionMensual, datos) {
     console.log('📝 Llenando datos de Análisis Energético:', { resultados, generacionMensual, datos });
-    
+
     // Radiación promedio
     const radiacionPromedio = document.getElementById('wizardRadiacionPromedio');
     if (radiacionPromedio) {
@@ -2115,13 +2193,13 @@ function llenarDatosAnalisisEnergetico(resultados, generacionMensual, datos) {
     } else {
         console.error('❌ No se encontró elemento wizardRadiacionPromedio');
     }
-    
+
     // Ubicación
     const ubicacionNombre = document.getElementById('wizardUbicacionNombre');
     if (ubicacionNombre) {
         ubicacionNombre.textContent = datos.ubicacion || wizardData.ubicacionNombre || 'Ubicación seleccionada';
     }
-    
+
     // Pérdidas por temperatura
     const perdidasTemperatura = document.getElementById('wizardPerdidasTemperatura');
     if (perdidasTemperatura) {
@@ -2130,7 +2208,7 @@ function llenarDatosAnalisisEnergetico(resultados, generacionMensual, datos) {
         const perdidas = Math.max(0, (tempPromedio - 25) * 0.4);
         perdidasTemperatura.textContent = `${perdidas.toFixed(1)}%`;
     }
-    
+
     // Energía consumida e inyectada
     const energiaConsumida = document.getElementById('wizardEnergiaConsumida');
     const energiaInyectada = document.getElementById('wizardEnergiaInyectada');
@@ -2146,18 +2224,54 @@ function llenarDatosAnalisisEnergetico(resultados, generacionMensual, datos) {
 function llenarDatosInstalacion(resultados, datos) {
     const moneda = wizardData.moneda || 'ARS';
     const simbolo = moneda === 'USD' ? '$' : '$';
-    
-    // Imagen de instalación
-    const imagenInstalacion = document.getElementById('wizardInstalacionImagen');
-    if (imagenInstalacion) {
-        if (datos.inclinacion === 20) {
-            imagenInstalacion.src = 'images/panel20.png';
-        } else {
-            imagenInstalacion.src = 'images/panel45.png';
-        }
-        imagenInstalacion.alt = `Instalación solar a ${datos.inclinacion}°`;
+
+    // === PRODUCTOS (nueva sección) ===
+    // Producto 1: Paneles (190W por panel)
+    const productPanelesCantidad = document.getElementById('wizardProductPanelesCantidad');
+    const productPotenciaTotal = document.getElementById('wizardProductPotenciaTotal');
+    if (productPanelesCantidad) {
+        productPanelesCantidad.textContent = resultados.num_paneles;
     }
-    
+    if (productPotenciaTotal) {
+        const potenciaKW = (resultados.num_paneles * 0.19).toFixed(2); // 190W = 0.19kW por panel
+        productPotenciaTotal.textContent = potenciaKW;
+    }
+
+    // Producto 2: Inversor 360solar
+    const productInversorPotencia = document.getElementById('wizardProductInversorPotencia');
+    if (productInversorPotencia) {
+        const potenciaKW = (resultados.num_paneles * 0.19).toFixed(2); // 190W por panel
+        productInversorPotencia.textContent = potenciaKW;
+    }
+
+    // Producto 3: Estructura/Soporte
+    const productEstructuraTipo = document.getElementById('wizardProductEstructuraTipo');
+    const productInclinacion = document.getElementById('wizardProductInclinacion');
+    const productSoporteImagen = document.getElementById('wizardProductSoporteImagen');
+
+    if (productInclinacion) {
+        productInclinacion.textContent = datos.inclinacion;
+    }
+
+    if (productEstructuraTipo) {
+        if (datos.inclinacion === 20) {
+            productEstructuraTipo.textContent = 'Aluminio Anodizado (Coplanar)';
+        } else {
+            productEstructuraTipo.textContent = 'Aluminio Anodizado (Triángulo)';
+        }
+    }
+
+    if (productSoporteImagen) {
+        // Mostrar imagen según ángulo seleccionado
+        if (datos.inclinacion === 20) {
+            productSoporteImagen.src = 'images/soporte20.png';
+        } else {
+            productSoporteImagen.src = 'images/soporte45.png';
+        }
+        productSoporteImagen.alt = `Estructura de soporte a ${datos.inclinacion}°`;
+    }
+
+    // === BOM (mantener si sigue existiendo en el HTML) ===
     // BOM - Paneles
     const bomPanelesCantidad = document.getElementById('wizardBomPanelesCantidad');
     const bomPanelesModelo = document.getElementById('wizardBomPanelesModelo');
@@ -2167,14 +2281,14 @@ function llenarDatosInstalacion(resultados, datos) {
     if (bomPanelesModelo) {
         bomPanelesModelo.textContent = 'Jinko/Longi 450W';
     }
-    
+
     // BOM - Inversor
     const bomInversorModelo = document.getElementById('wizardBomInversorModelo');
     if (bomInversorModelo) {
-        const potenciaKW = (resultados.num_paneles * 190 / 1000).toFixed(1);
+        const potenciaKW = (resultados.num_paneles * 0.45).toFixed(1);
         bomInversorModelo.textContent = `Growatt/Huawei ${potenciaKW}kW`;
     }
-    
+
     // BOM - Estructura
     const bomEstructuraTipo = document.getElementById('wizardBomEstructuraTipo');
     if (bomEstructuraTipo) {
@@ -2184,14 +2298,14 @@ function llenarDatosInstalacion(resultados, datos) {
             bomEstructuraTipo.textContent = 'Aluminio Anodizado (Triángulo)';
         }
     }
-    
+
     // Espacio requerido
     const espacioRequerido = document.getElementById('wizardEspacioRequerido');
     if (espacioRequerido) {
         const superficie = resultados.num_paneles * 1.5; // m² aproximado
         espacioRequerido.textContent = `${superficie.toFixed(1)} m²`;
     }
-    
+
     // Diagrama de techo
     const techoArea = document.getElementById('wizardTechoArea');
     if (techoArea) {
@@ -2210,27 +2324,27 @@ function inicializarWizardResultadosDetallados() {
     const tabEnergia = document.getElementById('wizardTabEnergia');
     const tabFinanzas = document.getElementById('wizardTabFinanzas');
     const tabInstalacion = document.getElementById('wizardTabInstalacion');
-    
+
     // Mostrar pestañas desde el inicio
     if (tabsContainer) {
         tabsContainer.style.display = 'block';
     }
-    
+
     // Cargar datos detallados si ya existen
     if (window.wizardResultados) {
         llenarVistaDetalladaWizard();
     }
-    
+
     // Tabs de resultados (4 pestañas: panorama, energia, finanzas, instalacion)
     const tabs = document.querySelectorAll('#wizardStep5 .wizard-result-tab');
     tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', function () {
             const tabName = this.dataset.tab;
-            
+
             // Actualizar tabs activos
             tabs.forEach(t => t.classList.remove('active'));
             this.classList.add('active');
-            
+
             // Ocultar todos los panes explícitamente
             if (tabPanorama) {
                 tabPanorama.style.display = 'none';
@@ -2248,7 +2362,7 @@ function inicializarWizardResultadosDetallados() {
                 tabInstalacion.style.display = 'none';
                 tabInstalacion.classList.remove('active');
             }
-            
+
             // Mostrar el pane correspondiente
             let targetPane = null;
             if (tabName === 'panorama') {
@@ -2260,14 +2374,14 @@ function inicializarWizardResultadosDetallados() {
             } else if (tabName === 'instalacion') {
                 targetPane = tabInstalacion;
             }
-            
+
             if (targetPane) {
                 targetPane.style.display = 'block';
                 targetPane.classList.add('active');
                 // Asegurar que solo este pane esté visible
                 console.log('📌 Mostrando tab:', tabName, 'Ocultando otros tabs');
             }
-            
+
             // Cargar gráficos cuando la pestaña se hace visible
             if (tabName === 'energia' && window.wizardGeneracionMensual) {
                 // Asegurar que el tab esté visible primero
@@ -2283,7 +2397,7 @@ function inicializarWizardResultadosDetallados() {
                         parent = parent.parentElement;
                     }
                 }
-                
+
                 // Esperar a que el navegador renderice el cambio
                 requestAnimationFrame(() => {
                     requestAnimationFrame(() => {
@@ -2321,13 +2435,13 @@ function inicializarWizardResultadosDetallados() {
             }
         });
     });
-    
+
     // Input de inflación para actualizar gráfico financiero
     const inflacionInput = document.getElementById('wizardInflacionInput');
-    const btnActualizarInflacion = document.getElementById('wizardBtnActualizarInflacion');
-    
-    if (btnActualizarInflacion) {
-        btnActualizarInflacion.addEventListener('click', function() {
+    const btnRecalcular = document.getElementById('wizardBtnRecalcular');
+
+    if (btnRecalcular) {
+        btnRecalcular.addEventListener('click', function () {
             const inflacion = parseFloat(inflacionInput?.value || 3) / 100;
             if (window.wizardResultados) {
                 generarGraficaFinancieraWizard(inflacion);
@@ -2339,12 +2453,12 @@ function inicializarWizardResultadosDetallados() {
 
 function llenarVistaDetalladaWizard() {
     if (!window.wizardResultados || !window.wizardDatos) return;
-    
+
     const resultados = window.wizardResultados;
     const datos = window.wizardDatos;
     const moneda = wizardData.moneda || 'ARS';
     const simbolo = moneda === 'USD' ? '$' : '$';
-    
+
     // Finanzas
     const detailROI = document.getElementById('wizardDetailROI');
     if (detailROI) {
@@ -2354,34 +2468,41 @@ function llenarVistaDetalladaWizard() {
             detailROI.textContent = `${resultados.roi_anos.toFixed(1)} años`;
         }
     }
-    
+
     const detailCostoBase = document.getElementById('wizardDetailCostoBase');
     if (detailCostoBase) {
         detailCostoBase.textContent = `${simbolo}${formatearNumero(resultados.costo_base, moneda)}`;
     }
-    
+
     const detailCostoPaneles = document.getElementById('wizardDetailCostoPaneles');
     if (detailCostoPaneles) {
         detailCostoPaneles.textContent = `${simbolo}${formatearNumero(resultados.costo_paneles, moneda)}`;
     }
-    
+
     const detailCostoTotal = document.getElementById('wizardDetailCostoTotal');
     if (detailCostoTotal) {
-        detailCostoTotal.textContent = `${simbolo}${formatearNumero(resultados.inversion_total, moneda)}`;
+        detailCostoTotal.textContent = `${simbolo}${formatearNumero(resultados.costo_total || resultados.inversion_total, moneda)}`;
     }
-    
+
+    // Calcular ahorro a 25 años con inflación del 3% anual
     const detailAhorro25 = document.getElementById('wizardDetailAhorro25');
     if (detailAhorro25) {
-        detailAhorro25.textContent = `${simbolo}${formatearNumero(resultados.ahorro_25_anos, moneda)}`;
+        let ahorroTotal25 = 0;
+        let ahorroAnualActual = resultados.ahorro_anual || 0;
+        for (let i = 1; i <= 25; i++) {
+            ahorroTotal25 += ahorroAnualActual;
+            ahorroAnualActual *= 1.03; // 3% inflación anual
+        }
+        detailAhorro25.textContent = `${simbolo}${formatearNumero(ahorroTotal25, moneda)}`;
     }
-    
+
     // Energía - Balance Energético
     const balanceGeneracion = document.getElementById('wizardBalanceGeneracion');
     if (balanceGeneracion) {
         const energiaAnual = resultados.energia_anual_total || resultados.generacion_anual || 0;
         balanceGeneracion.textContent = `${energiaAnual.toFixed(0)} kWh`;
     }
-    
+
     const balanceInyectado = document.getElementById('wizardBalanceInyectado');
     if (balanceInyectado) {
         const consumoAnual = (datos.consumo_mensual || datos.consumo) * 12;
@@ -2389,34 +2510,34 @@ function llenarVistaDetalladaWizard() {
         const excedentes = Math.max(0, energiaAnual - consumoAnual);
         balanceInyectado.textContent = `${excedentes.toFixed(0)} kWh`;
     }
-    
+
     // Equipamiento
     const equipPanelModelo = document.getElementById('wizardEquipPanelModelo');
     if (equipPanelModelo) {
         equipPanelModelo.textContent = 'Panel de Referencia 190W';
     }
-    
+
     const equipPanelCantidad = document.getElementById('wizardEquipPanelCantidad');
     if (equipPanelCantidad) {
         equipPanelCantidad.textContent = resultados.num_paneles;
     }
-    
+
     const equipPanelPotencia = document.getElementById('wizardEquipPanelPotencia');
     if (equipPanelPotencia) {
         equipPanelPotencia.textContent = `${(resultados.num_paneles * 190 / 1000).toFixed(1)} kW`;
     }
-    
+
     const equipSuperficie = document.getElementById('wizardEquipSuperficie');
     if (equipSuperficie) {
         const superficie = resultados.num_paneles * 1.5; // m² aproximado
         equipSuperficie.textContent = `${superficie.toFixed(1)} m²`;
     }
-    
+
     const equipInclinacion = document.getElementById('wizardEquipInclinacion');
     if (equipInclinacion) {
         equipInclinacion.textContent = `${datos.inclinacion}°`;
     }
-    
+
     const equipEstructura = document.getElementById('wizardEquipEstructura');
     if (equipEstructura) {
         if (datos.inclinacion === 20) {
@@ -2425,33 +2546,46 @@ function llenarVistaDetalladaWizard() {
             equipEstructura.textContent = 'Inclinada (45°) - Requiere soportes triangulares para elevar los paneles';
         }
     }
-    
+
     const equipPanelPrecio = document.getElementById('wizardEquipPanelPrecio');
     if (equipPanelPrecio) {
         equipPanelPrecio.textContent = `${simbolo}${formatearNumero(resultados.costo_panel, moneda)}`;
     }
-    
+
     // Tabla mensual
     llenarTablaMensualWizard();
 }
 
 function llenarTablaMensualWizard() {
     if (!window.wizardGeneracionMensual || !window.wizardDatos) return;
-    
+
     const tbody = document.getElementById('wizardMonthlyTableBody');
     if (!tbody) return;
-    
+
     tbody.innerHTML = '';
     const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
-    window.wizardGeneracionMensual.forEach((mes, index) => {
-        const consumo = window.wizardDatos.consumo || 350;
-        const balance = mes.energia_mensual - consumo;
-        
+
+    const generacionMensual = window.wizardGeneracionMensual;
+    const numPaneles = (window.wizardResultados && window.wizardResultados.num_paneles) ? window.wizardResultados.num_paneles : 1;
+    const consumoMensualBase = window.wizardDatos.consumo_mensual || window.wizardDatos.consumo || 350;
+
+    // Usar exactamente la misma lógica de consumos que el gráfico mensual
+    let consumos;
+    if (typeof wizardData !== 'undefined' && wizardData.modoConsumo === 'especifico' && wizardData.consumoMensualArray && wizardData.consumoMensualArray.length === 12) {
+        consumos = wizardData.consumoMensualArray;
+    } else {
+        consumos = new Array(12).fill(consumoMensualBase);
+    }
+
+    generacionMensual.forEach((mes, index) => {
+        const energia = mes.energia_mensual * numPaneles;
+        const consumo = consumos[index];
+        const balance = energia - consumo;
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td>${meses[index]}</td>
-            <td>${mes.energia_mensual.toFixed(1)}</td>
+            <td>${energia.toFixed(1)}</td>
             <td>${consumo.toFixed(1)}</td>
             <td style="color: ${balance >= 0 ? '#2ecc71' : '#e74c3c'}; font-weight: 600;">
                 ${balance >= 0 ? '+' : ''}${balance.toFixed(1)}
@@ -2468,29 +2602,29 @@ let wizardDistributionChart = null;
 
 function generarGraficaMensualWizard() {
     console.log('🎨 Generando gráfico mensual (wizard)...');
-    
+
     if (!window.wizardGeneracionMensual || !window.wizardDatos || !window.wizardResultados) {
         console.error('❌ Faltan datos');
         return;
     }
-    
+
     const ctx = document.getElementById('wizardMonthlyChart');
     if (!ctx) {
         console.error('❌ Canvas no encontrado');
         return;
     }
-    
+
     // Destruir gráfica anterior
     if (wizardMonthlyChart) {
         wizardMonthlyChart.destroy();
     }
-    
+
     const generacionMensual = window.wizardGeneracionMensual;
     const numPaneles = window.wizardResultados.num_paneles;
     const consumoMensual = window.wizardDatos.consumo_mensual || window.wizardDatos.consumo || 350;
-    
+
     const energias = generacionMensual.map(mes => parseFloat((mes.energia_mensual * numPaneles).toFixed(1)));
-    
+
     // Usar datos de consumo mensual específico si está disponible
     let consumos;
     if (wizardData.modoConsumo === 'especifico' && wizardData.consumoMensualArray && wizardData.consumoMensualArray.length === 12) {
@@ -2498,7 +2632,7 @@ function generarGraficaMensualWizard() {
     } else {
         consumos = new Array(12).fill(consumoMensual);
     }
-    
+
     console.log('📊 Datos para gráfico mensual:', {
         energias: energias.slice(0, 3) + '...',
         consumos: consumos.slice(0, 3) + '...',
@@ -2506,7 +2640,7 @@ function generarGraficaMensualWizard() {
         canvasExists: !!ctx,
         canvasParent: ctx.parentElement?.className
     });
-    
+
     // Asegurar que el canvas y su contenedor estén visibles
     const container = ctx.parentElement;
     if (container) {
@@ -2515,11 +2649,11 @@ function generarGraficaMensualWizard() {
         container.style.height = '400px';
         container.style.width = '100%';
     }
-    
+
     ctx.style.display = 'block';
     ctx.style.width = '100%';
     ctx.style.height = '400px';
-    
+
     // Verificar que el canvas tenga dimensiones antes de crear el gráfico
     const rect = ctx.getBoundingClientRect();
     console.log('📐 Dimensiones del canvas:', {
@@ -2527,7 +2661,7 @@ function generarGraficaMensualWizard() {
         height: rect.height,
         visible: rect.width > 0 && rect.height > 0
     });
-    
+
     // Si no tiene dimensiones, usar valores por defecto (Chart.js con responsive se ajustará)
     if (rect.width === 0 || rect.height === 0) {
         console.warn('⚠️ Canvas sin dimensiones, usando valores por defecto (Chart.js se ajustará cuando sea visible)');
@@ -2535,7 +2669,7 @@ function generarGraficaMensualWizard() {
         ctx.width = 800;
         ctx.height = 400;
     }
-    
+
     wizardMonthlyChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -2590,7 +2724,7 @@ function generarGraficaMensualWizard() {
             }
         }
     });
-    
+
     // Forzar resize después de un momento para asegurar renderizado
     setTimeout(() => {
         if (wizardMonthlyChart) {
@@ -2611,94 +2745,95 @@ function generarGraficaFinancieraWizard(inflacionEnergetica = 0.03) {
         console.error('❌ No se encontró canvas wizardFinancialChart');
         return;
     }
-    
+
     // Asegurar que el contenedor esté visible
-    const container = ctx.closest('.wizard-chart-container');
+    const container = ctx.closest('.financial-chart-container') || ctx.closest('.wizard-chart-container');
     if (container) {
         container.style.display = 'block';
-        container.style.minHeight = '400px';
+        container.style.minHeight = '350px';
     }
-    
-    const parentWidth = ctx.parentElement.clientWidth;
-    const width = parentWidth > 0 ? parentWidth : 800;
-    
-    // Configurar dimensiones del canvas
-    ctx.style.display = 'block';
-    ctx.style.width = '100%';
-    ctx.style.height = '400px';
-    
-    console.log('💰 Generando gráfico financiero...', {
-        parentWidth: parentWidth,
-        usedWidth: width
-    });
-    
+
+    // Destruir gráfico anterior si existe
+    if (wizardFinancialChart) {
+        wizardFinancialChart.destroy();
+        wizardFinancialChart = null;
+    }
+
     const resultados = window.wizardResultados;
     const moneda = wizardData.moneda || 'ARS';
     const simbolo = moneda === 'USD' ? '$' : '$';
-    
-    console.log('💰 Datos para gráfico financiero:', {
-        resultados: resultados,
-        costo_total: resultados.costo_total,
-        ahorro_anual: resultados.ahorro_anual,
-        inflacion: inflacionEnergetica
-    });
-    
-    // Calcular flujo de caja acumulado a 25 años (como en el paper)
+
+    // Calcular datos para 25 años
     const anos = 25;
-    const labels = [];
-    const flujoAcumulado = [];
-    
-    // Inversión inicial (negativa) - usar costo_total
-    const inversionInicial = resultados.costo_total || resultados.inversion_total || 0;
-    let acumulado = -inversionInicial;
-    flujoAcumulado.push(acumulado);
-    labels.push('Año 0');
-    
-    // Calcular ahorro anual con inflación energética
-    let ahorroAnualActual = resultados.ahorro_anual || 0;
-    
-    console.log('💰 Inversión inicial:', inversionInicial, 'Ahorro anual:', ahorroAnualActual);
-    
+    const labels = ['Año 0'];
+    const inversionInicial = [];
+    const ahorrosAcumulados = [];
+    const flujoNetoAcumulado = [];
+
+    const inversionTotal = resultados.costo_total || resultados.inversion_total || 0;
+
+    // Inversión inicial: solo un punto en el año 0
+    inversionInicial.push(-inversionTotal);
     for (let i = 1; i <= anos; i++) {
+        inversionInicial.push(null);
         labels.push(`Año ${i}`);
-        acumulado += ahorroAnualActual;
-        flujoAcumulado.push(acumulado);
-        
+    }
+
+    // Calcular ahorros acumulados y flujo neto acumulado
+    let ahorroAnualActual = resultados.ahorro_anual || 0;
+    let ahorrosAcum = 0;
+
+    ahorrosAcumulados.push(0);
+    flujoNetoAcumulado.push(-inversionTotal);
+
+    for (let i = 1; i <= anos; i++) {
+        ahorrosAcum += ahorroAnualActual;
+        const flujoNeto = ahorrosAcum - inversionTotal;
+
+        ahorrosAcumulados.push(ahorrosAcum);
+        flujoNetoAcumulado.push(flujoNeto);
+
         // Aplicar inflación energética
         ahorroAnualActual *= (1 + inflacionEnergetica);
     }
-    
-    // Encontrar el break-even point
-    const breakEvenIndex = flujoAcumulado.findIndex(val => val >= 0);
-    const breakEvenYear = breakEvenIndex !== -1 ? breakEvenIndex : null;
-    
+
     wizardFinancialChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [
                 {
-                    label: 'Flujo de Caja Acumulado',
-                    data: flujoAcumulado,
-                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                    borderColor: 'rgba(52, 152, 219, 1)',
-                    borderWidth: 3,
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointHoverRadius: 5
+                    label: 'Inversión Inicial',
+                    data: inversionInicial,
+                    borderColor: 'rgba(231, 76, 60, 1)',
+                    backgroundColor: 'rgba(231, 76, 60, 1)',
+                    borderWidth: 0,
+                    fill: false,
+                    pointRadius: 8,
+                    pointHoverRadius: 10,
+                    showLine: false
                 },
                 {
-                    label: 'Break-even Point',
-                    data: breakEvenYear !== null ? [null, ...Array(breakEvenYear - 1).fill(null), 0, ...Array(anos - breakEvenYear).fill(null)] : Array(anos + 1).fill(null),
+                    label: 'Ahorros Acumulados',
+                    data: ahorrosAcumulados,
                     borderColor: 'rgba(46, 204, 113, 1)',
+                    backgroundColor: 'rgba(46, 204, 113, 0.1)',
                     borderWidth: 2,
-                    borderDash: [10, 5],
-                    pointRadius: 6,
-                    pointBackgroundColor: 'rgba(46, 204, 113, 1)',
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    fill: false
+                    fill: false,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    tension: 0.4
+                },
+                {
+                    label: 'Flujo Neto Acumulado',
+                    data: flujoNetoAcumulado,
+                    borderColor: 'rgba(52, 152, 219, 1)',
+                    backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                    borderWidth: 2,
+                    fill: false,
+                    pointRadius: 3,
+                    pointHoverRadius: 5,
+                    tension: 0.4
                 }
             ]
         },
@@ -2712,28 +2847,15 @@ function generarGraficaFinancieraWizard(inflacionEnergetica = 0.03) {
                     labels: {
                         boxWidth: 12,
                         padding: 8,
-                        font: { size: 12 }
+                        font: { size: 12 },
+                        usePointStyle: true
                     }
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
-                            if (context.datasetIndex === 0) {
-                                return `${context.dataset.label}: ${simbolo}${formatearNumero(context.parsed.y, moneda)}`;
-                            }
-                            return context.dataset.label;
-                        }
-                    }
-                },
-                annotation: {
-                    annotations: {
-                        line1: {
-                            type: 'line',
-                            yMin: 0,
-                            yMax: 0,
-                            borderColor: 'rgba(46, 204, 113, 0.5)',
-                            borderWidth: 2,
-                            borderDash: [5, 5]
+                        label: function (context) {
+                            if (context.parsed.y === null) return null;
+                            return `${context.dataset.label}: ${simbolo}${formatearNumero(context.parsed.y, moneda)}`;
                         }
                     }
                 }
@@ -2742,11 +2864,11 @@ function generarGraficaFinancieraWizard(inflacionEnergetica = 0.03) {
                 y: {
                     title: {
                         display: true,
-                        text: `Dinero (${moneda})`,
+                        text: 'Dinero ($)',
                         font: { size: 12 }
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return simbolo + formatearNumero(value, moneda);
                         }
                     }
@@ -2754,7 +2876,7 @@ function generarGraficaFinancieraWizard(inflacionEnergetica = 0.03) {
                 x: {
                     title: {
                         display: true,
-                        text: 'Tiempo (Años)',
+                        text: 'Tiempo',
                         font: { size: 12 }
                     }
                 }
@@ -2768,19 +2890,19 @@ function generarGraficaDistribucionWizard() {
         console.error('❌ Faltan datos para generar gráfico de distribución');
         return;
     }
-    
+
     const ctx = document.getElementById('wizardDistributionChart');
     if (!ctx) {
         console.error('❌ No se encontró canvas wizardDistributionChart');
         return;
     }
-    
+
     // Destruir gráfica anterior si existe
     if (wizardDistributionChart) {
         wizardDistributionChart.destroy();
         wizardDistributionChart = null;
     }
-    
+
     // Asegurar que el canvas y su contenedor estén visibles
     const container = ctx.closest('.wizard-distribution-chart') || ctx.parentElement;
     if (container) {
@@ -2789,11 +2911,11 @@ function generarGraficaDistribucionWizard() {
         container.style.height = '400px';
         container.style.width = '100%';
     }
-    
+
     ctx.style.display = 'block';
     ctx.style.width = '100%';
     ctx.style.height = '400px';
-    
+
     // Verificar dimensiones
     const rect = ctx.getBoundingClientRect();
     console.log('🎨 Generando gráfico de distribución...', {
@@ -2801,7 +2923,7 @@ function generarGraficaDistribucionWizard() {
         height: rect.height,
         visible: rect.width > 0 && rect.height > 0
     });
-    
+
     // Si no tiene dimensiones, usar valores por defecto (Chart.js con responsive se ajustará)
     if (rect.width === 0 || rect.height === 0) {
         console.warn('⚠️ Canvas sin dimensiones, usando valores por defecto (Chart.js se ajustará cuando sea visible)');
@@ -2809,13 +2931,13 @@ function generarGraficaDistribucionWizard() {
         ctx.width = 400;
         ctx.height = 400;
     }
-    
+
     const consumoAnual = (window.wizardDatos.consumo_mensual || window.wizardDatos.consumo) * 12;
     const generacionAnual = window.wizardResultados.energia_anual_total || 0;
-    
+
     const energiaConsumida = Math.min(consumoAnual, generacionAnual);
     const energiaInyectada = Math.max(0, generacionAnual - consumoAnual);
-    
+
     wizardDistributionChart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -2837,7 +2959,7 @@ function generarGraficaDistribucionWizard() {
             }
         }
     });
-    
+
     // Forzar resize después de un momento
     setTimeout(() => {
         if (wizardDistributionChart) {
@@ -2849,31 +2971,36 @@ function generarGraficaDistribucionWizard() {
 
 function llenarTablaAhorroAcumulado(inflacionEnergetica = 0.03) {
     if (!window.wizardResultados) return;
-    
+
     const tbody = document.getElementById('wizardAhorroTableBody');
     if (!tbody) return;
-    
+
     tbody.innerHTML = '';
-    
-    const ahorroAnual = window.wizardResultados.ahorro_anual;
-    const costoTotal = window.wizardResultados.costo_total;
+
+    const ahorroAnualBase = window.wizardResultados.ahorro_anual || 0;
+    const costoTotal = window.wizardResultados.costo_total || window.wizardResultados.inversion_total || 0;
     const moneda = wizardData.moneda || 'ARS';
     const simbolo = moneda === 'USD' ? '$' : '$';
-    
-    const años = [1, 5, 10, 15, 20];
-    
+
+    const años = [1, 5, 10, 15];
+
     años.forEach(año => {
         let ahorroAcumulado = 0;
+        let ahorroAnualActual = ahorroAnualBase;
+
         for (let i = 1; i <= año; i++) {
-            ahorroAcumulado += ahorroAnual * Math.pow(1 + inflacionEnergetica, i - 1);
+            ahorroAcumulado += ahorroAnualActual;
+            ahorroAnualActual *= (1 + inflacionEnergetica);
         }
-        const beneficioNeto = ahorroAcumulado - costoTotal;
-        
+
+        // Calcular ahorro del año actual (con inflación acumulada)
+        const ahorroAnual = ahorroAnualBase * Math.pow(1 + inflacionEnergetica, año - 1);
+
         const tr = document.createElement('tr');
         tr.innerHTML = `
             <td style="padding: 0.75rem; border-bottom: 1px solid #e0e0e0;">${año}</td>
             <td style="padding: 0.75rem; border-bottom: 1px solid #e0e0e0;">${simbolo}${formatearNumero(ahorroAcumulado, moneda)}</td>
-            <td style="padding: 0.75rem; border-bottom: 1px solid #e0e0e0; color: ${beneficioNeto >= 0 ? '#2ecc71' : '#e74c3c'}; font-weight: 600;">${simbolo}${formatearNumero(beneficioNeto, moneda)}</td>
+            <td style="padding: 0.75rem; border-bottom: 1px solid #e0e0e0; color: ${ahorroAnual >= 0 ? '#2ecc71' : '#e74c3c'}; font-weight: 600;">${simbolo}${formatearNumero(ahorroAnual, moneda)}</td>
         `;
         tbody.appendChild(tr);
     });
@@ -2881,7 +3008,7 @@ function llenarTablaAhorroAcumulado(inflacionEnergetica = 0.03) {
 
 function actualizarImagenInstalacion() {
     if (!window.wizardDatos) return;
-    
+
     const imagenInstalacion = document.getElementById('wizardInstalacionImage');
     if (imagenInstalacion) {
         const inclinacion = wizardData.inclinacion || window.wizardDatos.inclinacion;
@@ -2910,20 +3037,20 @@ function formatearNumero(numero, moneda = 'ARS') {
 function initScrollSpy() {
     const sections = document.querySelectorAll('section[id]');
     const navLinks = document.querySelectorAll('.nav-link');
-    
+
     window.addEventListener('scroll', () => {
         let current = '';
         const scrollPosition = window.scrollY + 100; // Offset para activar antes
-        
+
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
             const sectionHeight = section.clientHeight;
-            
+
             if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
                 current = section.getAttribute('id');
             }
         });
-        
+
         navLinks.forEach(link => {
             link.classList.remove('active');
             if (link.getAttribute('href') === `#${current}`) {
@@ -2939,40 +3066,18 @@ function initScrollSpy() {
 
 function initHeaderScroll() {
     const header = document.querySelector('.header');
-    let lastScroll = 0;
-    let ticking = false;
-    
+
     window.addEventListener('scroll', () => {
-        if (!ticking) {
-            window.requestAnimationFrame(() => {
-                const currentScroll = window.scrollY;
-                
-                // Si estamos en la parte superior, siempre mostrar el header
-                if (currentScroll <= 50) {
-                    header.classList.remove('scrolled');
-                    header.classList.remove('header-hidden');
-                    header.classList.add('header-visible');
-                } else {
-                    header.classList.add('scrolled');
-                    
-                    // Scroll hacia abajo: ocultar header
-                    if (currentScroll > lastScroll && currentScroll > 100) {
-                        header.classList.remove('header-visible');
-                        header.classList.add('header-hidden');
-                    }
-                    // Scroll hacia arriba: mostrar header
-                    else if (currentScroll < lastScroll) {
-                        header.classList.remove('header-hidden');
-                        header.classList.add('header-visible');
-                    }
-                }
-                
-                lastScroll = currentScroll;
-                ticking = false;
-            });
-            
-            ticking = true;
-        }
+        window.requestAnimationFrame(() => {
+            const currentScroll = window.scrollY;
+
+            // Si estamos en la parte superior, quitar efecto scrolled
+            if (currentScroll <= 50) {
+                header.classList.remove('scrolled');
+            } else {
+                header.classList.add('scrolled');
+            }
+        });
     });
 }
 
@@ -2983,7 +3088,7 @@ function initHeaderScroll() {
 function abrirMapa() {
     const modal = document.getElementById('mapModal');
     modal.style.display = 'flex';
-    
+
     // Inicializar mapa si no existe
     if (!map) {
         setTimeout(() => {
@@ -3010,18 +3115,18 @@ function actualizarPrecioPanel() {
 function inicializarMapa() {
     // Crear mapa centrado en Argentina
     map = L.map('map').setView([-38.4161, -63.6167], 5);
-    
+
     // Añadir capa de OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
         maxZoom: 18
     }).addTo(map);
-    
+
     // Evento de click en el mapa (sin polígono amarillo)
-    map.on('click', function(e) {
+    map.on('click', function (e) {
         const lat = e.latlng.lat;
         const lon = e.latlng.lng;
-        
+
         // Verificar si está dentro de Argentina (aprox.)
         if (lat >= -55 && lat <= -21.5 && lon >= -73.5 && lon <= -53) {
             seleccionarUbicacionMapa(lat, lon);
@@ -3029,19 +3134,19 @@ function inicializarMapa() {
             mostrarNotificacion('⚠️ Por favor selecciona una ubicación dentro de Argentina', 'error');
         }
     });
-    
+
     console.log('🗺️ Mapa inicializado');
 }
 
 function seleccionarUbicacionMapa(lat, lon, nombreCiudad = null) {
     selectedLat = lat;
     selectedLon = lon;
-    
+
     // Remover marker anterior si existe
     if (marker) {
         map.removeLayer(marker);
     }
-    
+
     // Añadir nuevo marker
     marker = L.marker([lat, lon], {
         icon: L.icon({
@@ -3053,15 +3158,15 @@ function seleccionarUbicacionMapa(lat, lon, nombreCiudad = null) {
             shadowSize: [41, 41]
         })
     }).addTo(map);
-    
+
     // Actualizar coordenadas mostradas
-    const coordsText = nombreCiudad 
+    const coordsText = nombreCiudad
         ? `${nombreCiudad} (${lat.toFixed(2)}°, ${lon.toFixed(2)}°)`
         : `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
-    
+
     document.getElementById('selectedCoords').textContent = coordsText;
     document.getElementById('confirmLocationBtn').disabled = false;
-    
+
     console.log(`📍 Ubicación seleccionada: ${lat.toFixed(2)}°, ${lon.toFixed(2)}°`);
 }
 
@@ -3075,15 +3180,15 @@ async function confirmarUbicacion() {
         mostrarNotificacion('⚠️ Por favor selecciona una ubicación en el mapa', 'error');
         return;
     }
-    
+
     // Cerrar modal
     cerrarMapa();
-    
+
     // Obtener referencias al botón
     const button = document.getElementById('openMapButton');
     const buttonIcon = document.getElementById('buttonIcon');
     const buttonText = document.getElementById('buttonText');
-    
+
     // Mostrar spinner en el botón (mantener color primario)
     buttonIcon.innerHTML = '<div class="spinner"></div>';
     buttonText.textContent = 'Obteniendo datos...';
@@ -3093,18 +3198,18 @@ async function confirmarUbicacion() {
         button.style.background = '';
         button.style.boxShadow = '';
     }
-    
+
     // Guardar coordenadas
     ubicacionActual.lat = selectedLat;
     ubicacionActual.lon = selectedLon;
-    
+
     try {
         // Primero obtener el nombre del lugar
         await obtenerNombreLugar(selectedLat, selectedLon, buttonText);
-        
+
         // Luego obtener datos solares (solo guarda datos, no calcula)
         await obtenerDatosSolaresNASA(selectedLat, selectedLon, buttonIcon, buttonText);
-        
+
         // Mostrar mensaje de confirmación en el botón (mantener color primario amarillo)
         const nombreUbicacion = ubicacionActual.nombre || `${selectedLat.toFixed(2)}°, ${selectedLon.toFixed(2)}°`;
         buttonIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 18px; height: 18px; flex-shrink: 0;"><path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
@@ -3117,10 +3222,10 @@ async function confirmarUbicacion() {
         button.style.background = '';
         button.style.boxShadow = '';
         button.disabled = false;
-        
+
         // Validar si ahora se puede habilitar el botón calcular
         validarYHabilitarBotonCalcular();
-        
+
     } catch (error) {
         console.error('Error:', error);
         mostrarNotificacion('⚠️ Error obteniendo datos. Intenta de nuevo.', 'error');
@@ -3144,39 +3249,39 @@ async function confirmarUbicacion() {
 async function obtenerNombreLugar(lat, lon, buttonText) {
     try {
         buttonText.textContent = 'Obteniendo nombre de la ubicación...';
-        
+
         // Usar Nominatim API (OpenStreetMap) para geocodificación inversa
         const url = `https://nominatim.openstreetmap.org/reverse?` +
-                    `format=json` +
-                    `&lat=${lat}` +
-                    `&lon=${lon}` +
-                    `&zoom=10` +
-                    `&addressdetails=1` +
-                    `&accept-language=es`;
-        
+            `format=json` +
+            `&lat=${lat}` +
+            `&lon=${lon}` +
+            `&zoom=10` +
+            `&addressdetails=1` +
+            `&accept-language=es`;
+
         const response = await fetch(url, {
             headers: {
                 'User-Agent': 'Solar360Simulator/1.0'
             }
         });
-        
+
         if (!response.ok) {
             throw new Error('No se pudo obtener el nombre del lugar');
         }
-        
+
         const data = await response.json();
-        
+
         // Extraer el nombre más relevante
         let nombreLugar = '';
         if (data.address) {
-            nombreLugar = data.address.city || 
-                         data.address.town || 
-                         data.address.village || 
-                         data.address.municipality || 
-                         data.address.state || 
-                         data.address.county ||
-                         'Ubicación seleccionada';
-            
+            nombreLugar = data.address.city ||
+                data.address.town ||
+                data.address.village ||
+                data.address.municipality ||
+                data.address.state ||
+                data.address.county ||
+                'Ubicación seleccionada';
+
             // Agregar provincia si existe
             if (data.address.state && nombreLugar !== data.address.state) {
                 nombreLugar += `, ${data.address.state}`;
@@ -3184,12 +3289,12 @@ async function obtenerNombreLugar(lat, lon, buttonText) {
         } else {
             nombreLugar = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
         }
-        
+
         ubicacionActual.nombre = nombreLugar;
         console.log('📍 Ubicación identificada:', nombreLugar);
-        
+
         buttonText.textContent = `${nombreLugar} - Obteniendo datos solares...`;
-        
+
     } catch (error) {
         console.warn('No se pudo obtener el nombre del lugar:', error);
         ubicacionActual.nombre = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
@@ -3205,12 +3310,12 @@ async function obtenerDatosUbicacion() {
     const statusDiv = document.getElementById('locationStatus');
     const statusIcon = statusDiv.querySelector('.status-icon');
     const statusText = statusDiv.querySelector('.status-text');
-    
+
     // Mostrar estado de carga
     statusDiv.style.display = 'flex';
     statusIcon.textContent = '⏳';
     statusText.textContent = 'Obteniendo tu ubicación...';
-    
+
     // Verificar si geolocalización está disponible
     if (!navigator.geolocation) {
         statusIcon.textContent = '❌';
@@ -3219,7 +3324,7 @@ async function obtenerDatosUbicacion() {
         mostrarNotificacion('⚠️ Geolocalización no disponible. Usa datos de ejemplo.', 'error');
         return;
     }
-    
+
     try {
         // Obtener posición del usuario
         const position = await new Promise((resolve, reject) => {
@@ -3229,21 +3334,21 @@ async function obtenerDatosUbicacion() {
                 maximumAge: 0
             });
         });
-        
+
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-        
+
         console.log(`📍 Ubicación obtenida: ${lat.toFixed(2)}°, ${lon.toFixed(2)}°`);
-        
+
         statusIcon.textContent = '🌐';
         statusText.textContent = `Ubicación: ${lat.toFixed(2)}°, ${lon.toFixed(2)}° - Consultando datos solares...`;
-        
+
         // Obtener datos solares de NASA POWER API
         await obtenerDatosSolaresNASA(lat, lon, statusDiv, statusIcon, statusText);
-        
+
     } catch (error) {
         console.error('Error obteniendo ubicación:', error);
-        
+
         if (error.code === 1) {
             statusIcon.textContent = '🔒';
             statusText.textContent = 'Permiso de ubicación denegado';
@@ -3257,7 +3362,7 @@ async function obtenerDatosUbicacion() {
             statusText.textContent = 'Tiempo de espera agotado';
             mostrarNotificacion('⚠️ Tiempo agotado. Intenta de nuevo.', 'error');
         }
-        
+
         setTimeout(() => statusDiv.style.display = 'none', 4000);
     }
 }
@@ -3270,67 +3375,67 @@ async function obtenerDatosSolaresNASA(lat, lon, buttonIcon, buttonText) {
     try {
         // API de NASA POWER - Datos solares mensuales
         // Documentación: https://power.larc.nasa.gov/docs/services/api/
-        
+
         // El spinner ya está mostrado en el botón, solo actualizamos el texto si es necesario
         if (buttonText) {
             buttonText.textContent = 'Obteniendo datos solares...';
         }
-        
+
         // Parámetros solares:
         // ALLSKY_SFC_SW_DWN: Irradiancia solar (kWh/m²/día)
         // T2M: Temperatura a 2m (°C)
-        
+
         const year = new Date().getFullYear() - 1; // Año anterior (datos completos)
-        
+
         const url = `https://power.larc.nasa.gov/api/temporal/monthly/point?` +
-                    `parameters=ALLSKY_SFC_SW_DWN,T2M` +
-                    `&community=RE` +
-                    `&longitude=${lon}` +
-                    `&latitude=${lat}` +
-                    `&start=${year}` +
-                    `&end=${year}` +
-                    `&format=JSON`;
-        
+            `parameters=ALLSKY_SFC_SW_DWN,T2M` +
+            `&community=RE` +
+            `&longitude=${lon}` +
+            `&latitude=${lat}` +
+            `&start=${year}` +
+            `&end=${year}` +
+            `&format=JSON`;
+
         console.log('🌐 Consultando NASA POWER API...');
-        
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         console.log('✅ Datos recibidos de NASA POWER:', data);
-        
+
         // Extraer datos mensuales
         const irradiance = data.properties.parameter.ALLSKY_SFC_SW_DWN;
         const temperature = data.properties.parameter.T2M;
-        
+
         // Convertir objeto de meses a array
         const mesesKeys = Object.keys(irradiance).sort();
-        
+
         // Rellenar formulario (guardar datos internamente)
         for (let i = 0; i < 12; i++) {
             const mesKey = mesesKeys[i];
-            
+
             // PSH ≈ Irradiancia diaria (kWh/m²/día)
             const psh = irradiance[mesKey];
             const temp = temperature[mesKey];
-            
+
             if (psh !== undefined && temp !== undefined) {
                 document.getElementById(`psh_${i + 1}`).value = psh.toFixed(1);
                 document.getElementById(`temp_${i + 1}`).value = temp.toFixed(1);
             }
         }
-        
+
         // Datos guardados - NO calcular automáticamente
         // El mensaje de confirmación se mostrará en confirmarUbicacion()
         console.log('✅ Datos climáticos guardados internamente');
-        
+
     } catch (error) {
         console.error('Error consultando NASA POWER:', error);
-        
+
         // Intentar con API alternativa (Open-Meteo)
         try {
             await obtenerDatosSolaresOpenMeteo(lat, lon, buttonIcon, buttonText);
@@ -3350,63 +3455,63 @@ async function obtenerDatosSolaresOpenMeteo(lat, lon, buttonIcon, buttonText) {
         if (buttonText) {
             buttonText.textContent = 'Obteniendo datos solares (Open-Meteo)...';
         }
-        
+
         // Open-Meteo Archive API para datos históricos
         const endDate = new Date();
         const startDate = new Date();
         startDate.setFullYear(startDate.getFullYear() - 1);
-        
+
         const url = `https://archive-api.open-meteo.com/v1/archive?` +
-                    `latitude=${lat}` +
-                    `&longitude=${lon}` +
-                    `&start_date=${startDate.toISOString().split('T')[0]}` +
-                    `&end_date=${endDate.toISOString().split('T')[0]}` +
-                    `&daily=shortwave_radiation_sum,temperature_2m_mean` +
-                    `&timezone=auto`;
-        
+            `latitude=${lat}` +
+            `&longitude=${lon}` +
+            `&start_date=${startDate.toISOString().split('T')[0]}` +
+            `&end_date=${endDate.toISOString().split('T')[0]}` +
+            `&daily=shortwave_radiation_sum,temperature_2m_mean` +
+            `&timezone=auto`;
+
         console.log('🌐 Consultando Open-Meteo API...');
-        
+
         const response = await fetch(url);
-        
+
         if (!response.ok) {
             throw new Error(`API Error: ${response.status}`);
         }
-        
+
         const data = await response.json();
-        
+
         console.log('✅ Datos recibidos de Open-Meteo:', data);
-        
+
         // Procesar datos por mes
         const radiationData = data.daily.shortwave_radiation_sum; // Wh/m²
         const tempData = data.daily.temperature_2m_mean; // °C
         const dates = data.daily.time;
-        
+
         // Agrupar por mes
         const monthlyData = new Array(12).fill(null).map(() => ({ radiation: [], temp: [] }));
-        
+
         dates.forEach((date, index) => {
             const month = new Date(date).getMonth();
             monthlyData[month].radiation.push(radiationData[index]);
             monthlyData[month].temp.push(tempData[index]);
         });
-        
+
         // Calcular promedios mensuales
         for (let i = 0; i < 12; i++) {
             if (monthlyData[i].radiation.length > 0) {
                 const avgRadiation = monthlyData[i].radiation.reduce((a, b) => a + b, 0) / monthlyData[i].radiation.length;
                 const avgTemp = monthlyData[i].temp.reduce((a, b) => a + b, 0) / monthlyData[i].temp.length;
-                
+
                 // Convertir radiación de Wh/m² a PSH (kWh/m²/día)
                 const psh = (avgRadiation / 1000).toFixed(1);
-                
+
                 document.getElementById(`psh_${i + 1}`).value = psh;
                 document.getElementById(`temp_${i + 1}`).value = avgTemp.toFixed(1);
             }
         }
-        
+
         // Datos guardados - NO calcular automáticamente
         console.log('✅ Datos climáticos guardados internamente (Open-Meteo)');
-        
+
     } catch (error) {
         console.error('Error consultando Open-Meteo:', error);
         throw error;
@@ -3420,12 +3525,12 @@ async function obtenerDatosSolaresOpenMeteo(lat, lon, buttonIcon, buttonText) {
 function validarYHabilitarBotonCalcular() {
     const btnCalcular = document.getElementById('btnCalcularFinal');
     let puedeCalcular = true;
-    
+
     // 1. Validar campos de Parámetros del Sistema
     const inclinacion = document.getElementById('inclinacion').value;
     const consumo = document.getElementById('consumo').value;
     const precio_kwh = document.getElementById('precio_kwh').value;
-    
+
     // Inclinación: solo acepta 20° o 45°
     if (!inclinacion || inclinacion === '' || (inclinacion !== '20' && inclinacion !== '45')) {
         puedeCalcular = false;
@@ -3436,7 +3541,7 @@ function validarYHabilitarBotonCalcular() {
     if (!precio_kwh || precio_kwh === '' || isNaN(parseFloat(precio_kwh)) || parseFloat(precio_kwh) <= 0) {
         puedeCalcular = false;
     }
-    
+
     // 2. Validar datos climáticos según el modo
     if (modoActual === 'ubicacion') {
         // En modo ubicación: verificar que el botón muestre "Datos obtenidos para..."
@@ -3449,7 +3554,7 @@ function validarYHabilitarBotonCalcular() {
         for (let i = 1; i <= 12; i++) {
             const psh = document.getElementById(`psh_${i}`).value;
             const temp = document.getElementById(`temp_${i}`).value;
-            
+
             if (!psh || psh === '' || isNaN(parseFloat(psh)) || parseFloat(psh) < 0) {
                 puedeCalcular = false;
                 break;
@@ -3460,7 +3565,7 @@ function validarYHabilitarBotonCalcular() {
             }
         }
     }
-    
+
     // 3. Habilitar o deshabilitar el botón
     if (puedeCalcular) {
         btnCalcular.disabled = false;
@@ -3484,7 +3589,7 @@ function agregarValidacionTiempoReal() {
     document.getElementById('consumo').addEventListener('change', validarYHabilitarBotonCalcular);
     document.getElementById('precio_kwh').addEventListener('input', validarYHabilitarBotonCalcular);
     document.getElementById('precio_kwh').addEventListener('change', validarYHabilitarBotonCalcular);
-    
+
     // Campos de datos manuales (modo experto)
     for (let i = 1; i <= 12; i++) {
         document.getElementById(`psh_${i}`).addEventListener('input', validarYHabilitarBotonCalcular);
@@ -3500,32 +3605,32 @@ function agregarValidacionTiempoReal() {
 
 async function calcularDimensionamiento(e) {
     e.preventDefault();
-    
+
     console.log('🔄 Iniciando cálculo de dimensionamiento...');
-    
+
     // 1. Obtener datos del formulario
     const datos = obtenerDatosFormulario();
-    
+
     // 2. Validar datos
     if (!validarDatos(datos)) {
         mostrarNotificacion('⚠️ Por favor completa todos los campos correctamente', 'error');
         return;
     }
-    
+
     // 3. Mostrar estado de carga en el botón
     const btnCalcular = document.getElementById('btnCalcularFinal');
     const btnIcon = btnCalcular.querySelector('.btn-icon');
     const btnText = btnCalcular.querySelector('span');
-    
+
     // Guardar estado original
     const originalHTML = btnIcon.innerHTML;
     const originalText = btnText.textContent;
-    
+
     // Cambiar a estado de carga
     btnCalcular.disabled = true;
     btnCalcular.style.opacity = '0.8';
     btnCalcular.style.cursor = 'wait';
-    
+
     // Crear spinner SVG animado
     btnIcon.innerHTML = `
         <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none" opacity="0.3"/>
@@ -3535,50 +3640,50 @@ async function calcularDimensionamiento(e) {
     `;
     btnIcon.style.display = 'block';
     btnText.textContent = 'Calculando...';
-    
+
     // Simular tiempo de procesamiento (2-2.5 segundos)
     const tiempoCarga = 2000 + Math.random() * 500; // Entre 2 y 2.5 segundos
-    
+
     try {
         // Esperar tiempo de carga simulado
         await new Promise(resolve => setTimeout(resolve, tiempoCarga));
-        
+
         // 4. Calcular generación mensual usando modelo OLS
         const generacionMensual = calcularGeneracionMensual(datos);
-        
+
         // 5. Calcular dimensionamiento
         const resultados = calcularResultados(datos, generacionMensual);
-        
+
         // 6. Mostrar resultados
         mostrarResultados(resultados, generacionMensual, datos);
-        
+
         // 7. Restaurar botón
         btnIcon.innerHTML = originalHTML;
         btnText.textContent = originalText;
         btnCalcular.disabled = false;
         btnCalcular.style.opacity = '1';
         btnCalcular.style.cursor = 'pointer';
-        
+
         // 8. Scroll a resultados
         setTimeout(() => {
-            document.getElementById('resultsContainer').scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'nearest' 
+            document.getElementById('resultsContainer').scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest'
             });
         }, 100);
-        
+
         console.log('✅ Cálculo completado:', resultados);
-        
+
     } catch (error) {
         console.error('❌ Error en el cálculo:', error);
-        
+
         // Restaurar botón en caso de error
         btnIcon.innerHTML = originalHTML;
         btnText.textContent = originalText;
         btnCalcular.disabled = false;
         btnCalcular.style.opacity = '1';
         btnCalcular.style.cursor = 'pointer';
-        
+
         mostrarNotificacion('⚠️ Error al calcular el dimensionamiento. Por favor intenta nuevamente.', 'error');
     }
 }
@@ -3596,8 +3701,8 @@ function obtenerDatosFormulario() {
         costo_panel: parseFloat(document.getElementById('costo_panel').value),
         modo: modoActual,
         modo_dimensionamiento: modoDimensionamiento,
-        porcentaje_cobertura: modoDimensionamiento === 'porcentaje' 
-            ? parseFloat(document.getElementById('porcentaje_cobertura')?.value || 100) 
+        porcentaje_cobertura: modoDimensionamiento === 'porcentaje'
+            ? parseFloat(document.getElementById('porcentaje_cobertura')?.value || 100)
             : null,
         num_paneles_fijo: modoDimensionamiento === 'paneles'
             ? parseInt(document.getElementById('num_paneles_manual')?.value || 1)
@@ -3605,13 +3710,13 @@ function obtenerDatosFormulario() {
         psh: [],
         temperatura: []
     };
-    
+
     // Obtener datos mensuales
     for (let i = 1; i <= 12; i++) {
         datos.psh.push(parseFloat(document.getElementById(`psh_${i}`).value));
         datos.temperatura.push(parseFloat(document.getElementById(`temp_${i}`).value));
     }
-    
+
     return datos;
 }
 
@@ -3624,17 +3729,17 @@ function validarDatos(datos) {
     if (isNaN(datos.inclinacion) || (datos.inclinacion !== 20 && datos.inclinacion !== 45)) {
         return false;
     }
-    
+
     if (isNaN(datos.consumo_mensual) || datos.consumo_mensual <= 0) {
         return false;
     }
-    
+
     for (let i = 0; i < 12; i++) {
         if (isNaN(datos.psh[i]) || isNaN(datos.temperatura[i])) {
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -3684,14 +3789,14 @@ function calcularGeneracionMensual(datos) {
 function calcularResultados(datos, generacionMensual) {
     // Energía total anual por panel
     const energia_anual_por_panel = generacionMensual.reduce((sum, mes) => sum + mes.energia_mensual, 0);
-    
+
     // Energía anual requerida
     const energia_anual_requerida = datos.consumo_mensual * 12;
-    
+
     // Calcular número de paneles según el modo de dimensionamiento
     let num_paneles;
     let porcentaje_objetivo = null;
-    
+
     if (datos.modo_dimensionamiento === 'paneles' && datos.num_paneles_fijo) {
         // Modo: Elegir cantidad de paneles
         num_paneles = datos.num_paneles_fijo;
@@ -3702,40 +3807,40 @@ function calcularResultados(datos, generacionMensual) {
         const energia_objetivo = energia_anual_requerida * (porcentaje / 100);
         num_paneles = Math.ceil(energia_objetivo / energia_anual_por_panel);
     }
-    
+
     // Energía total del sistema
     const energia_anual_total = energia_anual_por_panel * num_paneles;
     const energia_mensual_promedio = energia_anual_total / 12;
-    
+
     // Costos con modelo BOS (Balance of System)
     // Costo Total = Costo Base (BOS) + (N × Costo por Panel)
     const costo_base = MODELO_CLUSTER.constantes.costo_base_bos;
     const costo_paneles = num_paneles * MODELO_CLUSTER.constantes.costo_por_panel;
     const costo_total = costo_base + costo_paneles;
-    
+
     // Ahorros
     const ahorro_anual = energia_anual_total * datos.precio_kwh;
     const ahorro_mensual = ahorro_anual / 12;
-    
+
     // ROI (años)
     const roi_anos = costo_total / ahorro_anual;
-    
+
     // Impacto ambiental (CO₂ evitado)
     const co2_anual = energia_anual_total * MODELO_CLUSTER.constantes.factor_co2;
-    
+
     // Cobertura del consumo (%)
     const cobertura = (energia_anual_total / energia_anual_requerida) * 100;
-    
+
     // Bandas de incertidumbre (±σ)
     // En el paper R² = 1.0, por lo que la varianza residual es prácticamente nula.
     // Aquí mantenemos la estructura pero con incertidumbre muy baja (≈0).
     const incertidumbre_anual = 0; // kWh, puede ajustarse si se calibra con nuevos datos
     const rango_inferior = Math.max(0, energia_anual_total - incertidumbre_anual);
     const rango_superior = energia_anual_total + incertidumbre_anual;
-    
+
     // Potencia total instalada
     const potencia_total_kw = (num_paneles * MODELO_CLUSTER.constantes.potencia_panel_nominal) / 1000;
-    
+
     return {
         num_paneles,
         potencia_total_kw,
@@ -3767,65 +3872,65 @@ function mostrarResultados(resultados, generacionMensual, datos = null) {
     // Guardar resultados para la impresión
     ultimosResultados = resultados;
     ultimaGeneracionMensual = generacionMensual;
-    
+
     // Obtener datos del formulario si no se pasaron
     if (!datos) {
         datos = obtenerDatosFormulario();
     }
-    
+
     // Ocultar preview y mostrar resultados reales
     const resultsPreview = document.getElementById('resultsPreview');
     if (resultsPreview) {
         resultsPreview.style.display = 'none';
     }
-    
+
     const resultsContainer = document.getElementById('resultsContainer');
     resultsContainer.style.display = 'flex';
     resultsContainer.classList.add('show');
-    
+
     // Panel estándar según modelo experimental
     const tipoPanelTexto = 'Panel de Referencia 190W';
     const consumoMensual = parseFloat(document.getElementById('consumo').value);
-    
+
     // ============================================
     // VISTA SIMPLE - KPIs Principales
     // ============================================
-    
+
     // KPI 1: Inversión Total
     const kpiInversion = document.getElementById('kpiInversion');
     const kpiInversionDetail = document.getElementById('kpiInversionDetail');
     if (kpiInversion) kpiInversion.textContent = `$${formatNumber(resultados.costo_total)}`;
-    if (kpiInversionDetail) kpiInversionDetail.textContent = 
+    if (kpiInversionDetail) kpiInversionDetail.textContent =
         `Base: $${formatNumber(resultados.costo_base)} + ${resultados.num_paneles} paneles`;
-    
+
     // KPI 2: Ahorro Mensual
     const kpiAhorroMensual = document.getElementById('kpiAhorroMensual');
     const kpiAhorroAnual = document.getElementById('kpiAhorroAnual');
     if (kpiAhorroMensual) kpiAhorroMensual.textContent = `$${formatNumber(resultados.ahorro_mensual)}`;
-    if (kpiAhorroAnual) kpiAhorroAnual.textContent = 
+    if (kpiAhorroAnual) kpiAhorroAnual.textContent =
         `$${formatNumber(resultados.ahorro_anual)}/año`;
-    
+
     // KPI 3: Sistema Ideal
     const kpiSistema = document.getElementById('kpiSistema');
     const kpiSistemaDetail = document.getElementById('kpiSistemaDetail');
-    if (kpiSistema) kpiSistema.textContent = 
+    if (kpiSistema) kpiSistema.textContent =
         `${resultados.num_paneles} Paneles + Inversor`;
-    if (kpiSistemaDetail) kpiSistemaDetail.textContent = 
+    if (kpiSistemaDetail) kpiSistemaDetail.textContent =
         `${tipoPanelTexto} • ${resultados.potencia_total_kw.toFixed(2)} kW`;
-    
+
     // KPI 4: Impacto Ambiental (equivalente a árboles)
     const arbolesEquiv = Math.round(resultados.co2_anual / 20); // 1 árbol ≈ 20 kg CO₂/año
     const kpiImpacto = document.getElementById('kpiImpacto');
     const kpiImpactoDetail = document.getElementById('kpiImpactoDetail');
-    if (kpiImpacto) kpiImpacto.textContent = 
+    if (kpiImpacto) kpiImpacto.textContent =
         `${formatNumber(resultados.co2_anual)} kg CO₂`;
-    if (kpiImpactoDetail) kpiImpactoDetail.textContent = 
+    if (kpiImpactoDetail) kpiImpactoDetail.textContent =
         `Equivale a plantar ${arbolesEquiv} árboles`;
-    
+
     // ============================================
     // VISTA DETALLADA - Pestaña Finanzas
     // ============================================
-    
+
     // ROI
     const detailROI = document.getElementById('detailROI');
     if (detailROI) {
@@ -3835,46 +3940,46 @@ function mostrarResultados(resultados, generacionMensual, datos = null) {
             detailROI.textContent = `${resultados.roi_anos.toFixed(1)} años`;
         }
     }
-    
+
     // Desglose de costos
     const detailCostoBase = document.getElementById('detailCostoBase');
     const detailCostoPaneles = document.getElementById('detailCostoPaneles');
     const detailCostoTotal = document.getElementById('detailCostoTotal');
     if (detailCostoBase) detailCostoBase.textContent = `$${formatNumber(resultados.costo_base)}`;
-    if (detailCostoPaneles) detailCostoPaneles.textContent = 
+    if (detailCostoPaneles) detailCostoPaneles.textContent =
         `$${formatNumber(resultados.costo_paneles)} (${resultados.num_paneles} paneles)`;
     if (detailCostoTotal) detailCostoTotal.textContent = `$${formatNumber(resultados.costo_total)}`;
-    
+
     // Ahorro a 25 años
     const ahorro25Anos = resultados.ahorro_anual * 25;
     const detailAhorro25Anos = document.getElementById('detailAhorro25Anos');
     if (detailAhorro25Anos) detailAhorro25Anos.textContent = `$${formatNumber(ahorro25Anos)}`;
-    
+
     // ============================================
     // VISTA DETALLADA - Pestaña Energía
     // ============================================
-    
+
     // Tabla mensual
     llenarTablaMensual(generacionMensual, resultados.num_paneles, consumoMensual);
-    
+
     // Resumen de energía
     const summaryGeneracionAnual = document.getElementById('summaryGeneracionAnual');
     const summaryCobertura = document.getElementById('summaryCobertura');
-    if (summaryGeneracionAnual) summaryGeneracionAnual.textContent = 
+    if (summaryGeneracionAnual) summaryGeneracionAnual.textContent =
         `${formatNumber(resultados.energia_anual_total)} kWh`;
-    
+
     // Cobertura
     let coberturaTexto;
     if (resultados.modo_dimensionamiento === 'paneles') {
         coberturaTexto = `${resultados.cobertura.toFixed(0)}%`;
     } else {
         const porcentajeSeleccionado = resultados.porcentaje_objetivo || 100;
-        coberturaTexto = porcentajeSeleccionado < 100 
+        coberturaTexto = porcentajeSeleccionado < 100
             ? `${resultados.cobertura.toFixed(0)}% (objetivo: ${porcentajeSeleccionado}%)`
             : `${resultados.cobertura.toFixed(0)}%`;
     }
     if (summaryCobertura) summaryCobertura.textContent = coberturaTexto;
-    
+
     // Excedentes (si hay)
     const energiaAnualRequerida = consumoMensual * 12;
     const excedentesAnuales = resultados.energia_anual_total - energiaAnualRequerida;
@@ -3888,11 +3993,11 @@ function mostrarResultados(resultados, generacionMensual, datos = null) {
             summaryExcedentes.style.display = 'none';
         }
     }
-    
+
     // ============================================
     // VISTA DETALLADA - Pestaña Equipamiento
     // ============================================
-    
+
     const equipPanelModelo = document.getElementById('equipPanelModelo');
     const equipPanelCantidad = document.getElementById('equipPanelCantidad');
     const equipPanelPotencia = document.getElementById('equipPanelPotencia');
@@ -3901,18 +4006,18 @@ function mostrarResultados(resultados, generacionMensual, datos = null) {
     if (equipPanelCantidad) equipPanelCantidad.textContent = resultados.num_paneles;
     if (equipPanelPotencia) equipPanelPotencia.textContent = resultados.potencia_total_kw.toFixed(2);
     if (equipPanelPrecio) equipPanelPrecio.textContent = `$${formatNumber(resultados.costo_por_panel)}`;
-    
+
     // Superficie necesaria (aprox. 1.6 m² por panel de 190W)
     const superficieNecesaria = resultados.num_paneles * 1.6;
     const equipSuperficie = document.getElementById('equipSuperficie');
-    if (equipSuperficie) equipSuperficie.textContent = 
+    if (equipSuperficie) equipSuperficie.textContent =
         `${superficieNecesaria.toFixed(1)} m² (aprox.)`;
-    
+
     // Inclinación
     const inclinacion = document.getElementById('inclinacion').value;
     const equipInclinacion = document.getElementById('equipInclinacion');
     if (equipInclinacion) equipInclinacion.textContent = `${inclinacion}°`;
-    
+
     // ============================================
     // Inicializar eventos del botón y pestañas
     // ============================================
@@ -3928,11 +4033,11 @@ function inicializarVistaDetallada() {
     const btnVerAnalisis = document.getElementById('btnVerAnalisis');
     const vistaDetallada = document.getElementById('resultsDetailedView');
     const iconAnalisis = document.getElementById('iconAnalisis');
-    
+
     if (btnVerAnalisis && vistaDetallada) {
-        btnVerAnalisis.addEventListener('click', function() {
+        btnVerAnalisis.addEventListener('click', function () {
             const isExpanded = vistaDetallada.style.display !== 'none';
-            
+
             if (isExpanded) {
                 // Colapsar
                 vistaDetallada.style.display = 'none';
@@ -3941,7 +4046,7 @@ function inicializarVistaDetallada() {
                 // Expandir
                 vistaDetallada.style.display = 'block';
                 btnVerAnalisis.classList.add('expanded');
-                
+
                 // Generar gráficas solo cuando se expande (lazy loading)
                 if (ultimosResultados && ultimaGeneracionMensual) {
                     const consumoMensual = parseFloat(document.getElementById('consumo').value);
@@ -3950,7 +4055,7 @@ function inicializarVistaDetallada() {
                         generarGraficaFinanciera(ultimosResultados);
                     }, 100);
                 }
-                
+
                 // Scroll suave a la vista expandida
                 setTimeout(() => {
                     vistaDetallada.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -3958,10 +4063,10 @@ function inicializarVistaDetallada() {
             }
         });
     }
-    
+
     // Manejar pestañas
     document.querySelectorAll('.result-tab').forEach(tab => {
-        tab.addEventListener('click', function() {
+        tab.addEventListener('click', function () {
             const tabName = this.dataset.tab;
             cambiarPestaña(tabName);
         });
@@ -3973,19 +4078,19 @@ function cambiarPestaña(tabName) {
     document.querySelectorAll('.result-tab').forEach(tab => {
         tab.classList.remove('active');
     });
-    
+
     // Ocultar todos los panes
     document.querySelectorAll('.tab-pane').forEach(pane => {
         pane.classList.remove('active');
     });
-    
+
     // Activar pestaña seleccionada
     const tab = document.querySelector(`.result-tab[data-tab="${tabName}"]`);
     const pane = document.getElementById(`tab${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
-    
+
     if (tab) tab.classList.add('active');
     if (pane) pane.classList.add('active');
-    
+
     // Si es la pestaña de energía o finanzas, asegurar que los gráficos estén renderizados
     if ((tabName === 'energia' || tabName === 'finanzas') && ultimosResultados && ultimaGeneracionMensual) {
         setTimeout(() => {
@@ -4002,17 +4107,17 @@ function cambiarPestaña(tabName) {
 function llenarTablaMensual(generacionMensual, numPaneles, consumoMensual) {
     const tbody = document.getElementById('monthlyTableBody');
     if (!tbody) return;
-    
+
     tbody.innerHTML = '';
-    
+
     generacionMensual.forEach((mes, index) => {
         const generacionTotal = mes.energia_mensual * numPaneles;
         const balance = generacionTotal - consumoMensual;
         const balanceClass = balance >= 0 ? 'positive' : 'negative';
-        const balanceText = balance >= 0 
-            ? `+${balance.toFixed(1)} kWh` 
+        const balanceText = balance >= 0
+            ? `+${balance.toFixed(1)} kWh`
             : `${balance.toFixed(1)} kWh`;
-        
+
         const row = document.createElement('tr');
         row.innerHTML = `
             <td><strong>${mes.mes}</strong></td>
@@ -4030,15 +4135,15 @@ function llenarTablaMensual(generacionMensual, numPaneles, consumoMensual) {
 
 function generarGraficaMensual(generacionMensual, numPaneles, consumoMensual) {
     const ctx = document.getElementById('monthlyChart');
-    
+
     // Destruir gráfica anterior si existe
     if (monthlyChart) {
         monthlyChart.destroy();
     }
-    
+
     const energias = generacionMensual.map(mes => parseFloat((mes.energia_mensual * numPaneles).toFixed(1)));
     const consumos = new Array(12).fill(consumoMensual); // Consumo constante para todos los meses
-    
+
     monthlyChart = new Chart(ctx, {
         type: 'bar',
         data: {
@@ -4087,10 +4192,10 @@ function generarGraficaMensual(generacionMensual, numPaneles, consumoMensual) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             const valor = context.parsed.y;
                             let label = `${context.dataset.label}: ${valor} kWh`;
-                            
+
                             // Si es el dataset de generación, calcular excedente/déficit
                             if (context.datasetIndex === 0) {
                                 const consumo = consumoMensual;
@@ -4103,7 +4208,7 @@ function generarGraficaMensual(generacionMensual, numPaneles, consumoMensual) {
                                     label += ` (Equilibrado)`;
                                 }
                             }
-                            
+
                             return label;
                         }
                     },
@@ -4158,24 +4263,24 @@ function generarGraficaMensual(generacionMensual, numPaneles, consumoMensual) {
 
 function generarGraficaFinanciera(resultados) {
     const ctx = document.getElementById('financialChart');
-    
+
     // Destruir gráfica anterior si existe
     if (financialChart) {
         financialChart.destroy();
     }
-    
+
     // Calcular flujo de caja acumulado (10 años)
     const anos = 10;
     const labels = [];
     const costos = [];
     const ahorros = [];
     const flujoAcumulado = [];
-    
+
     let acumulado = -resultados.costo_total;
-    
+
     for (let i = 0; i <= anos; i++) {
         labels.push(`Año ${i}`);
-        
+
         if (i === 0) {
             costos.push(-resultados.costo_total);
             ahorros.push(0);
@@ -4184,10 +4289,10 @@ function generarGraficaFinanciera(resultados) {
             ahorros.push(resultados.ahorro_anual * i);
             acumulado += resultados.ahorro_anual;
         }
-        
+
         flujoAcumulado.push(i === 0 ? -resultados.costo_total : acumulado);
     }
-    
+
     financialChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -4237,7 +4342,7 @@ function generarGraficaFinanciera(resultados) {
                 },
                 tooltip: {
                     callbacks: {
-                        label: function(context) {
+                        label: function (context) {
                             return `${context.dataset.label}: $${formatNumber(Math.abs(context.parsed.y))}`;
                         }
                     },
@@ -4259,7 +4364,7 @@ function generarGraficaFinanciera(resultados) {
                         }
                     },
                     ticks: {
-                        callback: function(value) {
+                        callback: function (value) {
                             return '$' + formatNumber(value);
                         },
                         font: {
@@ -4313,9 +4418,9 @@ function mostrarNotificacion(mensaje, tipo = 'info') {
         z-index: 10000;
         animation: slideInRight 0.3s ease-out;
     `;
-    
+
     document.body.appendChild(notification);
-    
+
     // Remover después de 3 segundos
     setTimeout(() => {
         notification.style.animation = 'slideOutRight 0.3s ease-out';
