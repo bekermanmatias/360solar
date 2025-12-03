@@ -147,64 +147,82 @@ let ubicacionActual = {
 // Función para Imprimir Reporte PDF
 // ============================================
 
-function imprimirReporte() {
-    // 1. Validar que existan resultados
-    if (!window.wizardResultados || !window.ultimaGeneracionMensual) {
-        alert('Calcula primero el dimensionamiento antes de imprimir');
+async function imprimirReporteWizard() {
+    // 0. Verificar que jsPDF esté disponible
+    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+        mostrarNotificacion('❌ Error: La librería PDF no está disponible. Por favor recarga la página.', 'error');
+        console.error('jsPDF no está disponible. Verifica que las librerías se hayan cargado correctamente.');
         return;
     }
 
-    // 2. Establecer fecha de impresión
-    const dateElement = document.getElementById('printDate');
-    if (dateElement) {
-        const now = new Date();
-        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
-        dateElement.textContent = now.toLocaleDateString('es-AR', options);
+    // 1. Validar que existan resultados
+    if (!window.wizardResultados || !window.wizardGeneracionMensual) {
+        mostrarNotificacion('⚠️ Calcula primero el dimensionamiento antes de descargar el reporte.', 'error');
+        return;
     }
 
-    // 3. Preparar entorno para renderizado de gráficos
-    // Chart.js necesita que los canvas sean visibles para renderizarse correctamente.
-    // Hacemos visibles temporalmente las pestañas ocultas.
-    const tabs = document.querySelectorAll('.wizard-tab-pane');
-    const originalStyles = [];
-
-    tabs.forEach(tab => {
-        originalStyles.push({
-            display: tab.style.display,
-            visibility: tab.style.visibility,
-            position: tab.style.position
-        });
-        // Forzar visibilidad pero sin afectar el layout visual actual drásticamente
-        tab.style.display = 'block';
-        tab.style.visibility = 'hidden';
-        tab.style.position = 'absolute';
-        tab.style.top = '-9999px';
-    });
-
-    // 4. Generar TODOS los gráficos y tablas
     try {
-        // Gráficos de Energía
+        mostrarNotificacion('📄 Generando reporte PDF...', 'info');
+
+        // 2. Asegurar que todos los gráficos estén generados
+        const tabs = document.querySelectorAll('.wizard-tab-pane');
+        const originalStyles = [];
+
+        tabs.forEach(tab => {
+            originalStyles.push({
+                display: tab.style.display,
+                visibility: tab.style.visibility,
+                position: tab.style.position
+            });
+            tab.style.display = 'block';
+            tab.style.visibility = 'hidden';
+            tab.style.position = 'absolute';
+            tab.style.top = '-9999px';
+        });
+
+        // Generar gráficos si no existen
         if (!wizardMonthlyChart) generarGraficaMensualWizard();
         if (!wizardDistributionChart) generarGraficaDistribucionWizard();
-
-        // Gráfico Financiero
         if (!wizardFinancialChart) generarGraficaFinancieraWizard();
 
-        // Tablas
+        // Asegurar que las tablas estén llenas
+        llenarTablaMensualWizard();
         llenarTablaAhorroAcumulado();
 
-        // Asegurar que la tabla mensual esté llena (usando datos guardados)
-        const consumoMensual = window.wizardDatos ? window.wizardDatos.consumo_mensual : parseFloat(document.getElementById('consumo').value);
-        llenarTablaMensual(window.ultimaGeneracionMensual, window.wizardResultados.num_paneles, consumoMensual);
+        // Esperar a que los gráficos se rendericen
+        await new Promise(resolve => setTimeout(resolve, 1000));
 
-    } catch (error) {
-        console.error('Error generando reporte:', error);
-    }
+        // 3. Capturar gráficos como imágenes
+        let imagenGeneracion = '';
+        let imagenDistribucion = '';
+        let imagenFinanciera = '';
 
-    // 5. Restaurar estilos originales y Imprimir
-    // Damos un pequeño delay para asegurar que Chart.js termine de dibujar
-    setTimeout(() => {
-        // Restaurar estilos para que la UI vuelva a la normalidad
+        try {
+            if (wizardMonthlyChart && typeof wizardMonthlyChart.toBase64Image === 'function') {
+                imagenGeneracion = wizardMonthlyChart.toBase64Image('image/png', 1.0);
+            }
+        } catch (e) {
+            console.warn('No se pudo capturar gráfico mensual:', e);
+        }
+
+        try {
+            if (wizardDistributionChart && typeof wizardDistributionChart.toBase64Image === 'function') {
+                imagenDistribucion = wizardDistributionChart.toBase64Image('image/png', 1.0);
+            }
+        } catch (e) {
+            console.warn('No se pudo capturar gráfico de distribución:', e);
+        }
+
+        try {
+            if (wizardFinancialChart && typeof wizardFinancialChart.toBase64Image === 'function') {
+                wizardFinancialChart.update('none');
+                imagenFinanciera = wizardFinancialChart.toBase64Image('image/png', 1.0);
+            }
+        } catch (e) {
+            console.warn('No se pudo capturar gráfico financiero:', e);
+        }
+
+        // 4. Restaurar estilos
         tabs.forEach((tab, index) => {
             tab.style.display = originalStyles[index].display;
             tab.style.visibility = originalStyles[index].visibility;
@@ -212,9 +230,473 @@ function imprimirReporte() {
             tab.style.top = '';
         });
 
-        // Imprimir
-        window.print();
-    }, 800);
+        // 5. Generar PDF y mostrar previsualización
+        const pdfBlob = await generarPDFCompleto(imagenGeneracion, imagenDistribucion, imagenFinanciera);
+        
+        if (pdfBlob) {
+            mostrarPrevisualizacionPDF(pdfBlob);
+        } else {
+            mostrarNotificacion('✅ Reporte PDF generado exitosamente', 'success');
+        }
+
+    } catch (error) {
+        console.error('Error generando PDF:', error);
+        mostrarNotificacion('❌ Error al generar el reporte. Por favor intenta nuevamente.', 'error');
+    }
+}
+
+async function generarPDFCompleto(imagenGeneracion = '', imagenDistribucion = '', imagenFinanciera = '') {
+    // Verificar que jsPDF esté disponible
+    if (typeof window.jspdf === 'undefined' || !window.jspdf.jsPDF) {
+        console.error('jsPDF no está disponible. Verifica que la librería se haya cargado correctamente.');
+        mostrarNotificacion('❌ Error: La librería PDF no está disponible. Por favor recarga la página.', 'error');
+        return null;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('p', 'mm', 'a4');
+    
+    // Cargar logo
+    let logoImage = null;
+    try {
+        // Intentar cargar el logo desde diferentes rutas posibles
+        const logoPaths = ['images/logo360.png', './images/logo360.png', '/images/logo360.png'];
+        for (const path of logoPaths) {
+            try {
+                logoImage = await cargarImagenComoBase64(path);
+                break;
+            } catch (e) {
+                continue;
+            }
+        }
+        if (!logoImage) {
+            console.warn('No se pudo cargar el logo desde ninguna ruta');
+        }
+    } catch (e) {
+        console.warn('No se pudo cargar el logo:', e);
+    }
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 15;
+    let yPos = margin;
+    const lineHeight = 7;
+    const sectionSpacing = 10;
+
+    const resultados = window.wizardResultados;
+    const datos = window.wizardDatos || (typeof wizardData !== 'undefined' ? wizardData : {});
+    const generacionMensual = window.wizardGeneracionMensual || window.ultimaGeneracionMensual;
+    const wizardDataLocal = typeof wizardData !== 'undefined' ? wizardData : {};
+    const moneda = wizardDataLocal.moneda || 'ARS';
+    const simbolo = moneda === 'USD' ? '$' : '$';
+
+    // Función auxiliar para agregar nueva página si es necesario
+    const checkNewPage = (requiredSpace) => {
+        if (yPos + requiredSpace > pageHeight - margin) {
+            doc.addPage();
+            yPos = margin;
+            return true;
+        }
+        return false;
+    };
+
+    // Función para agregar título de sección
+    const addSectionTitle = (title, iconText = '') => {
+        checkNewPage(15);
+        doc.setFontSize(16);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(0, 100, 150);
+        const titleText = iconText ? `${iconText} ${title}` : title;
+        doc.text(titleText, margin, yPos);
+        yPos += lineHeight + 3;
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
+    };
+
+    // Función para agregar tabla de datos
+    const addDataTable = (data) => {
+        checkNewPage(data.length * 6 + 10);
+        data.forEach(([label, value]) => {
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.text(label, margin, yPos);
+            doc.setFont(undefined, 'bold');
+            doc.text(String(value), pageWidth - margin - doc.getTextWidth(String(value)), yPos);
+            yPos += lineHeight;
+        });
+        yPos += 3;
+    };
+
+    // PORTADA
+    doc.setFillColor(0, 100, 150);
+    doc.rect(0, 0, pageWidth, 50, 'F');
+    
+    let hasLogo = false;
+    // Agregar logo si está disponible
+    if (logoImage) {
+        try {
+            const logoWidth = 35;
+            const logoHeight = 12; // Ajustar según proporción del logo
+            const logoX = (pageWidth - logoWidth) / 2;
+            const logoY = 8;
+            doc.addImage(logoImage, 'PNG', logoX, logoY, logoWidth, logoHeight);
+            hasLogo = true;
+        } catch (e) {
+            console.warn('Error agregando logo:', e);
+            hasLogo = false;
+        }
+    }
+    
+    doc.setTextColor(255, 255, 255);
+    if (!hasLogo) {
+        // Solo mostrar título si no hay logo
+        doc.setFontSize(24);
+        doc.setFont(undefined, 'bold');
+        doc.text('Solar360', pageWidth / 2, 25, { align: 'center' });
+    }
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'normal');
+    doc.text('Reporte de Simulación Solar', pageWidth / 2, hasLogo ? 25 : 35, { align: 'center' });
+
+    yPos = 60;
+    doc.setTextColor(0, 0, 0);
+    doc.setFontSize(10);
+    const fecha = new Date();
+    const fechaFormateada = fecha.toLocaleDateString('es-AR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+    doc.text(`Fecha de generación: ${fechaFormateada}`, margin, yPos);
+    yPos += sectionSpacing * 2;
+
+    // 1. DATOS DEL PROYECTO
+    addSectionTitle('Datos del Proyecto');
+    const ubicacionTexto = datos.ubicacion || wizardDataLocal.ubicacionNombre || 'Ubicación seleccionada';
+    const coordenadas = wizardDataLocal.lat && wizardDataLocal.lon
+        ? `${wizardDataLocal.lat.toFixed(4)}°, ${wizardDataLocal.lon.toFixed(4)}°`
+        : 'No disponible';
+    const anguloSeleccionado = wizardDataLocal.angulo || 'No especificado';
+    
+    addDataTable([
+        ['Ubicación', ubicacionTexto],
+        ['Coordenadas', coordenadas],
+        ['Inclinación de paneles', `${anguloSeleccionado}°`],
+        ['Consumo mensual', `${(datos.consumo_mensual || wizardDataLocal.consumoMensual || 0).toFixed(0)} kWh`],
+        ['Tarifa eléctrica', `${simbolo}${formatearNumero(datos.precio_kwh || wizardDataLocal.precioKwh || 0, moneda)}/kWh`]
+    ]);
+
+    // 2. SISTEMA RECOMENDADO
+    addSectionTitle('Sistema Recomendado');
+    const tipoPanel = wizardDataLocal.tipoPanel === 'premium' ? 'Panel Premium 450W' : 'Panel Estándar 190W';
+    addDataTable([
+        ['Tipo de panel', tipoPanel],
+        ['Cantidad de paneles', `${resultados.num_paneles}`],
+        ['Potencia instalada', `${resultados.potencia_total_kw.toFixed(2)} kW`],
+        ['Generación anual', `${formatearNumero(resultados.energia_anual_total || resultados.generacion_anual || 0, moneda)} kWh`],
+        ['Generación mensual promedio', `${formatearNumero((resultados.energia_anual_total || 0) / 12, moneda)} kWh`],
+        ['Cobertura del consumo', `${resultados.cobertura.toFixed(1)}%`]
+    ]);
+
+    // 3. ANÁLISIS FINANCIERO
+    addSectionTitle('Análisis Financiero');
+    addDataTable([
+        ['Inversión total estimada', `${simbolo}${formatearNumero(resultados.costo_total || resultados.inversion_total || 0, moneda)}`],
+        ['Costo base (BOS)', `${simbolo}${formatearNumero(resultados.costo_base || 0, moneda)}`],
+        ['Costo por panel', `${simbolo}${formatearNumero(resultados.costo_por_panel || resultados.costo_panel || 0, moneda)}`],
+        [`Total paneles (${resultados.num_paneles} paneles)`, `${simbolo}${formatearNumero(resultados.costo_paneles || 0, moneda)}`],
+        ['Ahorro mensual', `${simbolo}${formatearNumero(resultados.ahorro_mensual || 0, moneda)}`],
+        ['Ahorro anual', `${simbolo}${formatearNumero(resultados.ahorro_anual || 0, moneda)}`],
+        ['Retorno de inversión (ROI)', resultados.roi_anos === Infinity || isNaN(resultados.roi_anos) ? 'N/A' : `${resultados.roi_anos.toFixed(1)} años`],
+        ['Ahorro estimado a 25 años', `${simbolo}${formatearNumero((resultados.ahorro_anual || 0) * 25, moneda)}`]
+    ]);
+
+    // 4. IMPACTO AMBIENTAL (SECCIÓN AMPLIADA)
+    addSectionTitle('Impacto Ambiental');
+    
+    const co2Anual = resultados.co2_anual || 0;
+    const co225Anos = co2Anual * 25;
+    const co2Toneladas = co225Anos / 1000;
+    
+    // Equivalencias ambientales
+    const arbolesEquiv = Math.round(co225Anos / 20); // 1 árbol ≈ 20 kg CO₂/año
+    const autosEquiv = Math.round(co225Anos / 4200); // 1 auto promedio ≈ 4.2 toneladas CO₂/año
+    const vuelosEquiv = Math.round(co2Toneladas / 0.5); // 1 vuelo Buenos Aires-Madrid ≈ 0.5 toneladas CO₂
+    const hogaresEquiv = Math.round(co2Toneladas / 4.5); // 1 hogar promedio ≈ 4.5 toneladas CO₂/año
+    
+    addDataTable([
+        ['CO2 evitado por año', `${formatearNumero(co2Anual.toFixed(0), moneda)} kg`],
+        ['CO2 evitado en 25 años', `${formatearNumero(co225Anos.toFixed(0), moneda)} kg (${co2Toneladas.toFixed(2)} toneladas)`],
+        ['', ''], // Separador
+        ['Equivalente a árboles plantados', `~${formatearNumero(arbolesEquiv, moneda)} árboles`],
+        ['Equivalente a autos retirados de circulación', `~${formatearNumero(autosEquiv, moneda)} autos por 1 año`],
+        ['Equivalente a vuelos evitados', `~${formatearNumero(vuelosEquiv, moneda)} vuelos Buenos Aires-Madrid`],
+        ['Equivalente a hogares neutralizados', `~${formatearNumero(hogaresEquiv, moneda)} hogares por 1 año`]
+    ]);
+
+    // Texto adicional sobre impacto ambiental
+    checkNewPage(20);
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'italic');
+    doc.setTextColor(100, 100, 100);
+    doc.text('Nota: Las equivalencias son aproximadas y basadas en promedios internacionales.', margin, yPos);
+    yPos += lineHeight;
+    doc.text('El impacto real puede variar según la fuente de energía de la red eléctrica local.', margin, yPos);
+    yPos += sectionSpacing;
+
+    // 5. DATOS CLIMÁTICOS MENSUALES
+    addSectionTitle('Datos Climáticos Mensuales');
+    checkNewPage(80);
+    
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const mesesCompletos = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    // Encabezado de tabla
+    doc.setFontSize(9);
+    doc.setFont(undefined, 'bold');
+    doc.text('Mes', margin, yPos);
+    doc.text('PSH', margin + 30, yPos);
+    doc.text('Temp.', margin + 45, yPos);
+    doc.text('Generación', margin + 60, yPos);
+    doc.text('Consumo', margin + 85, yPos);
+    doc.text('Balance', margin + 110, yPos);
+    yPos += lineHeight;
+    
+    doc.setFont(undefined, 'normal');
+    const consumoMensual = datos.consumo_mensual || wizardDataLocal.consumoMensual || 0;
+    let generacionTotal = 0;
+    let consumoTotal = 0;
+    
+    meses.forEach((mes, index) => {
+        checkNewPage(8);
+        // La estructura de generacionMensual puede ser un array de objetos con energia_mensual o un array de números
+        let generacion = 0;
+        if (generacionMensual && generacionMensual[index]) {
+            if (typeof generacionMensual[index] === 'object' && generacionMensual[index].energia_mensual) {
+                generacion = generacionMensual[index].energia_mensual * (resultados.num_paneles || 1);
+            } else {
+                generacion = generacionMensual[index] * (resultados.num_paneles || 1);
+            }
+        }
+        const consumo = consumoMensual;
+        const balance = generacion - consumo;
+        generacionTotal += generacion;
+        consumoTotal += consumo;
+        
+        doc.text(mes, margin, yPos);
+        doc.text(datos.psh && datos.psh[index] ? datos.psh[index].toFixed(2) : '-', margin + 30, yPos);
+        doc.text(datos.temperatura && datos.temperatura[index] ? `${datos.temperatura[index].toFixed(1)}°C` : '-', margin + 45, yPos);
+        doc.text(generacion.toFixed(0), margin + 60, yPos);
+        doc.text(consumo.toFixed(0), margin + 85, yPos);
+        doc.setFont(undefined, balance >= 0 ? 'bold' : 'normal');
+        if (balance >= 0) {
+            doc.setTextColor(0, 150, 0);
+        } else {
+            doc.setTextColor(200, 0, 0);
+        }
+        doc.text(balance >= 0 ? `+${balance.toFixed(0)}` : balance.toFixed(0), margin + 110, yPos);
+        doc.setFont(undefined, 'normal');
+        doc.setTextColor(0, 0, 0);
+        yPos += lineHeight;
+    });
+    
+    // Totales
+    checkNewPage(10);
+    doc.setFont(undefined, 'bold');
+    doc.text('TOTAL', margin, yPos);
+    doc.text(`${(datos.psh ? datos.psh.reduce((a, b) => a + b, 0) / 12 : 0).toFixed(2)}`, margin + 30, yPos);
+    doc.text(`${(datos.temperatura ? datos.temperatura.reduce((a, b) => a + b, 0) / 12 : 0).toFixed(1)}°C`, margin + 45, yPos);
+    doc.text(generacionTotal.toFixed(0), margin + 60, yPos);
+    doc.text(consumoTotal.toFixed(0), margin + 85, yPos);
+    const balanceTotal = generacionTotal - consumoTotal;
+    if (balanceTotal >= 0) {
+        doc.setTextColor(0, 150, 0);
+    } else {
+        doc.setTextColor(200, 0, 0);
+    }
+    doc.text(balanceTotal >= 0 ? `+${balanceTotal.toFixed(0)}` : balanceTotal.toFixed(0), margin + 110, yPos);
+    doc.setFont(undefined, 'normal');
+    doc.setTextColor(0, 0, 0);
+    yPos += sectionSpacing * 2;
+
+    // 6. ANÁLISIS ESTACIONAL
+    addSectionTitle('Análisis por Estación');
+    checkNewPage(30);
+    
+    const estaciones = [
+        { nombre: 'Verano (Dic-Feb)', indices: [11, 0, 1] },
+        { nombre: 'Otoño (Mar-May)', indices: [2, 3, 4] },
+        { nombre: 'Invierno (Jun-Ago)', indices: [5, 6, 7] },
+        { nombre: 'Primavera (Sep-Nov)', indices: [8, 9, 10] }
+    ];
+    
+    estaciones.forEach(est => {
+        checkNewPage(8);
+        const generacionEst = est.indices.reduce((sum, idx) => {
+            if (generacionMensual && generacionMensual[idx]) {
+                if (typeof generacionMensual[idx] === 'object' && generacionMensual[idx].energia_mensual) {
+                    return sum + (generacionMensual[idx].energia_mensual * (resultados.num_paneles || 1));
+                } else {
+                    return sum + (generacionMensual[idx] * (resultados.num_paneles || 1));
+                }
+            }
+            return sum;
+        }, 0);
+        const consumoEst = consumoMensual * 3;
+        const porcentaje = consumoMensual > 0 ? (generacionEst / consumoEst * 100) : 0;
+        
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.text(est.nombre, margin, yPos);
+        yPos += lineHeight;
+        doc.setFont(undefined, 'normal');
+        doc.text(`  Generación: ${generacionEst.toFixed(0)} kWh`, margin + 5, yPos);
+        yPos += lineHeight;
+        doc.text(`  Consumo: ${consumoEst.toFixed(0)} kWh`, margin + 5, yPos);
+        yPos += lineHeight;
+        doc.text(`  Cobertura: ${porcentaje.toFixed(1)}%`, margin + 5, yPos);
+        yPos += lineHeight;
+    });
+    yPos += sectionSpacing;
+
+    // 7. GRÁFICOS (si están disponibles)
+    if (imagenGeneracion) {
+        addSectionTitle('Generación vs Consumo Mensual');
+        checkNewPage(80);
+        try {
+            const imgWidth = pageWidth - 2 * margin;
+            const imgHeight = (imgWidth * 0.6); // Mantener proporción
+            doc.addImage(imagenGeneracion, 'PNG', margin, yPos, imgWidth, imgHeight);
+            yPos += imgHeight + sectionSpacing;
+        } catch (e) {
+            console.warn('Error agregando gráfico de generación:', e);
+        }
+    }
+
+    if (imagenDistribucion) {
+        addSectionTitle('Distribución de Energía (Ley de Generación Distribuida)');
+        checkNewPage(80);
+        try {
+            const imgWidth = pageWidth - 2 * margin;
+            const imgHeight = (imgWidth * 0.6);
+            doc.addImage(imagenDistribucion, 'PNG', margin, yPos, imgWidth, imgHeight);
+            yPos += imgHeight + sectionSpacing;
+        } catch (e) {
+            console.warn('Error agregando gráfico de distribución:', e);
+        }
+    }
+
+    if (imagenFinanciera) {
+        addSectionTitle('Análisis Financiero (10 años)');
+        checkNewPage(80);
+        try {
+            const imgWidth = pageWidth - 2 * margin;
+            const imgHeight = (imgWidth * 0.6);
+            doc.addImage(imagenFinanciera, 'PNG', margin, yPos, imgWidth, imgHeight);
+            yPos += imgHeight + sectionSpacing;
+        } catch (e) {
+            console.warn('Error agregando gráfico financiero:', e);
+        }
+    }
+
+    // 8. ESPECIFICACIONES TÉCNICAS
+    addSectionTitle('Especificaciones Técnicas');
+    checkNewPage(30);
+    doc.setFontSize(10);
+    const performanceRatio = (typeof MODELO_CLUSTER !== 'undefined' && MODELO_CLUSTER.constantes && MODELO_CLUSTER.constantes.performance_ratio) 
+        ? MODELO_CLUSTER.constantes.performance_ratio 
+        : 0.75;
+    doc.text(`• Eficiencia del sistema: ${(performanceRatio * 100).toFixed(0)}%`, margin, yPos);
+    yPos += lineHeight;
+    doc.text('• Degradación anual estimada: 0.5%', margin, yPos);
+    yPos += lineHeight;
+    doc.text('• Vida útil esperada del sistema: 25-30 años', margin, yPos);
+    yPos += lineHeight;
+    doc.text('• Garantía de rendimiento: 25 años', margin, yPos);
+    yPos += lineHeight;
+    doc.text('• Mantenimiento recomendado: Limpieza semestral', margin, yPos);
+    yPos += sectionSpacing * 2;
+
+    // FOOTER
+    checkNewPage(20);
+    doc.setFontSize(8);
+    doc.setTextColor(100, 100, 100);
+    doc.setFont(undefined, 'italic');
+    doc.text('Solar360 • La Plata, Buenos Aires • info@solar360.com.ar', pageWidth / 2, yPos, { align: 'center' });
+    yPos += lineHeight;
+    doc.text('Este reporte es informativo. Se recomienda evaluación técnica en sitio antes de realizar la instalación.', pageWidth / 2, yPos, { align: 'center' });
+
+    // Retornar el PDF como blob para previsualización
+    const pdfBlob = doc.output('blob');
+    return pdfBlob;
+}
+
+// Función para cargar imagen como base64
+function cargarImagenComoBase64(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            try {
+                const dataURL = canvas.toDataURL('image/png');
+                resolve(dataURL);
+            } catch (e) {
+                reject(e);
+            }
+        };
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+// Función para mostrar previsualización del PDF usando la vista previa del navegador
+function mostrarPrevisualizacionPDF(pdfBlob) {
+    // Guardar el blob globalmente para descarga
+    window.pdfBlobActual = pdfBlob;
+    
+    // Crear URL del blob
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+    
+    // Abrir en nueva ventana con la vista previa del navegador
+    const previewWindow = window.open(pdfUrl, '_blank');
+    
+    if (!previewWindow) {
+        // Si el popup fue bloqueado, mostrar notificación y descargar directamente
+        mostrarNotificacion('⚠️ Por favor permite ventanas emergentes para ver la previsualización, o descarga directamente el PDF.', 'warning');
+        descargarPDFDesdePreview();
+    } else {
+        // Mostrar notificación con opción de descargar
+        mostrarNotificacion('📄 Vista previa abierta. Puedes descargar el PDF desde el botón de descarga en la barra del navegador.', 'info');
+        
+        // Limpiar URL después de un tiempo
+        setTimeout(() => {
+            // No revocar inmediatamente para que el navegador pueda cargar el PDF
+        }, 1000);
+    }
+}
+
+function descargarPDFDesdePreview() {
+    if (window.pdfBlobActual) {
+        const fecha = new Date();
+        const nombreArchivo = `Reporte_Solar360_${fecha.getFullYear()}${String(fecha.getMonth() + 1).padStart(2, '0')}${String(fecha.getDate()).padStart(2, '0')}.pdf`;
+        const url = URL.createObjectURL(window.pdfBlobActual);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        mostrarNotificacion('✅ Reporte PDF descargado exitosamente', 'success');
+    }
 }
 
 // ============================================
@@ -278,11 +760,26 @@ function redimensionarGraficos() {
 }
 
 function initializeApp() {
+    console.log('🚀 Inicializando aplicación...');
+    
     // Event listeners
-    document.getElementById('modeUbicacion').addEventListener('click', seleccionarModoUbicacion);
-    document.getElementById('modeManual').addEventListener('click', seleccionarModoManual);
-    document.getElementById('openMapButton').addEventListener('click', abrirMapa);
-    document.getElementById('simulatorForm').addEventListener('submit', calcularDimensionamiento);
+    const modeUbicacion = document.getElementById('modeUbicacion');
+    const modeManual = document.getElementById('modeManual');
+    const openMapButton = document.getElementById('openMapButton');
+    const simulatorForm = document.getElementById('simulatorForm');
+    
+    if (modeUbicacion) {
+        modeUbicacion.addEventListener('click', seleccionarModoUbicacion);
+    }
+    if (modeManual) {
+        modeManual.addEventListener('click', seleccionarModoManual);
+    }
+    if (openMapButton) {
+        openMapButton.addEventListener('click', abrirMapa);
+    }
+    if (simulatorForm) {
+        simulatorForm.addEventListener('submit', calcularDimensionamiento);
+    }
 
     // Modal Simulador
     const btnAbrirSimulador = document.getElementById('btnAbrirSimulador');
@@ -290,8 +787,16 @@ function initializeApp() {
     const modalSimulador = document.getElementById('modalSimulador');
     const navSimulador = document.getElementById('navSimulador');
 
+    console.log('🔍 Buscando botón btnAbrirSimulador:', btnAbrirSimulador);
     if (btnAbrirSimulador) {
-        btnAbrirSimulador.addEventListener('click', abrirModalSimulador);
+        btnAbrirSimulador.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('🖱️ Click en botón Simulación Personalizada');
+            abrirModalSimulador();
+        });
+        console.log('✅ Event listener agregado al botón');
+    } else {
+        console.error('❌ No se encontró el botón btnAbrirSimulador');
     }
 
     // Abrir modal desde el menú de navegación
@@ -390,13 +895,22 @@ let currentWizardStep = 0; // Paso 0 = Introducción
 const totalWizardSteps = 6; // 0-5 (6 pasos totales: intro, ubicación, factura, dimensionamiento, ángulo, resultados)
 
 function abrirModalSimulador() {
+    console.log('🔓 Intentando abrir modal simulador...');
     const modal = document.getElementById('modalSimulador');
     if (modal) {
+        console.log('✅ Modal encontrado, abriendo...');
         modal.classList.add('active');
         document.body.style.overflow = 'hidden'; // Prevenir scroll del body
         // Reiniciar al paso 0 (introducción) cuando se abre el modal
         currentWizardStep = 0;
-        actualizarWizardUI();
+        if (typeof actualizarWizardUI === 'function') {
+            actualizarWizardUI();
+        } else {
+            console.error('❌ actualizarWizardUI no está definida');
+        }
+        console.log('✅ Modal abierto');
+    } else {
+        console.error('❌ No se encontró el elemento modalSimulador');
     }
 }
 
