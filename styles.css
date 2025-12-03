@@ -146,6 +146,13 @@ button,
     gap: 2rem;
 }
 
+.nav-container .nav-menu {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
 .logo {
     display: flex;
     align-items: center;
@@ -177,8 +184,9 @@ button,
 .nav-menu {
     display: flex;
     list-style: none;
-    gap: 2rem;
+    gap: 1.5rem;
     margin: 0;
+    margin-left: auto;
 }
 
 .nav-link {
@@ -313,8 +321,8 @@ button,
 .hero {
     min-height: 100vh;
     display: flex;
-    align-items: center;
-    padding: 140px 0 80px;
+    align-items: flex-start;
+    padding: 120px 0 80px;
     position: relative;
     overflow: hidden;
     background-color: #f5f7fa;
@@ -346,11 +354,39 @@ button,
 
 /* Hero Minimalista */
 .hero-content-minimal {
-    text-align: center;
+    text-align: left;
     max-width: 900px;
-    margin: 0 auto;
+    margin: 0;
+    margin-left: 0;
+    margin-top: 10.5rem;
+    padding-left: 0;
     position: relative;
     z-index: 10;
+}
+
+.hero .container {
+    padding-left: 1rem;
+    padding-right: 2rem;
+}
+
+@media (min-width: 768px) {
+    .hero .container {
+        padding-left: 1rem;
+        padding-right: 2rem;
+    }
+}
+
+@media (min-width: 1200px) {
+    .hero .container {
+        padding-left: 0;
+        padding-right: 2rem;
+        max-width: 1400px;
+    }
+    
+    .hero-content-minimal {
+        margin-left: -35rem;
+        padding-left: 0;
+    }
 }
 
 .hero-title-minimal,
@@ -365,39 +401,213 @@ button,
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
     letter-spacing: -1px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.hero-title-yellow {
+    color: var(--primary-color);
+    text-shadow: 2px 2px 8px rgba(253, 184, 19, 0.5);
+}
+
+.hero-title-white {
+    color: #ffffff;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .hero-subtitle-minimal {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     font-size: 1.25rem;
     color: #ffffff;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
     line-height: 1.6;
     text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.3);
     font-weight: 400;
 }
 
+.hero-buttons {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
 .btn-hero-minimal {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     display: inline-block;
-    padding: 1.25rem 3rem;
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
-    color: white;
-    border: 2px solid var(--primary-color);
+    padding: 1.5rem 3.5rem;
     border-radius: 12px;
-    font-size: 1rem;
+    font-size: 1.15rem;
     font-weight: 700;
     cursor: pointer;
     transition: all 0.3s ease;
     text-decoration: none;
+    border: none;
+    text-align: center;
+}
+
+.btn-hero-primary {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: white;
+    border: 2px solid var(--primary-color);
     box-shadow: 0 4px 15px rgba(253, 184, 19, 0.3);
 }
 
-.btn-hero-minimal:hover {
+.btn-hero-primary:hover {
     background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary-color) 100%);
     color: white;
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(253, 184, 19, 0.4);
+}
+
+.btn-hero-secondary {
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-dark);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.btn-hero-secondary:hover {
+    background: rgba(255, 255, 255, 1);
+    color: var(--text-dark);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+}
+
+/* Cards informativos en Hero */
+.hero-info-cards {
+    position: absolute;
+    bottom: 4rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 10;
+}
+
+.hero-info-card {
+    padding: 1.75rem 2rem;
+    border-radius: var(--border-radius);
+    backdrop-filter: blur(20px);
+    box-shadow: var(--shadow-lg);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    min-width: 300px;
+    transition: var(--transition);
+}
+
+.hero-info-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.hero-card-white:hover {
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.hero-card-dark:hover {
+    border-color: var(--primary-color);
+}
+
+.hero-card-white {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.hero-card-dark {
+    background: rgba(26, 32, 44, 0.9);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.hero-card-number {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1;
+    letter-spacing: -1px;
+    width: 100%;
+}
+
+.hero-card-primary {
+    color: var(--primary-color);
+    text-shadow: 0 2px 8px rgba(253, 184, 19, 0.3);
+}
+
+.hero-card-white-text {
+    color: var(--text-white);
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hero-card-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    width: 100%;
+}
+
+.hero-card-label {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    line-height: 1.4;
+}
+
+.hero-card-white .hero-card-label {
+    color: rgba(255, 255, 255, 0.95);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.hero-card-dark .hero-card-label {
+    color: rgba(255, 255, 255, 0.95);
+}
+
+.hero-card-desc {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    color: var(--text-light);
+}
+
+.hero-card-dark .hero-card-desc {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+@media (max-width: 968px) {
+    .hero-info-cards {
+        position: relative;
+        bottom: auto;
+        right: auto;
+        margin-top: 3rem;
+        flex-direction: row;
+        justify-content: flex-start;
+    }
+    
+    .hero-info-card {
+        min-width: 240px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-info-cards {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .hero-info-card {
+        min-width: 100%;
+    }
+    
+    .hero-card-number {
+        font-size: 2.5rem;
+        min-width: 60px;
+    }
 }
 
 @media (max-width: 768px) {
@@ -408,6 +618,8 @@ button,
     .hero .hero-title-minimal {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
         font-size: 3rem;
+        flex-direction: column;
+        gap: 0.25rem;
     }
 
     .hero-subtitle-minimal {
@@ -415,9 +627,16 @@ button,
         margin-bottom: 2rem;
     }
 
+    .hero-buttons {
+        flex-direction: column;
+        gap: 1rem;
+        width: 100%;
+    }
+
     .btn-hero-minimal {
         padding: 1rem 2rem;
         font-size: 0.95rem;
+        width: 100%;
     }
 }
 
@@ -3014,121 +3233,255 @@ section:last-of-type::after {
     z-index: 10;
 }
 
-.contact-minimal {
-    max-width: 800px;
+/* Contenedor principal de dos columnas */
+.contact-container {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 4rem;
+    max-width: 1200px;
     margin: 0 auto;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
-    padding: 4rem 3rem;
-    border-radius: 0;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    align-items: start;
+}
+
+/* Columna Izquierda: Información de Contacto */
+.contact-info-column {
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
 }
 
 .contact-title {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 3rem;
+    font-size: 2.5rem;
     font-weight: 900;
-    margin-bottom: 3rem;
     color: var(--text-dark);
     letter-spacing: -0.5px;
+    margin: 0;
 }
 
-.contact-info-minimal {
-    display: flex;
-    justify-content: center;
-    gap: 3rem;
-    margin-bottom: 4rem;
-    flex-wrap: wrap;
-}
-
-.contact-item {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 1rem;
-    font-weight: 400;
+.contact-subtitle {
+    font-size: 1.1rem;
     color: var(--text-light);
-    text-decoration: none;
-    transition: color 0.3s ease;
+    line-height: 1.6;
+    margin: 0;
 }
 
-.contact-item:hover {
-    color: var(--text-dark);
-}
-
-.contact-form-minimal {
+.contact-info-cards {
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
 }
 
-.contact-form-minimal input,
-.contact-form-minimal textarea {
+.contact-info-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    transition: var(--transition);
+}
+
+.contact-info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    border-color: var(--primary-color);
+}
+
+.contact-info-icon {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    border-radius: 12px;
+    color: white;
+    font-size: 1.25rem;
+}
+
+.contact-info-content {
+    flex: 1;
+}
+
+.contact-info-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0 0 0.5rem 0;
+}
+
+.contact-info-value {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    text-decoration: none;
+    display: block;
+    transition: color 0.3s ease;
+}
+
+.contact-info-value:hover {
+    color: var(--primary-color);
+}
+
+/* Columna Derecha: Formulario */
+.contact-form-column {
+    display: flex;
+    align-items: stretch;
+}
+
+.contact-form-wrapper {
     width: 100%;
-    padding: 1rem 1.5rem;
-    border: 1px solid #e0e0e0;
-    border-radius: 0;
+    padding: 2.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.contact-form-title {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--text-dark);
+    margin: 0 0 0.5rem 0;
+}
+
+.contact-form-subtitle {
+    font-size: 0.95rem;
+    color: var(--text-light);
+    margin: 0 0 2rem 0;
+}
+
+.contact-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: 2px solid #e8ecef;
+    border-radius: 8px;
     font-size: 1rem;
     font-family: inherit;
-    transition: border-color 0.3s ease;
+    transition: var(--transition);
     background: #ffffff;
+    color: var(--text-dark);
 }
 
-.contact-form-minimal input:focus,
-.contact-form-minimal textarea:focus {
+.form-input:focus,
+.form-textarea:focus {
     outline: none;
-    border-color: var(--text-dark);
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(253, 184, 19, 0.1);
 }
 
-.contact-form-minimal textarea {
+.form-textarea {
     resize: vertical;
     min-height: 120px;
+    font-family: inherit;
 }
 
-.btn-contact-minimal {
-    padding: 1rem 2.5rem;
-    background: var(--text-dark);
-    color: white;
-    border: none;
-    border-radius: 0;
+.btn-contact-submit {
+    margin-top: 0.5rem;
+    padding: 1rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
     font-size: 1rem;
-    font-weight: 400;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    align-self: center;
+    font-weight: 700;
+    border-radius: 8px;
+    transition: var(--transition);
 }
 
-.btn-contact-minimal:hover {
-    background: #1a1a1a;
+.btn-contact-submit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(253, 184, 19, 0.3);
 }
 
-/* Responsive contacto minimalista */
+.btn-contact-submit i {
+    font-size: 1rem;
+}
+
+/* Responsive contacto */
+@media (max-width: 968px) {
+    .contact-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+
+    .contact-info-column {
+        order: 2;
+    }
+
+    .contact-form-column {
+        order: 1;
+    }
+}
+
 @media (max-width: 768px) {
     .contact-section {
         padding: 60px 0;
     }
 
-    .contact-minimal {
-        padding: 3rem 2rem;
+    .contact-container {
+        gap: 2rem;
     }
 
     .contact-title {
         font-size: 2rem;
-        margin-bottom: 2rem;
     }
 
-    .contact-info-minimal {
-        flex-direction: column;
-        gap: 1.5rem;
-        margin-bottom: 3rem;
+    .contact-subtitle {
+        font-size: 1rem;
     }
 
-    .contact-item {
-        font-size: 0.95rem;
+    .contact-info-card {
+        padding: 1.25rem;
     }
 
-    .contact-form-minimal input,
-    .contact-form-minimal textarea {
-        padding: 0.875rem 1.25rem;
+    .contact-info-icon {
+        width: 40px;
+        height: 40px;
+        min-width: 40px;
+        font-size: 1.1rem;
+    }
+
+    .contact-form-wrapper {
+        padding: 2rem 1.5rem;
+    }
+
+    .contact-form-title {
+        font-size: 1.5rem;
+    }
+
+    .form-input,
+    .form-textarea {
+        padding: 0.875rem 1rem;
         font-size: 0.95rem;
     }
 }

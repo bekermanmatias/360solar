@@ -37,8 +37,9 @@
                     <li><a href="#inicio" class="nav-link active">Inicio</a></li>
                     <li><a href="#simulador" class="nav-link" id="navSimulador">Simulador</a></li>
                     <li><a href="sobre-nosotros.html" class="nav-link">Sobre Nosotros</a></li>
+                    <li><a href="#productos" class="nav-link">Tecnología</a></li>
+                    <li><a href="#contacto" class="nav-link">Contacto</a></li>
                 </ul>
-                <a href="#contacto" class="btn btn-primary">Contacto</a>
                 <button class="mobile-menu-toggle" aria-label="Toggle menu">
                     <span></span>
                     <span></span>
@@ -55,9 +56,31 @@
         </video>
         <div class="container">
             <div class="hero-content-minimal">
-                <h1 class="hero-title-minimal">Energía Inteligente.</h1>
-                <p class="hero-subtitle-minimal">Ingeniería de precisión para la autonomía energética residencial.</p>
-                <button type="button" id="btnAbrirSimulador" class="btn-hero-minimal">Simulación Personalizada </button>
+                <h1 class="hero-title-minimal">
+                    <span class="hero-title-yellow">Crea tu propia energia,</span>
+                    <span class="hero-title-white">limpia y renovable.</span>
+                </h1>
+                <p class="hero-subtitle-minimal">Instalamos sistemas de última generación para que reduzcas tus costos, aumentando el valor de tu propiedad y cuidando el medio ambiente.</p>
+                <div class="hero-buttons">
+                    <button type="button" id="btnAbrirSimulador" class="btn-hero-minimal btn-hero-primary">Calcular ahorro</button>
+                    <a href="#contacto" class="btn-hero-minimal btn-hero-secondary">Contacto</a>
+                </div>
+            </div>
+            
+            <!-- Cards informativos -->
+            <div class="hero-info-cards">
+                <div class="hero-info-card hero-card-white">
+                    <div class="hero-card-number hero-card-primary">Elegi tu %</div>
+                    <div class="hero-card-text">
+                        <div class="hero-card-label">de Autonomía Energetica.</div>
+                    </div>
+                </div>
+                <div class="hero-info-card hero-card-dark">
+                    <div class="hero-card-number hero-card-white-text">25 Años</div>
+                    <div class="hero-card-text">
+                        <div class="hero-card-label">Vida útil garantizada.</div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -80,6 +103,7 @@
     <section id="productos" class="products-fullwidth-section">
         <div class="section-header center" style="padding-top: 4rem; padding-bottom: -.2rem;">
             <h2 class="section-title">Infraestructura</h2>
+            <p class="section-subtitle">Sistemas de generación solar de grado industrial para autonomía energética residencial</p>
         </div>
 
         <div class="products-full-grid">
@@ -170,23 +194,79 @@
     <!-- Contacto -->
     <section id="contacto" class="contact-section">
         <div class="container">
-            <div class="contact-minimal">
-                <h2 class="contact-title">Contacto</h2>
+            <div class="contact-container">
+                <!-- Columna Izquierda: Información de Contacto -->
+                <div class="contact-info-column">
+                    <h2 class="contact-title">Contacto</h2>
+                    <p class="contact-subtitle">Estamos aquí para ayudarte a dar el paso hacia la energía solar</p>
+                    
+                    <div class="contact-info-cards">
+                        <div class="contact-info-card">
+                            <div class="contact-info-icon">
+                                <i class="fas fa-envelope"></i>
+                            </div>
+                            <div class="contact-info-content">
+                                <h3 class="contact-info-label">Email</h3>
+                                <a href="mailto:info@solar360.com.ar" class="contact-info-value">info@solar360.com.ar</a>
+                            </div>
+                        </div>
 
-                <div class="contact-info-minimal">
-                    <a href="mailto:info@solar360.com.ar" class="contact-item">info@solar360.com.ar</a>
-                    <a href="tel:+541112345678" class="contact-item">+54 11 1234-5678</a>
-                    <span class="contact-item">La Plata, Buenos Aires</span>
+                        <div class="contact-info-card">
+                            <div class="contact-info-icon">
+                                <i class="fas fa-phone"></i>
+                            </div>
+                            <div class="contact-info-content">
+                                <h3 class="contact-info-label">Teléfono</h3>
+                                <a href="tel:+541112345678" class="contact-info-value">+54 11 1234-5678</a>
+                            </div>
+                        </div>
+
+                        <div class="contact-info-card">
+                            <div class="contact-info-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <div class="contact-info-content">
+                                <h3 class="contact-info-label">Ubicación</h3>
+                                <span class="contact-info-value">La Plata, Buenos Aires</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <form class="contact-form-minimal"
-                    onsubmit="event.preventDefault(); alert('¡Gracias! Te contactaremos pronto.');">
-                    <input type="text" required placeholder="Nombre">
-                    <input type="email" required placeholder="Email">
-                    <input type="tel" required placeholder="Teléfono">
-                    <textarea rows="4" placeholder="Mensaje"></textarea>
-                    <button type="submit" class="btn-contact-minimal">Enviar</button>
-                </form>
+                <!-- Columna Derecha: Formulario -->
+                <div class="contact-form-column">
+                    <div class="contact-form-wrapper">
+                        <h3 class="contact-form-title">Envíanos un Mensaje</h3>
+                        <p class="contact-form-subtitle">Completa el formulario y nos pondremos en contacto contigo</p>
+                        
+                        <form class="contact-form" onsubmit="event.preventDefault(); alert('¡Gracias! Te contactaremos pronto.');">
+                            <div class="form-group">
+                                <label for="contactName" class="form-label">Nombre</label>
+                                <input type="text" id="contactName" name="name" required class="form-input" placeholder="Tu nombre completo">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contactEmail" class="form-label">Email</label>
+                                <input type="email" id="contactEmail" name="email" required class="form-input" placeholder="tu@email.com">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contactPhone" class="form-label">Teléfono</label>
+                                <input type="tel" id="contactPhone" name="phone" required class="form-input" placeholder="+54 11 1234-5678">
+                            </div>
+
+                            <div class="form-group">
+                                <label for="contactMessage" class="form-label">Mensaje</label>
+                                <textarea id="contactMessage" name="message" rows="5" required class="form-textarea" placeholder="Cuéntanos sobre tu proyecto o consulta..."></textarea>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-contact-submit">
+                                <span>Enviar Mensaje</span>
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
