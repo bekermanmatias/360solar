@@ -140,6 +140,84 @@ let ubicacionActual = {
 };
 
 // ============================================
+// Función para Imprimir Reporte PDF
+// ============================================
+
+// ============================================
+// Función para Imprimir Reporte PDF
+// ============================================
+
+function imprimirReporte() {
+    // 1. Validar que existan resultados
+    if (!window.wizardResultados || !window.ultimaGeneracionMensual) {
+        alert('Calcula primero el dimensionamiento antes de imprimir');
+        return;
+    }
+
+    // 2. Establecer fecha de impresión
+    const dateElement = document.getElementById('printDate');
+    if (dateElement) {
+        const now = new Date();
+        const options = { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' };
+        dateElement.textContent = now.toLocaleDateString('es-AR', options);
+    }
+
+    // 3. Preparar entorno para renderizado de gráficos
+    // Chart.js necesita que los canvas sean visibles para renderizarse correctamente.
+    // Hacemos visibles temporalmente las pestañas ocultas.
+    const tabs = document.querySelectorAll('.wizard-tab-pane');
+    const originalStyles = [];
+
+    tabs.forEach(tab => {
+        originalStyles.push({
+            display: tab.style.display,
+            visibility: tab.style.visibility,
+            position: tab.style.position
+        });
+        // Forzar visibilidad pero sin afectar el layout visual actual drásticamente
+        tab.style.display = 'block';
+        tab.style.visibility = 'hidden';
+        tab.style.position = 'absolute';
+        tab.style.top = '-9999px';
+    });
+
+    // 4. Generar TODOS los gráficos y tablas
+    try {
+        // Gráficos de Energía
+        if (!wizardMonthlyChart) generarGraficaMensualWizard();
+        if (!wizardDistributionChart) generarGraficaDistribucionWizard();
+
+        // Gráfico Financiero
+        if (!wizardFinancialChart) generarGraficaFinancieraWizard();
+
+        // Tablas
+        llenarTablaAhorroAcumulado();
+
+        // Asegurar que la tabla mensual esté llena (usando datos guardados)
+        const consumoMensual = window.wizardDatos ? window.wizardDatos.consumo_mensual : parseFloat(document.getElementById('consumo').value);
+        llenarTablaMensual(window.ultimaGeneracionMensual, window.wizardResultados.num_paneles, consumoMensual);
+
+    } catch (error) {
+        console.error('Error generando reporte:', error);
+    }
+
+    // 5. Restaurar estilos originales y Imprimir
+    // Damos un pequeño delay para asegurar que Chart.js termine de dibujar
+    setTimeout(() => {
+        // Restaurar estilos para que la UI vuelva a la normalidad
+        tabs.forEach((tab, index) => {
+            tab.style.display = originalStyles[index].display;
+            tab.style.visibility = originalStyles[index].visibility;
+            tab.style.position = originalStyles[index].position;
+            tab.style.top = '';
+        });
+
+        // Imprimir
+        window.print();
+    }, 800);
+}
+
+// ============================================
 // Inicialización
 // ============================================
 
@@ -2118,6 +2196,11 @@ function cambiarAnguloWizard(angulo) {
 // Nota: La función calcularResultadosWizard() ya maneja todo el cálculo
 
 function mostrarResultadosWizard(resultados, generacionMensual, datos) {
+    // Guardar resultados globalmente para la función de impresión
+    window.wizardResultados = resultados;
+    window.ultimaGeneracionMensual = generacionMensual;
+    window.wizardDatos = datos;
+
     // Mostrar Panorama General (Solapa 1)
     const moneda = wizardData.moneda || 'ARS';
     const simbolo = moneda === 'USD' ? '$' : '$';
@@ -2141,9 +2224,9 @@ function mostrarResultadosWizard(resultados, generacionMensual, datos) {
     // 3. % de Autoconsumo
     const panoramaAutoconsumo = document.getElementById('wizardPanoramaAutoconsumo');
     if (panoramaAutoconsumo) {
-        const consumoAnual = (datos.consumo_mensual || datos.consumo) * 12;
-        const energiaAnual = resultados.energia_anual_total || resultados.generacion_anual || 0;
-        const porcentajeCobertura = Math.min(100, (energiaAnual / consumoAnual) * 100);
+        // Mostrar la cobertura real calculada basada en la generación de los paneles recomendados
+        // No limitamos a 100% para mostrar si hay excedentes, o si el usuario prefiere ver la cobertura real
+        const porcentajeCobertura = resultados.cobertura;
         panoramaAutoconsumo.textContent = `${porcentajeCobertura.toFixed(0)}%`;
     }
 

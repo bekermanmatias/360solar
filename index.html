@@ -53,8 +53,7 @@
             <div class="hero-content-minimal">
                 <h1 class="hero-title-minimal">Energía Inteligente.</h1>
                 <p class="hero-subtitle-minimal">Ingeniería de precisión para la autonomía energética residencial.</p>
-                <button type="button" id="btnAbrirSimulador" class="btn-hero-minimal">Análisis de Potencial
-                    Solar</button>
+                <button type="button" id="btnAbrirSimulador" class="btn-hero-minimal">Simulación Personalizada </button>
             </div>
         </div>
     </section>
@@ -73,42 +72,76 @@
     </section>
 
     <!-- Productos -->
-    <section id="productos" class="products-section">
-        <div class="container">
-            <div class="section-header center">
-                <h2 class="section-title">Infraestructura</h2>
-            </div>
+    <!-- Productos -->
+    <section id="productos" class="products-fullwidth-section">
+        <div class="section-header center" style="padding-top: 4rem; padding-bottom: -.2rem;">
+            <h2 class="section-title">Infraestructura</h2>
+        </div>
 
-            <div class="products-grid-minimal">
-                <!-- Producto 1: Captación -->
-                <div class="product-card-minimal">
+        <div class="products-full-grid">
+            <!-- Producto 1: Captación -->
+            <div class="product-full-card cover-style">
+                <img src="images/producto1.png" alt="Panel Solar 360-Ref" class="product-cover-img">
+                <div class="product-overlay-content">
                     <div class="product-number">01. Captación</div>
-                    <div class="product-image-minimal">
-                        <img src="images/producto1.png" alt="Panel Solar 360-Ref">
-                    </div>
                     <h3 class="product-title-minimal">Módulo FV 360-Ref</h3>
                     <p class="product-spec">Eficiencia Térmica Optimizada.</p>
                 </div>
+            </div>
 
-                <!-- Producto 2: Gestión -->
-                <div class="product-card-minimal">
+            <!-- Producto 2: Gestión -->
+            <div class="product-full-card cover-style">
+                <img src="images/producto2.png" alt="Inversor 360solar Grid-Tie" class="product-cover-img">
+                <div class="product-overlay-content">
                     <div class="product-number">02. Gestión</div>
-                    <div class="product-image-minimal">
-                        <img src="images/producto2.png" alt="Inversor 360solar Grid-Tie">
-                    </div>
                     <h3 class="product-title-minimal">Inversor 360solar</h3>
                     <p class="product-spec">Sincronización de Red Automática.</p>
                 </div>
+            </div>
 
-                <!-- Producto 3: Inteligencia -->
-                <div class="product-card-minimal">
+            <!-- Producto 3: Inteligencia -->
+            <div class="product-full-card cover-style">
+                <img src="images/producto3.png" alt="Smart Meter 360solar" class="product-cover-img">
+                <div class="product-overlay-content">
                     <div class="product-number">03. Inteligencia</div>
-                    <div class="product-image-minimal">
-                        <img src="images/producto3.png" alt="Smart Meter 360solar">
-                    </div>
                     <h3 class="product-title-minimal">Smart 360solar</h3>
                     <p class="product-spec">Auditoría en Tiempo Real.</p>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Métricas -->
+    <section id="metricas" class="metrics-section">
+        <div class="metrics-content">
+            <div class="metric-item">
+                <div class="metric-value">25 Años</div>
+                <div class="metric-label">de Vida Útil.</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value">5-7 Años</div>
+                <div class="metric-label">de Retorno de Inversión.</div>
+            </div>
+            <div class="metric-item">
+                <div class="metric-value">100%</div>
+                <div class="metric-label">Cobertura On-Grid.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Showcase Simulador -->
+    <section class="simulator-showcase">
+        <div class="showcase-split">
+            <div class="showcase-left">
+                <div class="showcase-content-wrapper">
+                    <h2 class="section-title" style="text-align: left; margin-bottom: 1.5rem;">Simulación de Precisión
+                    </h2>
+                    <p class="showcase-text">Nuestro modelo predictivo procesa datos satelitales históricos para
+                        proyectar su generación con precisión de laboratorio.</p>
+                </div>
+            </div>
+            <div class="showcase-right">
+                <img src="images/mok.png" alt="Interfaz del Simulador">
             </div>
         </div>
     </section>
@@ -904,23 +937,7 @@
         </div>
     </section>
 
-    <!-- Métricas -->
-    <section id="metricas" class="metrics-section">
-        <div class="metrics-content">
-            <div class="metric-item">
-                <div class="metric-value">25 Años</div>
-                <div class="metric-label">de Vida Útil.</div>
-            </div>
-            <div class="metric-item">
-                <div class="metric-value">5-7 Años</div>
-                <div class="metric-label">de Retorno de Inversión.</div>
-            </div>
-            <div class="metric-item">
-                <div class="metric-value">100%</div>
-                <div class="metric-label">Cobertura On-Grid.</div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- CTA Section -->
     <section class="cta-section">
@@ -1499,12 +1516,31 @@
                                             <div class="wizard-veredicto-text" id="wizardVeredictoRapido">-</div>
                                         </div>
 
-                                        <!-- Botón CTA -->
-                                        <button type="button" class="wizard-btn-cta-presupuesto"
-                                            id="wizardBtnPresupuesto">
-                                            <i class="fas fa-file-invoice-dollar"></i>
-                                            <span>Solicitar Presupuesto Formal</span>
-                                        </button>
+                                        <!-- Botones de Acción -->
+                                        <div class="wizard-actions-row">
+                                            <button type="button" class="wizard-btn-cta-presupuesto"
+                                                id="wizardBtnPresupuesto">
+                                                <i class="fas fa-file-invoice-dollar"></i>
+                                                <span>Solicitar Presupuesto Formal</span>
+                                            </button>
+
+                                            <button type="button" class="wizard-btn-secondary" id="wizardBtnImprimir"
+                                                onclick="imprimirReporte()">
+                                                <i class="fas fa-print"></i>
+                                                <span>Descargar Reporte PDF</span>
+                                            </button>
+                                        </div>
+
+                                        <!-- Print Header (Hidden by default) -->
+                                        <div class="print-header" style="display: none;">
+                                            <div class="print-logo">
+                                                <img src="images/logo360.png" alt="Solar360">
+                                            </div>
+                                            <div class="print-info">
+                                                <h1>Reporte de Simulación Solar</h1>
+                                                <p id="printDate"></p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -1529,13 +1565,7 @@
                                                     <div class="wizard-data-value" id="wizardRadiacionPromedio">-</div>
                                                     <div class="wizard-data-desc" id="wizardUbicacionNombre">-</div>
                                                 </div>
-                                                <div class="wizard-data-card">
-                                                    <div class="wizard-data-label">Pérdidas Estimadas por Temperatura
-                                                    </div>
-                                                    <div class="wizard-data-value" id="wizardPerdidasTemperatura">-
-                                                    </div>
-                                                    <div class="wizard-data-desc">Factor clave en paneles</div>
-                                                </div>
+
                                             </div>
                                         </div>
 
