@@ -770,8 +770,10 @@ section:last-of-type::after {
     font-weight: 400;
     text-align: center !important;
     width: 100%;
-    max-width: 100%;
+    max-width: 680px;
     margin-left: auto;
+    margin-right: auto;
+    display: block;
     margin-right: auto;
     padding: 0;
 }
@@ -3901,8 +3903,19 @@ section:last-of-type::after {
     color: var(--text-light);
     line-height: 1.8;
     margin: 0;
-    text-align: left !important;
+    text-align: center !important;
     width: 100%;
+    max-width: 680px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Texto dentro de columnas debe estar alineado a la izquierda */
+.philosophy-column .philosophy-text {
+    text-align: left !important;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
 }
 
 @media (max-width: 968px) {
