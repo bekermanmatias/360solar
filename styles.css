@@ -2541,6 +2541,37 @@ section:last-of-type::after {
     box-shadow: 0 4px 16px rgba(253, 184, 19, 0.2);
 }
 
+.dimensionamiento-option-card.coming-soon {
+    position: relative;
+    opacity: 0.5;
+    background: #f5f5f5;
+    border-color: #d0d0d0;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.dimensionamiento-option-card.coming-soon:hover {
+    border-color: #d0d0d0;
+    background: #f5f5f5;
+    box-shadow: none;
+    transform: none;
+}
+
+.dimensionamiento-option-card.coming-soon .option-icon {
+    background: #e0e0e0;
+    color: #999;
+}
+
+.dimensionamiento-option-card.coming-soon .option-title h5,
+.dimensionamiento-option-card.coming-soon .option-title p {
+    color: #999;
+}
+
+.dimensionamiento-option-card.coming-soon .option-radio input[type="radio"] {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
 .option-header {
     display: flex;
     align-items: center;
@@ -3758,7 +3789,8 @@ section:last-of-type::after {
     color: var(--text-light);
     line-height: 1.8;
     margin: 0;
-    text-align: left;
+    text-align: center;
+    max-width: 100%;
 }
 
 /* BLOQUE 2: FILOSOFÍA (Misión y Visión) */
@@ -3809,11 +3841,13 @@ section:last-of-type::after {
     flex-direction: column;
     gap: 3rem;
     width: 100%;
+    text-align: left;
 }
 
 .philosophy-column {
     position: relative;
     padding-left: 2rem;
+    text-align: left;
 }
 
 .philosophy-column::before {
@@ -3834,6 +3868,7 @@ section:last-of-type::after {
     text-transform: uppercase;
     letter-spacing: 2px;
     margin-bottom: 0.75rem;
+    text-align: left;
 }
 
 .philosophy-title {
@@ -3853,7 +3888,8 @@ section:last-of-type::after {
     color: var(--text-light);
     line-height: 1.8;
     margin: 0;
-    text-align: left;
+    text-align: left !important;
+    width: 100%;
 }
 
 @media (max-width: 968px) {
@@ -5386,6 +5422,7 @@ section:last-of-type::after {
     margin-bottom: 1.5rem;
     line-height: 1.2;
     color: white;
+    white-space: nowrap;
 }
 
 .wizard-instructions-question {
@@ -6463,7 +6500,8 @@ section:last-of-type::after {
 /* Pestañas de resultados detallados: ocupar casi todo el alto disponible y permitir scroll interno amplio */
 #wizardTabEnergia .wizard-results-detailed,
 #wizardTabFinanzas .wizard-results-detailed,
-#wizardTabInstalacion .wizard-results-detailed {
+#wizardTabInstalacion .wizard-results-detailed,
+#wizardTabImpacto .wizard-results-detailed {
     max-height: calc(100vh - 190px);
     /* ocupa un poco más hacia abajo sin chocar con los botones */
     overflow-y: auto;
@@ -6928,6 +6966,61 @@ section:last-of-type::after {
     line-height: 1.5;
 }
 
+.wizard-paneles-info {
+    margin-top: 2rem;
+}
+
+.wizard-paneles-card {
+    background: white;
+    border: 2px solid #e8ecef;
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    transition: var(--transition);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.wizard-paneles-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border-color: var(--primary-color);
+}
+
+.wizard-paneles-icon {
+    font-size: 2.5rem;
+    line-height: 1;
+    flex-shrink: 0;
+}
+
+.wizard-paneles-content {
+    flex: 1;
+}
+
+.wizard-paneles-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-light);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
+}
+
+.wizard-paneles-value {
+    font-size: 1.75rem;
+    font-weight: 900;
+    color: var(--text-dark);
+    line-height: 1.2;
+    margin-bottom: 0.25rem;
+}
+
+.wizard-paneles-desc {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 400;
+}
+
 .wizard-btn-cta-presupuesto {
     width: 100%;
     padding: 1.5rem 2rem;
@@ -7293,9 +7386,46 @@ section:last-of-type::after {
     box-shadow: 0 2px 8px rgba(253, 184, 19, 0.2);
 }
 
+.currency-option.coming-soon,
+.consumption-mode-option.coming-soon {
+    position: relative;
+    opacity: 0.5;
+    background: #f5f5f5;
+    border-color: #d0d0d0;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+.currency-option.coming-soon:hover,
+.consumption-mode-option.coming-soon:hover {
+    transform: none;
+    border-color: #d0d0d0;
+    background: #f5f5f5;
+    box-shadow: none;
+}
+
+.coming-soon-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(44, 62, 80, 0.9);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 10;
+    white-space: nowrap;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
 .currency-flag {
     font-size: 1.4rem;
     line-height: 1;
+    display: inline-block;
 }
 
 .currency-icon {
@@ -7304,9 +7434,11 @@ section:last-of-type::after {
 }
 
 .currency-code {
-    font-size: 0.95rem;
+    font-size: 1.4rem;
     font-weight: 700;
     color: var(--text-dark);
+    line-height: 1;
+    display: inline-block;
 }
 
 .currency-name {
@@ -7349,6 +7481,22 @@ section:last-of-type::after {
     border-color: var(--primary-color);
     background: rgba(253, 184, 19, 0.1);
     box-shadow: 0 2px 8px rgba(253, 184, 19, 0.2);
+}
+
+.consumption-mode-option.coming-soon .mode-option-icon {
+    background: #e0e0e0;
+    color: #999;
+}
+
+.consumption-mode-option.coming-soon .mode-option-title,
+.consumption-mode-option.coming-soon .mode-option-desc {
+    color: #999;
+}
+
+.currency-option.coming-soon .currency-icon,
+.currency-option.coming-soon .currency-code,
+.currency-option.coming-soon .currency-name {
+    color: #999;
 }
 
 .mode-option-icon {

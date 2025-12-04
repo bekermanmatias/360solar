@@ -186,8 +186,8 @@ export function actualizarWizardVisual() {
                 <div class="wizard-logo">
                     <img src="images/logo360.png" alt="Solar360" class="logo-img">
                 </div>
-                <h2 class="wizard-instructions-title">Ingresa tu dirección</h2>
-                <p class="wizard-instructions-question">¿Dónde te gustaría instalar el Sistema Fotovoltaico?</p>
+                <h2 class="wizard-instructions-title">Ingresa tu Ubicación</h2>
+                <p class="wizard-instructions-question">¿Dónde te gustaría instalar tu Sistema?</p>
                 <div class="wizard-progress">
                     <div class="wizard-progress-bar">
                         <div class="wizard-progress-fill" style="width: 20%"></div>
@@ -258,7 +258,7 @@ export function actualizarWizardVisual() {
                     <img src="images/logo360.png" alt="Solar360" class="logo-img">
                 </div>
                 <h2 class="wizard-instructions-title">Tus Resultados</h2>
-                <p class="wizard-instructions-question">Aquí está el análisis completo de tu sistema solar. Revisa los detalles y ajusta según necesites.</p>
+                <p class="wizard-instructions-question">Aquí está el análisis completo de tu sistema. Revisa los detalles y ajusta según necesites.</p>
                 <div class="wizard-progress">
                     <div class="wizard-progress-bar">
                         <div class="wizard-progress-fill" style="width: 100%"></div>
@@ -504,7 +504,7 @@ export function inicializarPaso2() {
         currencyARS.addEventListener('click', () => cambiarMoneda('ARS'));
     }
 
-    if (currencyUSD) {
+    if (currencyUSD && !currencyUSD.disabled) {
         currencyUSD.addEventListener('click', () => cambiarMoneda('USD'));
     }
 
@@ -515,7 +515,7 @@ export function inicializarPaso2() {
         modeAproximado.addEventListener('click', () => cambiarModoConsumo('aproximado'));
     }
 
-    if (modeEspecifico) {
+    if (modeEspecifico && !modeEspecifico.disabled) {
         modeEspecifico.addEventListener('click', () => cambiarModoConsumo('especifico'));
     }
 }
@@ -585,9 +585,9 @@ export function inicializarPaso3Wizard() {
         });
     }
 
-    if (radioPaneles) {
+    if (radioPaneles && !radioPaneles.disabled) {
         radioPaneles.addEventListener('change', function () {
-            if (this.checked) cambiarModoDimensionamientoWizard('paneles');
+            if (this.checked && !this.disabled) cambiarModoDimensionamientoWizard('paneles');
         });
     }
 
@@ -682,9 +682,15 @@ export function inicializarPaso4Wizard() {
         });
     });
 
-    const card45 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="45"]');
-    if (card45) {
-        card45.classList.add('active');
+    const card20 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="20"]');
+    if (card20) {
+        card20.classList.add('active');
+    }
+    
+    // Asegurar que el radio button de 20° esté marcado
+    if (radio20) {
+        radio20.checked = true;
+        cambiarAnguloWizard(20);
     }
 }
 
@@ -837,13 +843,18 @@ export function mostrarResultadosWizard(resultados, generacionMensual, datos) {
         const pshPromedio = datos.psh.reduce((a, b) => a + b, 0) / datos.psh.length;
         let veredicto = '';
         if (pshPromedio >= 5.5) {
-            veredicto = '¡Excelente ubicación! Tu techo tiene un potencial solar alto.';
+            veredicto = '¡Excelente ubicación! Tu techo tiene un potencial alto.';
         } else if (pshPromedio >= 4.5) {
-            veredicto = 'Buena ubicación. Tu techo tiene un potencial solar favorable.';
+            veredicto = 'Buena ubicación. Tu techo tiene potencial.';
         } else {
-            veredicto = 'Ubicación aceptable. El sistema solar puede ser una buena inversión.';
+            veredicto = 'Ubicación aceptable. El sistema puede ser una buena inversión.';
         }
         veredictoRapido.textContent = veredicto;
+    }
+
+    const panoramaNumPaneles = document.getElementById('wizardPanoramaNumPaneles');
+    if (panoramaNumPaneles) {
+        panoramaNumPaneles.textContent = resultados.num_paneles || '-';
     }
 
     llenarDatosAnalisisEnergetico(resultados, generacionMensual, datos);
@@ -1126,8 +1137,9 @@ export function inicializarWizardResultadosDetallados() {
     const inflacionInput = document.getElementById('wizardInflacionInput');
     const btnRecalcular = document.getElementById('wizardBtnRecalcular');
 
-    if (btnRecalcular) {
+    if (btnRecalcular && !btnRecalcular.disabled) {
         btnRecalcular.addEventListener('click', function () {
+            if (this.disabled) return;
             const inflacion = parseFloat(inflacionInput?.value || 3) / 100;
             if (window.wizardResultados) {
                 generarGraficaFinancieraWizard(inflacion);
@@ -1785,7 +1797,7 @@ export async function confirmarUbicacionWizard() {
         `;
         loadingOverlay.innerHTML = `
             <div class="spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--primary-color); border-radius: 50%; animation: spin 1s linear infinite;"></div>
-            <p style="color: #333; font-size: 1rem;">Obteniendo datos climáticos...</p>
+            <p style="color: #333; font-size: 1rem;">Obteniendo datos...</p>
         `;
 
         if (wizardStep1) {

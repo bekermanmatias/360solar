@@ -750,6 +750,12 @@ export function initializeApp() {
                     abrirModalSimulador: typeof abrirModalSimulador,
                     windowAbrir: typeof window.abrirModalSimulador
                 });
+                // Fallback: intentar abrir el modal directamente
+                const modal = document.getElementById('modalSimulador');
+                if (modal) {
+                    modal.classList.add('active');
+                    document.body.style.overflow = 'hidden';
+                }
             }
         });
     } else {

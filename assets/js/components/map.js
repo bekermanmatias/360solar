@@ -255,14 +255,14 @@ export async function obtenerNombreLugar(lat, lon, buttonText) {
         console.log('📍 Ubicación identificada:', nombreLugar);
 
         if (buttonText) {
-            buttonText.textContent = `${nombreLugar} - Obteniendo datos solares...`;
+            buttonText.textContent = `${nombreLugar} - Obteniendo datos...`;
         }
 
     } catch (error) {
         console.warn('No se pudo obtener el nombre del lugar:', error);
         ubicacionActual.nombre = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
         if (buttonText) {
-            buttonText.textContent = `Obteniendo datos solares...`;
+            buttonText.textContent = `Obteniendo datos...`;
         }
     }
 }
@@ -273,7 +273,7 @@ export async function obtenerNombreLugar(lat, lon, buttonText) {
 export async function obtenerDatosSolaresNASA(lat, lon, buttonIcon, buttonText) {
     try {
         if (buttonText) {
-            buttonText.textContent = 'Obteniendo datos solares...';
+            buttonText.textContent = 'Obteniendo datos...';
         }
 
         const year = new Date().getFullYear() - 1; // Año anterior (datos completos)
@@ -342,7 +342,7 @@ export async function obtenerDatosSolaresNASA(lat, lon, buttonIcon, buttonText) 
 export async function obtenerDatosSolaresOpenMeteo(lat, lon, buttonIcon, buttonText) {
     try {
         if (buttonText) {
-            buttonText.textContent = 'Obteniendo datos solares (Open-Meteo)...';
+            buttonText.textContent = 'Obteniendo datos (Open-Meteo)...';
         }
 
         // Open-Meteo Archive API para datos históricos
