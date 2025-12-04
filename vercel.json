@@ -5,6 +5,10 @@
     {
       "source": "/sobre-nosotros",
       "destination": "/sobre-nosotros.html"
+    },
+    {
+      "source": "/simulador",
+      "destination": "/simulador.html"
     }
   ],
   "headers": [

@@ -29,7 +29,8 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, 'index.html'),
-        sobreNosotros: resolve(__dirname, 'sobre-nosotros.html')
+        sobreNosotros: resolve(__dirname, 'sobre-nosotros.html'),
+        simulador: resolve(__dirname, 'simulador.html')
       }
     },
     copyPublicDir: false
