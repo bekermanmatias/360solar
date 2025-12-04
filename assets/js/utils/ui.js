@@ -23,12 +23,13 @@ export function initScrollSpy() {
             }
         });
 
-        navLinks.forEach(link => {
-            link.classList.remove('active');
-            if (link.getAttribute('href') === `#${current}`) {
-                link.classList.add('active');
-            }
-        });
+        // Desactivado: no se agrega clase 'active' a los enlaces del menú
+        // navLinks.forEach(link => {
+        //     link.classList.remove('active');
+        //     if (link.getAttribute('href') === `#${current}`) {
+        //         link.classList.add('active');
+        //     }
+        // });
     });
 }
 

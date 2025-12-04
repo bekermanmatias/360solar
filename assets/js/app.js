@@ -805,9 +805,18 @@ export function initializeApp() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const href = this.getAttribute('href');
+            const target = document.querySelector(href);
             if (target) {
-                target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                // Calcular el offset del header fijo
+                const header = document.querySelector('.header');
+                const headerHeight = header ? header.offsetHeight : 80;
+                const targetPosition = target.offsetTop - headerHeight;
+                
+                window.scrollTo({
+                    top: targetPosition,
+                    behavior: 'smooth'
+                });
             }
         });
     });

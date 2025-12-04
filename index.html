@@ -31,13 +31,15 @@
         <nav class="container">
             <div class="nav-container">
                 <div class="logo">
-                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                    <a href="#inicio">
+                        <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                    </a>
                 </div>
                 <ul class="nav-menu">
-                    <li><a href="#inicio" class="nav-link active">Inicio</a></li>
-                    <li><a href="#simulador" class="nav-link" id="navSimulador">Simulador</a></li>
-                    <li><a href="sobre-nosotros.html" class="nav-link">Sobre Nosotros</a></li>
+                    <li><a href="#inicio" class="nav-link">Inicio</a></li>
                     <li><a href="#productos" class="nav-link">Tecnología</a></li>
+                    <li><a href="#simulador" class="nav-link" id="navSimulador">Simulador</a></li>
+                    <li><a href="sobre-nosotros.html" class="nav-link">Nosotros</a></li>
                     <li><a href="#contacto" class="nav-link">Contacto</a></li>
                 </ul>
                 <button class="mobile-menu-toggle" aria-label="Toggle menu">
@@ -102,8 +104,8 @@
     <!-- Productos -->
     <section id="productos" class="products-fullwidth-section">
         <div class="section-header center" style="padding-top: 4rem; padding-bottom: -.2rem;">
-            <h2 class="section-title">Infraestructura</h2>
-            <p class="section-subtitle">Sistemas de generación solar de grado industrial para autonomía energética residencial</p>
+            <h2 class="section-title">Tecnología</h2>
+            <p class="section-subtitle">Nuestro grado industrial para autonomía energética.</p>
         </div>
 
         <div class="products-full-grid">
@@ -182,10 +184,10 @@
     <section class="cta-section">
         <div class="container">
             <div class="cta-content">
-                <h2>¿Listo para dar el paso a la energía solar?</h2>
-                <p>Solicita tu cotización gratuita hoy y empieza a ahorrar</p>
+                <h2>¿Listo para dar el paso hacia el futuro?</h2>
+                <p>Solicita tu cotización gratuita ahora mismo.</p>
                 <a href="#contacto" class="btn btn-primary btn-large">
-                    Solicitar Cotización Gratis
+                    Contactar
                 </a>
             </div>
         </div>
@@ -274,19 +276,53 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
-            <div class="footer-minimal">
-                <div class="footer-logo-minimal">
-                    <img src="images/logo360.png" alt="360Solar" class="logo-img">
+            <div class="footer-content">
+                <!-- Columna 1: Logo y Descripción -->
+                <div class="footer-column footer-brand">
+                    <div class="footer-logo">
+                        <img src="images/logo360.png" alt="360Solar" class="footer-logo-img">
+                    </div>
+                    <p class="footer-description">
+                        Transformando la radiación solar en capital. Ingeniería de precisión para sistemas fotovoltaicos residenciales.
+                    </p>
                 </div>
 
-                <nav class="footer-nav">
-                    <a href="#simulador">Simulador</a>
-                    <a href="#productos">Tecnología</a>
-                    <a href="#contacto">Contacto</a>
-                </nav>
+                <!-- Columna 2: Navegación -->
+                <div class="footer-column footer-nav-column">
+                    <h3 class="footer-column-title">Navegación</h3>
+                    <nav class="footer-nav">
+                        <a href="#inicio">Inicio</a>
+                        <a href="#productos">Tecnología</a>
+                        <a href="#simulador">Simulador</a>
+                        <a href="sobre-nosotros.html">Nosotros</a>
+                        <a href="#contacto">Contacto</a>
+                    </nav>
+                </div>
 
+                <!-- Columna 3: Contacto -->
+                <div class="footer-column footer-contact">
+                    <h3 class="footer-column-title">Contacto</h3>
+                    <div class="footer-contact-info">
+                        <div class="footer-contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:info@solar360.com.ar">info@solar360.com.ar</a>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+541112345678">+54 11 1234-5678</a>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>La Plata, Buenos Aires</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="footer-bottom">
                 <div class="footer-copyright">
-                    © 2025 360Solar. Ingeniería Solar.
+                    <p>© 2025 360Solar. Todos los derechos reservados. | Ingeniería Solar de Precisión</p>
                 </div>
             </div>
         </div>
@@ -354,10 +390,9 @@
                     <!-- Paso 0: Introducción -->
                     <div class="wizard-step-content active" data-step="0" id="wizardStep0">
                         <div class="wizard-intro">
-                            <h1 class="wizard-intro-title">Calculadora Solar 360</h1>
+                            <h1 class="wizard-intro-title">Paso a paso</h1>
                             <p class="wizard-intro-subtitle">
-                                Obtén tu simulación personalizada de paneles solares en solo 5 pasos y descubre cuánto
-                                puedes ahorrar con energía solar.
+                                Solo 5 pasos te separan de tus resultados.
                             </p>
                             <div class="wizard-intro-steps">
                                 <div class="wizard-intro-step">
@@ -397,12 +432,11 @@
                                 </div>
                             </div>
                             <p class="wizard-intro-reassurance">
-                                ⚡ Proceso rápido y sin compromiso • 🌞 Resultados instantáneos • 💰 Estimación de ahorro
-                                personalizada
+                                Personalizado • Rápido • Sin compromiso • Resultados instantáneos
                             </p>
                             <button type="button" class="btn btn-primary btn-large wizard-intro-btn"
                                 id="btnIniciarSimulador">
-                                COMENZAR SIMULACIÓN
+                                COMENZAR
                             </button>
                         </div>
                     </div>

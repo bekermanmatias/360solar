@@ -173,9 +173,9 @@ export function actualizarWizardVisual() {
                 <div class="intro-logo">
                     <img src="images/logo360.png" alt="Solar360" class="logo-img">
                 </div>
-                <h1 class="intro-title">Calculadora<br>Paneles<br>Solares</h1>
+                <h1 class="intro-title">Simulador</h1>
                 <p class="intro-description">
-                    Haz tu cálculo de paneles solares para saber cuánto puedes ahorrar con la energía solar en tu consumo eléctrico y emisiones de CO2.
+                    Simula tu propio sistema para saber cuánto podes ahorrar con la energía solar en tu consumo eléctrico y emisiones de CO2.
                 </p>
             </div>
         `;
