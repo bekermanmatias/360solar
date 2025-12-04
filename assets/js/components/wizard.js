@@ -444,6 +444,158 @@ export function validarPaso4() {
 }
 
 /**
+ * Resetear wizard - Limpia todos los datos para empezar de cero
+ */
+export function resetearWizard() {
+    console.log('🔄 Reseteando wizard...');
+    
+    // Resetear datos del wizard
+    wizardData = {
+        lat: null,
+        lon: null,
+        ubicacionNombre: '',
+        psh: null,
+        temperatura: null,
+        moneda: 'ARS',
+        modoConsumo: 'aproximado',
+        consumoMensual: null,
+        consumoMensualArray: [],
+        precioKwh: null,
+        modoDimensionamiento: 'porcentaje',
+        porcentajeCobertura: 100,
+        numPaneles: null,
+        inclinacion: null
+    };
+    
+    // Resetear ubicación seleccionada
+    ubicacionSeleccionada = null;
+    
+    // Resetear moneda y modo de consumo
+    monedaSeleccionada = 'ARS';
+    modoConsumo = 'aproximado';
+    
+    // Limpiar gráficos
+    if (wizardMonthlyChart) {
+        wizardMonthlyChart.destroy();
+        wizardMonthlyChart = null;
+    }
+    if (wizardFinancialChart) {
+        wizardFinancialChart.destroy();
+        wizardFinancialChart = null;
+    }
+    if (wizardDistributionChart) {
+        wizardDistributionChart.destroy();
+        wizardDistributionChart = null;
+    }
+    
+    // Limpiar resultados globales
+    window.wizardResultados = null;
+    window.wizardGeneracionMensual = null;
+    window.wizardDatos = null;
+    
+    // Limpiar mapa si existe
+    if (wizardMap) {
+        wizardMap.remove();
+        wizardMap = null;
+        wizardMapMarker = null;
+    }
+    
+    // Limpiar campos del formulario - Paso 2
+    const consumoAproximado = document.getElementById('consumoAproximado');
+    if (consumoAproximado) consumoAproximado.value = '';
+    
+    const precioKwh = document.getElementById('precioKwh');
+    if (precioKwh) precioKwh.value = '';
+    
+    // Limpiar inputs mensuales
+    document.querySelectorAll('.monthly-input').forEach(input => {
+        input.value = '';
+    });
+    
+    // Resetear moneda a ARS
+    const currencyARS = document.getElementById('currencyARS');
+    const currencyUSD = document.getElementById('currencyUSD');
+    if (currencyARS) currencyARS.classList.add('active');
+    if (currencyUSD) currencyUSD.classList.remove('active');
+    
+    // Resetear modo de consumo a aproximado
+    const modeAproximado = document.getElementById('modeAproximado');
+    const modeEspecifico = document.getElementById('modeEspecifico');
+    if (modeAproximado) modeAproximado.classList.add('active');
+    if (modeEspecifico) modeEspecifico.classList.remove('active');
+    
+    const consumoAproximadoSection = document.getElementById('consumoAproximadoSection');
+    const consumoEspecificoSection = document.getElementById('consumoEspecificoSection');
+    if (consumoAproximadoSection) consumoAproximadoSection.style.display = 'block';
+    if (consumoEspecificoSection) consumoEspecificoSection.style.display = 'none';
+    
+    // Resetear precio currency display
+    const priceCurrencyDisplay = document.getElementById('priceCurrencyDisplay');
+    if (priceCurrencyDisplay) priceCurrencyDisplay.textContent = 'ARS';
+    
+    // Limpiar búsqueda del mapa
+    const wizardMapSearch = document.getElementById('wizardMapSearch');
+    if (wizardMapSearch) wizardMapSearch.value = '';
+    
+    const wizardMapSearchSuggestions = document.getElementById('wizardMapSearchSuggestions');
+    if (wizardMapSearchSuggestions) {
+        wizardMapSearchSuggestions.classList.remove('active');
+        wizardMapSearchSuggestions.innerHTML = '';
+    }
+    
+    // Resetear paso 3 - Dimensionamiento
+    const wizardModePorcentaje = document.getElementById('wizardModePorcentaje');
+    const wizardModePaneles = document.getElementById('wizardModePaneles');
+    const wizardPorcentajeCobertura = document.getElementById('wizardPorcentajeCobertura');
+    if (wizardModePorcentaje) wizardModePorcentaje.checked = true;
+    if (wizardModePaneles) wizardModePaneles.checked = false;
+    if (wizardPorcentajeCobertura) {
+        wizardPorcentajeCobertura.value = 100;
+        actualizarDisplayCoberturaWizard();
+    }
+    
+    const cardPorcentaje = document.querySelector('#wizardStep3 .dimensionamiento-option-card[data-mode="porcentaje"]');
+    const cardPaneles = document.querySelector('#wizardStep3 .dimensionamiento-option-card[data-mode="paneles"]');
+    if (cardPorcentaje) cardPorcentaje.classList.add('active');
+    if (cardPaneles) cardPaneles.classList.remove('active');
+    
+    const controlPorcentaje = document.getElementById('wizardControlPorcentaje');
+    const controlPaneles = document.getElementById('wizardControlPaneles');
+    if (controlPorcentaje) controlPorcentaje.style.display = 'block';
+    if (controlPaneles) controlPaneles.style.display = 'none';
+    
+    // Resetear paso 4 - Ángulo
+    const wizardAngulo20 = document.getElementById('wizardAngulo20');
+    const wizardAngulo45 = document.getElementById('wizardAngulo45');
+    if (wizardAngulo20) wizardAngulo20.checked = false;
+    if (wizardAngulo45) wizardAngulo45.checked = false;
+    
+    const card20 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="20"]');
+    const card45 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="45"]');
+    if (card20) card20.classList.remove('active');
+    if (card45) card45.classList.remove('active');
+    
+    // Resetear tabs de resultados al tab por defecto
+    const tabs = document.querySelectorAll('#wizardStep5 .wizard-result-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    const tabPanorama = document.querySelector('#wizardStep5 .wizard-result-tab[data-tab="panorama"]');
+    if (tabPanorama) tabPanorama.classList.add('active');
+    
+    const tabPanes = document.querySelectorAll('#wizardStep5 .wizard-tab-pane');
+    tabPanes.forEach(pane => {
+        pane.style.display = 'none';
+        pane.classList.remove('active');
+    });
+    const tabPanoramaPane = document.getElementById('wizardTabPanorama');
+    if (tabPanoramaPane) {
+        tabPanoramaPane.style.display = 'block';
+        tabPanoramaPane.classList.add('active');
+    }
+    
+    console.log('✅ Wizard reseteado completamente');
+}
+
+/**
  * Inicializar wizard modal
  */
 export function inicializarWizardModal() {
@@ -474,6 +626,7 @@ export function inicializarWizardModal() {
                 }
             } else if (currentWizardStep === 5) {
                 // En el paso 5 (resultados), el botón "Nueva Simulación" reinicia el wizard
+                resetearWizard();
                 goToWizardStep(0);
             } else if (currentWizardStep === 1) {
                 if (ubicacionSeleccionada) {
@@ -2012,6 +2165,7 @@ window.buscarDireccion = buscarDireccion;
 window.inicializarTogglesMapa = inicializarTogglesMapa;
 window.confirmarUbicacionWizard = confirmarUbicacionWizard;
 window.obtenerDatosClimaticosWizard = obtenerDatosClimaticosWizard;
+window.resetearWizard = resetearWizard;
 
 // Exportar wizardData al scope global
 window.wizardData = wizardData;
