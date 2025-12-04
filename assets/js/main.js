@@ -14,6 +14,7 @@ import { MODELO_OLS, MODELO_CLUSTER, seleccionarClusterBeta1 } from './config/mo
 import { calcularGeneracionMensual, calcularResultados } from './utils/calculations.js';
 import { formatearNumero, formatNumber } from './utils/formatters.js';
 import { validarDatos } from './utils/validators.js';
+import { ejecutarValidacionCompleta } from './utils/validation.js';
 import { mostrarNotificacion } from './utils/notifications.js';
 import { initScrollSpy, redimensionarGraficos } from './utils/ui.js';
 
@@ -45,6 +46,9 @@ window.redimensionarGraficos = redimensionarGraficos;
 // Exportar funciones del wizard al scope global
 window.abrirModalSimulador = abrirModalSimulador;
 window.cerrarModalSimulador = cerrarModalSimulador;
+
+// Exportar funciones de validación
+window.validarModelo = ejecutarValidacionCompleta;
 
 // Inicializar cuando el DOM esté listo
 if (document.readyState === 'loading') {

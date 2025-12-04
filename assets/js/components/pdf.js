@@ -212,8 +212,8 @@ export async function generarPDFCompleto(imagenGeneracion = '', imagenDistribuci
     let hasLogo = false;
     if (logoImage) {
         try {
-            const logoWidth = 35;
-            const logoHeight = 12;
+            const logoWidth = 60;  // Aumentado de 35 a 60 para mejor visibilidad
+            const logoHeight = 20;  // Aumentado proporcionalmente de 12 a 20
             const logoX = (pageWidth - logoWidth) / 2;
             const logoY = 8;
             doc.addImage(logoImage, 'PNG', logoX, logoY, logoWidth, logoHeight);
@@ -232,7 +232,7 @@ export async function generarPDFCompleto(imagenGeneracion = '', imagenDistribuci
     }
     doc.setFontSize(14);
     doc.setFont(undefined, 'normal');
-    doc.text('Reporte de Simulación Solar', pageWidth / 2, hasLogo ? 25 : 35, { align: 'center' });
+    doc.text('Reporte de Simulación Solar', pageWidth / 2, hasLogo ? 32 : 35, { align: 'center' });
 
     yPos = 60;
     doc.setTextColor(0, 0, 0);
@@ -285,7 +285,7 @@ export async function generarPDFCompleto(imagenGeneracion = '', imagenDistribuci
         [`Total paneles (${resultados.num_paneles} paneles)`, `${simbolo}${formatearNumero(resultados.costo_paneles || 0, moneda)}`],
         ['Ahorro mensual', `${simbolo}${formatearNumero(resultados.ahorro_mensual || 0, moneda)}`],
         ['Ahorro anual', `${simbolo}${formatearNumero(resultados.ahorro_anual || 0, moneda)}`],
-        ['Retorno de inversión (ROI)', resultados.roi_anos === Infinity || isNaN(resultados.roi_anos) ? 'N/A' : `${resultados.roi_anos.toFixed(1)} años`],
+        ['Periodo de Recupero', resultados.roi_anos === Infinity || isNaN(resultados.roi_anos) ? 'N/A' : `${resultados.roi_anos.toFixed(1)} años`],
         ['Ahorro estimado a 25 años', `${simbolo}${formatearNumero((resultados.ahorro_anual || 0) * 25, moneda)}`]
     ]);
 
@@ -296,8 +296,8 @@ export async function generarPDFCompleto(imagenGeneracion = '', imagenDistribuci
     const co225Anos = co2Anual * 25;
     const co2Toneladas = co225Anos / 1000;
     
-    const arbolesEquiv = Math.round(co225Anos / 20);
-    const autosEquiv = Math.round(co225Anos / 4200);
+    const arbolesEquiv = Math.round(co225Anos / 22); // Según paper: 22 kg CO₂/árbol/año
+    const autosEquiv = Math.round(co225Anos / 2500); // Según paper: 2500 kg CO₂/auto/año
     const vuelosEquiv = Math.round(co2Toneladas / 0.5);
     const hogaresEquiv = Math.round(co2Toneladas / 4.5);
     
@@ -679,7 +679,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
                         <tr><td>Total paneles (${r.num_paneles} × $${formatNumber(r.costo_por_panel.toFixed(0))})</td><td>$${formatNumber(r.costo_paneles.toFixed(0))}</td></tr>
                         <tr><td>Ahorro mensual</td><td>$${formatNumber(r.ahorro_mensual.toFixed(0))}</td></tr>
                         <tr><td>Ahorro anual</td><td>$${formatNumber(r.ahorro_anual.toFixed(0))}</td></tr>
-                        <tr><td>Retorno de inversión</td><td>${r.roi_anos.toFixed(1)} años</td></tr>
+                        <tr><td>Periodo de Recupero</td><td>${r.roi_anos.toFixed(1)} años</td></tr>
                         <tr><td>Ahorro estimado a 25 años</td><td>$${formatNumber((r.ahorro_anual * 25).toFixed(0))}</td></tr>
                     </tbody>
                 </table>
@@ -691,7 +691,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
                     <tbody>
                         <tr><td>CO₂ evitado por año</td><td>${formatNumber(r.co2_anual.toFixed(0))} kg</td></tr>
                         <tr><td>CO₂ evitado en 25 años</td><td>${formatNumber((r.co2_anual * 25).toFixed(0))} kg</td></tr>
-                        <tr><td>Equivalente árboles plantados (25 años)</td><td>~${formatNumber((r.co2_anual * 25 / 20).toFixed(0))} árboles</td></tr>
+                        <tr><td>Equivalente árboles plantados (25 años)</td><td>~${formatNumber((r.co2_anual * 25 / 22).toFixed(0))} árboles</td></tr>
                     </tbody>
                 </table>
             </section>

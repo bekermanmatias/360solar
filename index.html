@@ -484,7 +484,9 @@
                                 <div class="currency-selector">
                                     <button type="button" class="currency-option active" data-currency="ARS"
                                         id="currencyARS">
-                                        <span class="currency-code">🇦🇷</span>
+                                        <span class="currency-code">
+                                            <img src="images/ar.webp" alt="Argentina" class="currency-flag-img">
+                                        </span>
                                         <span class="currency-name">Peso Argentino</span>
                                     </button>
                                     <button type="button" class="currency-option coming-soon" data-currency="USD" id="currencyUSD" disabled>
@@ -731,9 +733,9 @@
                                                     <p class="angulo-summary">Ideal para techos planos. Más económica y
                                                         con menor impacto visual.</p>
                                                     <ul class="angulo-benefits">
-                                                        <li>Sin soportes adicionales</li>
-                                                        <li>Paneles casi invisibles desde la calle</li>
-                                                        <li>Optimizada para verano</li>
+                                                        <li>- Sin soportes adicionales</li>
+                                                        <li>- Paneles casi invisibles desde la calle</li>
+                                                        <li>- Optimizada para verano</li>
                                                     </ul>
                                                     <div class="angulo-recomendado">
                                                         Si tu prioridad es estética y presupuesto ajustado.
@@ -764,9 +766,9 @@
                                                     <p class="angulo-summary">Máximo rendimiento todo el año. Mejor
                                                         captura en invierno.</p>
                                                     <ul class="angulo-benefits">
-                                                        <li>Rendimiento estable verano/invierno</li>
-                                                        <li>Mejor en invierno</li>
-                                                        <li>Requiere soportes adicionales</li>
+                                                        <li>- Rendimiento estable verano/invierno</li>
+                                                        <li>- Mejor en invierno</li>
+                                                        <li>- Requiere soportes adicionales</li>
                                                     </ul>
                                                     <div class="angulo-recomendado">
                                                         Si buscás máximo ahorro anual y energía estable.
@@ -813,7 +815,23 @@
                                 <!-- Solapa 1: Panorama General (Default) -->
                                 <div class="wizard-tab-pane active" id="wizardTabPanorama">
                                     <div class="wizard-panorama-container">
-                                        <h2 class="wizard-panorama-title">General</h2>
+                                        
+
+                                        <!-- Información de Paneles Recomendados -->
+                                        <div class="wizard-paneles-info">
+                                            <div class="wizard-paneles-card">
+                                                <div class="wizard-paneles-image">
+                                                    <img src="images/panelfrontal.png" alt="Panel Solar" class="wizard-paneles-img">
+                                                </div>
+                                                <div class="wizard-paneles-content">
+                                                    <div class="wizard-paneles-label">Paneles Recomendados</div>
+                                                    <div class="wizard-paneles-value">
+                                                        <span id="wizardPanoramaNumPaneles">-</span> paneles de 190W
+                                                    </div>
+                                                    <div class="wizard-paneles-desc">Sistema optimizado para tu consumo</div>
+                                                </div>
+                                            </div>
+                                        </div>
 
                                         <!-- KPIs (3 indicadores clave) -->
                                         <div class="wizard-panorama-kpis">
@@ -829,7 +847,7 @@
                                             <div class="wizard-panorama-kpi">
                                                 <div class="wizard-panorama-kpi-icon">📅</div>
                                                 <div class="wizard-panorama-kpi-content">
-                                                    <div class="wizard-panorama-kpi-label">Tiempo de Repago (ROI)</div>
+                                                    <div class="wizard-panorama-kpi-label">Periodo de Recupero</div>
                                                     <div class="wizard-panorama-kpi-value" id="wizardPanoramaROI">-
                                                     </div>
                                                 </div>
@@ -849,20 +867,6 @@
                                         <div class="wizard-veredicto">
                                             <div class="wizard-veredicto-icon">✨</div>
                                             <div class="wizard-veredicto-text" id="wizardVeredictoRapido">-</div>
-                                        </div>
-
-                                        <!-- Información de Paneles Recomendados -->
-                                        <div class="wizard-paneles-info">
-                                            <div class="wizard-paneles-card">
-                                                <div class="wizard-paneles-icon">🔋</div>
-                                                <div class="wizard-paneles-content">
-                                                    <div class="wizard-paneles-label">Paneles Recomendados</div>
-                                                    <div class="wizard-paneles-value">
-                                                        <span id="wizardPanoramaNumPaneles">-</span> paneles de 190W
-                                                    </div>
-                                                    <div class="wizard-paneles-desc">Sistema optimizado para tu consumo</div>
-                                                </div>
-                                            </div>
                                         </div>
 
                                     
@@ -901,7 +905,30 @@
                                                     <div class="wizard-data-value" id="wizardRadiacionPromedio">-</div>
                                                     <div class="wizard-data-desc" id="wizardUbicacionNombre">-</div>
                                                 </div>
+                                                <div class="wizard-data-card">
+                                                    <div class="wizard-data-label">Generación Anual Total</div>
+                                                    <div class="wizard-data-value" id="wizardGeneracionAnual">-</div>
+                                                    <div class="wizard-data-desc">Energía generada por el sistema</div>
+                                                </div>
+                                            </div>
+                                        </div>
 
+                                        <div class="wizard-tab-section">
+                                            <h4 class="wizard-tab-title">Tabla Mensual Detallada</h4>
+                                            <div class="monthly-table-container">
+                                                <table class="monthly-detail-table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Mes</th>
+                                                            <th>Generación (kWh)</th>
+                                                            <th>Consumo (kWh)</th>
+                                                            <th>Balance</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="wizardMonthlyTableBody">
+                                                        <!-- Se llena dinámicamente desde llenarTablaMensualWizard() -->
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
 
@@ -923,25 +950,6 @@
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="wizard-tab-section">
-                                            <h4 class="wizard-tab-title">Tabla Mensual Detallada</h4>
-                                            <div class="monthly-table-container">
-                                                <table class="monthly-detail-table">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>Mes</th>
-                                                            <th>Generación (kWh)</th>
-                                                            <th>Consumo (kWh)</th>
-                                                            <th>Balance</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody id="wizardMonthlyTableBody">
-                                                        <!-- Se llena dinámicamente desde llenarTablaMensualWizard() -->
-                                                    </tbody>
-                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -1070,9 +1078,9 @@
                                     <div class="wizard-tab-section">
                                         <div class="financial-details-grid">
                                             <div class="financial-detail-card">
-                                                <div class="detail-label">ROI Exacto</div>
+                                                <div class="detail-label">Periodo de Recupero</div>
                                                 <div class="detail-value" id="wizardDetailROI">-</div>
-                                                <div class="detail-desc">Tiempo de recuperación</div>
+                                                <div class="detail-desc">Tiempo de recuperación de la inversión</div>
                                             </div>
 
                                             <div class="financial-detail-card">
@@ -1313,7 +1321,7 @@
             <button type="button" class="btn btn-outline" id="wizardBtnImprimir"
                 onclick="imprimirReporteWizard()">
                 <i class="fas fa-download"></i>
-                <span>Descargar Reporte PDF</span>
+                <span>Descargar PDF</span>
             </button>
         </div>
         <button type="button" class="btn btn-primary" id="btnWizardNext">

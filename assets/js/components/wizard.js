@@ -36,7 +36,7 @@ let wizardData = {
     modoDimensionamiento: 'porcentaje',
     porcentajeCobertura: 100,
     numPaneles: null,
-    inclinacion: 20
+    inclinacion: null  // No preseleccionar, el usuario debe elegir
 };
 
 // Variables globales para gráficos del wizard
@@ -143,7 +143,7 @@ export function actualizarWizardUI() {
                 if (btnNext) {
                     btnNext.style.display = 'flex';
                     if (currentWizardStep === totalWizardSteps - 1) {
-                        btnNext.innerHTML = 'Finalizar <i class="fas fa-check"></i>';
+                        btnNext.innerHTML = 'Finalizar</i>';
                     } else {
                         btnNext.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
                     }
@@ -309,7 +309,11 @@ export function goToWizardStep(step) {
             inicializarWizardAngulo();
         }, 100);
     } else if (step === 5) {
-        setTimeout(() => {
+        // Recalcular y regenerar gráficos antes de mostrar resultados
+        setTimeout(async () => {
+            // Recalcular resultados para asegurar que estén actualizados
+            await calcularResultadosWizard();
+            // Inicializar vista detallada (esto regenera los gráficos)
             inicializarWizardResultadosDetallados();
         }, 100);
     }
@@ -682,15 +686,17 @@ export function inicializarPaso4Wizard() {
         });
     });
 
-    const card20 = document.querySelector('#wizardStep4 .angulo-option-card[data-angulo="20"]');
-    if (card20) {
-        card20.classList.add('active');
-    }
-    
-    // Asegurar que el radio button de 20° esté marcado
-    if (radio20) {
-        radio20.checked = true;
-        cambiarAnguloWizard(20);
+    // No preseleccionar ninguna opción - el usuario debe elegir
+    // Si ya hay un valor guardado, restaurarlo
+    if (wizardData.inclinacion) {
+        const angulo = wizardData.inclinacion;
+        if (angulo === 20 && radio20) {
+            radio20.checked = true;
+            cambiarAnguloWizard(20);
+        } else if (angulo === 45 && radio45) {
+            radio45.checked = true;
+            cambiarAnguloWizard(45);
+        }
     }
 }
 
@@ -877,6 +883,11 @@ export function llenarDatosAnalisisEnergetico(resultados, generacionMensual, dat
         ubicacionNombre.textContent = datos.ubicacion || wizardData.ubicacionNombre || 'Ubicación seleccionada';
     }
 
+    const generacionAnual = document.getElementById('wizardGeneracionAnual');
+    if (generacionAnual && resultados) {
+        generacionAnual.textContent = `${formatearNumero(resultados.energia_anual_total)} kWh/año`;
+    }
+
     const perdidasTemperatura = document.getElementById('wizardPerdidasTemperatura');
     if (perdidasTemperatura) {
         const tempPromedio = datos.temperatura.reduce((a, b) => a + b, 0) / datos.temperatura.length;
@@ -1031,6 +1042,28 @@ export function inicializarWizardResultadosDetallados() {
 
     if (window.wizardResultados) {
         llenarVistaDetalladaWizard();
+        
+        // Regenerar todos los gráficos para asegurar que estén actualizados
+        setTimeout(() => {
+            // Destruir gráficos existentes si existen
+            if (wizardMonthlyChart) {
+                wizardMonthlyChart.destroy();
+                wizardMonthlyChart = null;
+            }
+            if (wizardDistributionChart) {
+                wizardDistributionChart.destroy();
+                wizardDistributionChart = null;
+            }
+            if (wizardFinancialChart) {
+                wizardFinancialChart.destroy();
+                wizardFinancialChart = null;
+            }
+            
+            // Regenerar todos los gráficos
+            generarGraficaMensualWizard();
+            generarGraficaDistribucionWizard();
+            generarGraficaFinancieraWizard();
+        }, 200);
     }
 
     const tabs = document.querySelectorAll('#wizardStep5 .wizard-result-tab');
@@ -1134,19 +1167,8 @@ export function inicializarWizardResultadosDetallados() {
         });
     });
 
-    const inflacionInput = document.getElementById('wizardInflacionInput');
-    const btnRecalcular = document.getElementById('wizardBtnRecalcular');
-
-    if (btnRecalcular && !btnRecalcular.disabled) {
-        btnRecalcular.addEventListener('click', function () {
-            if (this.disabled) return;
-            const inflacion = parseFloat(inflacionInput?.value || 3) / 100;
-            if (window.wizardResultados) {
-                generarGraficaFinancieraWizard(inflacion);
-                llenarTablaAhorroAcumulado(inflacion);
-            }
-        });
-    }
+    // La sección de inflación está bloqueada, no se usa en los cálculos
+    // Los cálculos se hacen sin inflación
 }
 
 /**
@@ -1186,12 +1208,8 @@ export function llenarVistaDetalladaWizard() {
 
     const detailAhorro25 = document.getElementById('wizardDetailAhorro25');
     if (detailAhorro25) {
-        let ahorroTotal25 = 0;
-        let ahorroAnualActual = resultados.ahorro_anual || 0;
-        for (let i = 1; i <= 25; i++) {
-            ahorroTotal25 += ahorroAnualActual;
-            ahorroAnualActual *= 1.03;
-        }
+        // Sin inflación: simplemente multiplicar el ahorro anual por 25 años
+        const ahorroTotal25 = (resultados.ahorro_anual || 0) * 25;
         detailAhorro25.textContent = `${simbolo}${formatearNumero(ahorroTotal25, moneda)}`;
     }
 
@@ -1290,7 +1308,7 @@ export function llenarTablaMensualWizard() {
 /**
  * Llenar tabla ahorro acumulado
  */
-export function llenarTablaAhorroAcumulado(inflacionEnergetica = 0.03) {
+export function llenarTablaAhorroAcumulado() {
     if (!window.wizardResultados) return;
 
     const tbody = document.getElementById('wizardAhorroTableBody');
@@ -1306,15 +1324,9 @@ export function llenarTablaAhorroAcumulado(inflacionEnergetica = 0.03) {
     const años = [1, 5, 10, 15];
 
     años.forEach(año => {
-        let ahorroAcumulado = 0;
-        let ahorroAnualActual = ahorroAnualBase;
-
-        for (let i = 1; i <= año; i++) {
-            ahorroAcumulado += ahorroAnualActual;
-            ahorroAnualActual *= (1 + inflacionEnergetica);
-        }
-
-        const ahorroAnual = ahorroAnualBase * Math.pow(1 + inflacionEnergetica, año - 1);
+        // Sin inflación: el ahorro anual es constante
+        const ahorroAcumulado = ahorroAnualBase * año;
+        const ahorroAnual = ahorroAnualBase;
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -1779,6 +1791,15 @@ export async function confirmarUbicacionWizard() {
         wizardData.ubicacionNombre = ubicacionSeleccionada.nombre || 'Ubicación seleccionada';
 
         const wizardStep1 = document.getElementById('wizardStep1');
+        const btnNext = document.getElementById('btnWizardNext');
+        
+        // Deshabilitar botón Siguiente mientras carga
+        if (btnNext) {
+            btnNext.disabled = true;
+            btnNext.style.opacity = '0.5';
+            btnNext.style.cursor = 'not-allowed';
+        }
+
         const loadingOverlay = document.createElement('div');
         loadingOverlay.id = 'wizardLoadingOverlay';
         loadingOverlay.style.cssText = `
@@ -1808,10 +1829,26 @@ export async function confirmarUbicacionWizard() {
         try {
             await obtenerDatosClimaticosWizard(ubicacionSeleccionada.lat, ubicacionSeleccionada.lon);
             loadingOverlay.remove();
+            
+            // Habilitar botón Siguiente cuando termina la carga
+            if (btnNext) {
+                btnNext.disabled = false;
+                btnNext.style.opacity = '1';
+                btnNext.style.cursor = 'pointer';
+            }
+            
             return true;
         } catch (error) {
             console.error('Error obteniendo datos climáticos:', error);
             loadingOverlay.remove();
+            
+            // Habilitar botón Siguiente incluso si hay error
+            if (btnNext) {
+                btnNext.disabled = false;
+                btnNext.style.opacity = '1';
+                btnNext.style.cursor = 'pointer';
+            }
+            
             mostrarNotificacion('⚠️ Error obteniendo datos climáticos. Usando datos de ejemplo.', 'error');
             wizardData.psh = DATOS_EJEMPLO.psh;
             wizardData.temperatura = DATOS_EJEMPLO.temperatura;

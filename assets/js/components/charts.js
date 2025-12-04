@@ -404,7 +404,7 @@ export function generarGraficaMensualWizard() {
 /**
  * Generar gráfica financiera (wizard)
  */
-export function generarGraficaFinancieraWizard(inflacionEnergetica = 0.03) {
+export function generarGraficaFinancieraWizard() {
     if (!window.wizardResultados) {
         console.error('❌ Faltan datos para generar gráfico financiero');
         return;
@@ -450,22 +450,20 @@ export function generarGraficaFinancieraWizard(inflacionEnergetica = 0.03) {
         labels.push(`Año ${i}`);
     }
 
-    // Calcular ahorros acumulados y flujo neto acumulado
-    let ahorroAnualActual = resultados.ahorro_anual || 0;
+    // Calcular ahorros acumulados y flujo neto acumulado (sin inflación)
+    const ahorroAnual = resultados.ahorro_anual || 0;
     let ahorrosAcum = 0;
 
     ahorrosAcumulados.push(0);
     flujoNetoAcumulado.push(-inversionTotal);
 
     for (let i = 1; i <= anos; i++) {
-        ahorrosAcum += ahorroAnualActual;
+        // Sin inflación: el ahorro anual es constante
+        ahorrosAcum += ahorroAnual;
         const flujoNeto = ahorrosAcum - inversionTotal;
 
         ahorrosAcumulados.push(ahorrosAcum);
         flujoNetoAcumulado.push(flujoNeto);
-
-        // Aplicar inflación energética
-        ahorroAnualActual *= (1 + inflacionEnergetica);
     }
 
     wizardFinancialChart = new Chart(ctx, {

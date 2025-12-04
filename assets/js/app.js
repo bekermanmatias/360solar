@@ -829,11 +829,70 @@ export function initializeApp() {
 
     const mobileToggle = document.querySelector('.mobile-menu-toggle');
     const navMenu = document.querySelector('.nav-menu');
+    const body = document.body;
 
-    if (mobileToggle) {
-        mobileToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+    if (mobileToggle && navMenu) {
+        // Función para cerrar el menú
+        const cerrarMenu = () => {
+            navMenu.classList.remove('active');
+            mobileToggle.classList.remove('active');
+            body.classList.remove('menu-open');
+        };
+
+        // Función para abrir/cerrar el menú
+        const toggleMenu = (e) => {
+            e.stopPropagation();
+            const isActive = navMenu.classList.contains('active');
+            
+            if (isActive) {
+                cerrarMenu();
+            } else {
+                navMenu.classList.add('active');
+                mobileToggle.classList.add('active');
+                body.classList.add('menu-open');
+            }
+        };
+
+        // Toggle al hacer clic en el botón hamburguesa
+        mobileToggle.addEventListener('click', toggleMenu);
+
+        // Cerrar menú al hacer clic en un enlace
+        const navLinks = navMenu.querySelectorAll('.nav-link');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                // Pequeño delay para permitir la navegación
+                setTimeout(() => {
+                    cerrarMenu();
+                }, 100);
+            });
         });
+
+        // Cerrar menú al hacer clic fuera o en el overlay
+        document.addEventListener('click', (e) => {
+            if (navMenu.classList.contains('active')) {
+                if (!navMenu.contains(e.target) && !mobileToggle.contains(e.target)) {
+                    cerrarMenu();
+                }
+            }
+        });
+
+        // Cerrar menú con la tecla Escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navMenu.classList.contains('active')) {
+                cerrarMenu();
+            }
+        });
+
+        // Prevenir scroll del body cuando el menú está abierto
+        const observer = new MutationObserver(() => {
+            if (navMenu.classList.contains('active')) {
+                body.style.overflow = 'hidden';
+            } else {
+                body.style.overflow = '';
+            }
+        });
+
+        observer.observe(navMenu, { attributes: true, attributeFilter: ['class'] });
     }
 
     window.addEventListener('click', (e) => {
