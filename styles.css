@@ -6059,6 +6059,8 @@ section:last-of-type::after {
     height: 100%;
     display: flex;
     flex-direction: column;
+    flex: 1;
+    /* Ensure it takes remaining space */
 }
 
 /* Paso 4 específico - más ancho */
@@ -6480,7 +6482,7 @@ section:last-of-type::after {
     width: 100%;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 100%;
 }
 
 /* Dashboard de Impacto - Versión Resumida */
@@ -6635,13 +6637,11 @@ section:last-of-type::after {
 }
 
 .wizard-results-tabs-container {
-    margin-top: 0;
-    margin-bottom: 0;
+    margin: 0;
     display: block;
-    /* Siempre visible desde el inicio */
-    position: sticky;
-    top: 0;
-    z-index: 10;
+    /* Fixed Header */
+    position: relative;
+    z-index: 100;
     background: white;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
@@ -6651,10 +6651,14 @@ section:last-of-type::after {
     gap: 0;
     border-bottom: 2px solid #e8ecef;
     background: #f8f9fa;
-    border-radius: 12px 12px 0 0;
-    padding: 0.5rem 0.5rem 0 0.5rem;
+    border-radius: 0;
+    padding: 0;
     overflow-x: visible;
     overflow-y: visible;
+    flex-wrap: wrap;
+    /* -webkit-overflow-scrolling: touch; */
+    /* scrollbar-width: none; */
+    /* Firefox */
 }
 
 .wizard-result-tab {
@@ -6674,6 +6678,11 @@ section:last-of-type::after {
     position: relative;
     white-space: nowrap;
     border-radius: 8px 8px 0 0;
+    flex: 1 0 30%;
+    /* Force 3 items per row (33% approx) */
+    justify-content: center;
+    min-width: auto;
+    /* Allow shrinking if needed, but flex-basis controls */
 }
 
 .wizard-result-tab:hover {

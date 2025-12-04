@@ -156,7 +156,7 @@ export function actualizarWizardUI() {
                 if (btnNext) {
                     btnNext.style.display = 'flex';
                     if (currentWizardStep === totalWizardSteps - 1) {
-                        btnNext.innerHTML = 'Finalizar</i>';
+                        btnNext.innerHTML = 'Nueva Simulación <i class="fas fa-redo"></i>';
                     } else {
                         btnNext.innerHTML = 'Siguiente <i class="fas fa-arrow-right"></i>';
                     }
@@ -178,12 +178,12 @@ export function actualizarWizardUI() {
 export function actualizarWizardVisual() {
     const visualContent = document.getElementById('wizardVisualContent');
     if (!visualContent) return;
-    
+
     // Ajustar clase según si estamos en modal o página
     const isPageMode = document.body.classList.contains('simulador-page');
 
     const visualClass = isPageMode ? 'simulador-wizard-visual' : 'modal-wizard-visual';
-    
+
     if (currentWizardStep === 0) {
         visualContent.className = `${visualClass} intro-overlay`;
         visualContent.innerHTML = `
@@ -473,14 +473,8 @@ export function inicializarWizardModal() {
                     goToWizardStep(5);
                 }
             } else if (currentWizardStep === 5) {
-                // En el paso 5 (resultados), el botón "Finalizar" cierra el modal o redirige
-                const isPageMode = document.body.classList.contains('simulador-page');
-                if (isPageMode) {
-                    // En página completa, no hacer nada o mostrar mensaje
-                    mostrarNotificacion('✅ Simulación completada. Revisa tus resultados arriba.', 'success');
-                } else {
-                    cerrarModalSimulador();
-                }
+                // En el paso 5 (resultados), el botón "Nueva Simulación" reinicia el wizard
+                goToWizardStep(0);
             } else if (currentWizardStep === 1) {
                 if (ubicacionSeleccionada) {
                     const ubicacionOK = await confirmarUbicacionWizard();
@@ -1002,7 +996,7 @@ export function llenarDatosImpactoAmbiental() {
     const resultados = window.wizardResultados;
     const co2Anual = resultados.co2_anual || 0;
     const co225Anos = resultados.co2_25_anos || (co2Anual * 25);
-    
+
     const equivalencias = calcularEquivalenciasAmbientales(co2Anual);
 
     // CO₂ evitado por año
@@ -1046,7 +1040,7 @@ export function inicializarWizardResultadosDetallados() {
 
     if (window.wizardResultados) {
         llenarVistaDetalladaWizard();
-        
+
         // Regenerar todos los gráficos para asegurar que estén actualizados
         setTimeout(() => {
             // Destruir gráficos existentes si existen
@@ -1062,7 +1056,7 @@ export function inicializarWizardResultadosDetallados() {
                 wizardFinancialChart.destroy();
                 wizardFinancialChart = null;
             }
-            
+
             // Regenerar todos los gráficos
             generarGraficaMensualWizard();
             generarGraficaDistribucionWizard();
@@ -1796,7 +1790,7 @@ export async function confirmarUbicacionWizard() {
 
         const wizardStep1 = document.getElementById('wizardStep1');
         const btnNext = document.getElementById('btnWizardNext');
-        
+
         // Deshabilitar botón Siguiente mientras carga
         if (btnNext) {
             btnNext.disabled = true;
@@ -1833,26 +1827,26 @@ export async function confirmarUbicacionWizard() {
         try {
             await obtenerDatosClimaticosWizard(ubicacionSeleccionada.lat, ubicacionSeleccionada.lon);
             loadingOverlay.remove();
-            
+
             // Habilitar botón Siguiente cuando termina la carga
             if (btnNext) {
                 btnNext.disabled = false;
                 btnNext.style.opacity = '1';
                 btnNext.style.cursor = 'pointer';
             }
-            
+
             return true;
         } catch (error) {
             console.error('Error obteniendo datos climáticos:', error);
             loadingOverlay.remove();
-            
+
             // Habilitar botón Siguiente incluso si hay error
             if (btnNext) {
                 btnNext.disabled = false;
                 btnNext.style.opacity = '1';
                 btnNext.style.cursor = 'pointer';
             }
-            
+
             mostrarNotificacion('⚠️ Error obteniendo datos climáticos. Usando datos de ejemplo.', 'error');
             wizardData.psh = DATOS_EJEMPLO.psh;
             wizardData.temperatura = DATOS_EJEMPLO.temperatura;
