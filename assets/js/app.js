@@ -229,7 +229,7 @@ export function mostrarResultados(resultados, generacionMensual, datos = null) {
         resultsContainer.classList.add('show');
     }
 
-    const tipoPanelTexto = 'Panel de Referencia 190W';
+    const tipoPanelTexto = 'Módulo FV 360-Ref 190w';
     const consumoMensual = parseFloat(document.getElementById('consumo')?.value || 0);
 
     // KPIs Principales

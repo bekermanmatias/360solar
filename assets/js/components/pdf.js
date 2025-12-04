@@ -625,7 +625,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
     const consumo = parseFloat(document.getElementById('consumo')?.value) || 0;
     const precioKwh = parseFloat(document.getElementById('precio_kwh')?.value) || 0;
 
-    const tipoPanel = 'Panel de Referencia 190W - $200.000';
+    const tipoPanel = 'Módulo FV 360-Ref 190W - $200.000';
 
     const ubicacionTexto = window.ubicacionActual?.nombre || 'Ubicación personalizada';
     const coordenadas = window.ubicacionActual?.lat && window.ubicacionActual?.lon

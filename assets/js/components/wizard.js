@@ -1024,11 +1024,6 @@ export function llenarDatosImpactoAmbiental() {
     if (equivalenciaVuelos) {
         equivalenciaVuelos.textContent = `~${formatearNumero(equivalencias.vuelos, 'ARS')}`;
     }
-
-    const equivalenciaHogares = document.getElementById('wizardEquivalenciaHogares');
-    if (equivalenciaHogares) {
-        equivalenciaHogares.textContent = `~${formatearNumero(equivalencias.hogares, 'ARS')}`;
-    }
 }
 
 /**
@@ -1228,7 +1223,7 @@ export function llenarVistaDetalladaWizard() {
     }
 
     const equipPanelModelo = document.getElementById('wizardEquipPanelModelo');
-    if (equipPanelModelo) equipPanelModelo.textContent = 'Panel de Referencia 190W';
+    if (equipPanelModelo) equipPanelModelo.textContent = 'Módulo FV 360-Ref 190W';
 
     const equipPanelCantidad = document.getElementById('wizardEquipPanelCantidad');
     if (equipPanelCantidad) equipPanelCantidad.textContent = resultados.num_paneles;

@@ -164,8 +164,7 @@ export function calcularEquivalenciasAmbientales(co2Anual) {
     return {
         arboles: Math.round(co225Anos / 22), // 1 árbol ≈ 22 kg CO₂/año (según paper)
         autos: Math.round(co225Anos / 2500), // 1 auto ≈ 2500 kg CO₂/año (según paper)
-        vuelos: Math.round(co225Anos / 500), // 1 vuelo BA-Madrid ≈ 500 kg CO₂
-        hogares: Math.round(co225Anos / 4000) // 1 hogar ≈ 4000 kg CO₂/año (mantenido)
+        vuelos: Math.round(co225Anos / 500) // 1 vuelo BA-Madrid ≈ 500 kg CO₂
     };
 }
 
