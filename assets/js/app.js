@@ -15,7 +15,7 @@ import { validarDatos } from './utils/validators.js';
 import { formatNumber } from './utils/formatters.js';
 import { generarGraficaMensual, generarGraficaFinanciera } from './components/charts.js';
 import { abrirMapa, cerrarMapa } from './components/map.js';
-import { abrirModalSimulador, inicializarWizardModal } from './components/wizard.js';
+import { abrirModalSimulador, inicializarWizardModal, actualizarWizardUI } from './components/wizard.js';
 
 // Variables globales para compatibilidad
 let monthlyChart = null;
@@ -764,6 +764,16 @@ export function initializeApp() {
 
     if (navSimulador) {
         navSimulador.addEventListener('click', function (e) {
+            // Si estamos en la página del simulador, no hacer nada (ya estamos ahí)
+            if (document.body.classList.contains('simulador-page')) {
+                return;
+            }
+            // Si el enlace apunta a simulador.html, dejar que el navegador maneje la navegación
+            const href = navSimulador.getAttribute('href');
+            if (href && href.includes('simulador.html')) {
+                return; // Dejar que el navegador maneje la navegación
+            }
+            // Si no, intentar abrir modal (compatibilidad con versiones antiguas)
             e.preventDefault();
             abrirModalSimulador();
         });
@@ -803,10 +813,28 @@ export function initializeApp() {
         }
     });
 
-    inicializarWizardModal();
+    // Inicializar wizard solo si existe (puede estar en modal o en página completa)
+    if (document.getElementById('btnIniciarSimulador') || document.body.classList.contains('simulador-page')) {
+        inicializarWizardModal();
+    }
     inicializarDimensionamiento();
     agregarValidacionTiempoReal();
     validarYHabilitarBotonCalcular();
+    
+    // Si estamos en la página del simulador, inicializar desde el paso 0
+    if (document.body.classList.contains('simulador-page')) {
+        // Asegurar que el body tenga scroll habilitado
+        document.body.style.overflow = '';
+        document.body.style.overflowX = 'hidden';
+        document.body.style.overflowY = 'auto';
+        
+        // Resetear al paso 0 y actualizar UI
+        if (typeof window.goToWizardStep === 'function') {
+            window.goToWizardStep(0);
+        } else {
+            actualizarWizardUI();
+        }
+    }
 
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {

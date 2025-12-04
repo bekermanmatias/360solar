@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Solar360 - Simulador de paneles solares. Calcula tu ahorro y dimensiona tu sistema solar paso a paso.">
+    <title>Simulador Solar | Solar360</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
+        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+    <!-- jsPDF y html2canvas para generación de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <!-- Leaflet CSS y JS para el mapa -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body class="simulador-page">
+    <!-- Header -->
+    <header class="header">
+        <nav class="container">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo360.png" alt="Solar360" class="logo-img">
+                    </a>
+                </div>
+                <ul class="nav-menu">
+                    <li><a href="index.html#inicio" class="nav-link">Inicio</a></li>
+                    <li><a href="index.html#productos" class="nav-link">Tecnología</a></li>
+                    <li><a href="simulador.html" class="nav-link active">Simulador</a></li>
+                    <li><a href="sobre-nosotros.html" class="nav-link">Nosotros</a></li>
+                    <li><a href="index.html#contacto" class="nav-link">Contacto</a></li>
+                </ul>
+                <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Contenedor para impresión -->
+    <div id="printReport" class="print-report" style="display: none;"></div>
+
+    <!-- Simulador Fullscreen (convertido de modal a página) -->
+    <div class="simulador-page-container">
+
+        <!-- Sección Izquierda (1/3) - Imagen/Contenido Visual -->
+        <div class="simulador-page-left">
+            <div class="simulador-wizard-visual" id="wizardVisualContent">
+                <!-- Contenido visual cambiará según el paso -->
+            </div>
+        </div>
+
+        <!-- Sección Derecha (2/3) - Contenido del Paso Actual -->
+        <div class="simulador-page-right">
+            <div class="simulador-wizard-content">
+                <!-- Paso 0: Introducción -->
+                <div class="wizard-step-content active" data-step="0" id="wizardStep0">
+                    <div class="wizard-intro">
+                        <h1 class="wizard-intro-title">Paso a paso</h1>
+                        <p class="wizard-intro-subtitle">
+                            Solo 5 pasos te separan de tus resultados.
+                        </p>
+                        <div class="wizard-intro-steps">
+                            <div class="wizard-intro-step">
+                                <div class="wizard-intro-step-number">1</div>
+                                <div class="wizard-intro-step-content">
+                                    <h3>Ubicación</h3>
+                                    <p>Selecciona la ubicación de tu instalación en el mapa</p>
+                                </div>
+                            </div>
+                            <div class="wizard-intro-step">
+                                <div class="wizard-intro-step-number">2</div>
+                                <div class="wizard-intro-step-content">
+                                    <h3>Consumo</h3>
+                                    <p>Indica tu consumo mensual de energía</p>
+                                </div>
+                            </div>
+                            <div class="wizard-intro-step">
+                                <div class="wizard-intro-step-number">3</div>
+                                <div class="wizard-intro-step-content">
+                                    <h3>Dimensionamiento</h3>
+                                    <p>Elige el tamaño de tu instalación solar</p>
+                                </div>
+                            </div>
+                            <div class="wizard-intro-step">
+                                <div class="wizard-intro-step-number">4</div>
+                                <div class="wizard-intro-step-content">
+                                    <h3>Ángulo de Instalación</h3>
+                                    <p>Define la inclinación óptima de tus paneles</p>
+                                </div>
+                            </div>
+                            <div class="wizard-intro-step">
+                                <div class="wizard-intro-step-number">5</div>
+                                <div class="wizard-intro-step-content">
+                                    <h3>Resultados</h3>
+                                    <p>Obtén tu análisis completo y estimación de ahorro</p>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="wizard-intro-reassurance">
+                            Personalizado • Rápido • Sin compromiso • Resultados instantáneos
+                        </p>
+                        <button type="button" class="btn btn-primary btn-large wizard-intro-btn"
+                            id="btnIniciarSimulador">
+                            COMENZAR
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Paso 1: Ubicación -->
+                <div class="wizard-step-content" data-step="1" id="wizardStep1">
+                    <div class="wizard-step-body wizard-step-map">
+                        <!-- Mapa se mostrará aquí -->
+                        <div id="wizardMap" class="wizard-map-container"></div>
+
+                        <!-- Barra de búsqueda y controles del mapa -->
+                        <div class="wizard-map-controls">
+                            <div class="wizard-map-search">
+                                <input type="text" id="wizardMapSearch" class="wizard-map-search-input"
+                                    placeholder="Inserte la dirección o selecciónela en el mapa" autocomplete="off">
+                                <button type="button" class="wizard-map-search-btn">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <div class="wizard-map-search-suggestions" id="wizardMapSearchSuggestions"></div>
+                            </div>
+                            <div class="wizard-map-toggles">
+                                <button type="button" class="wizard-map-toggle active" data-view="map">Mapa</button>
+                                <button type="button" class="wizard-map-toggle"
+                                    data-view="satellite">Satélite</button>
+                            </div>
+                        </div>
+
+                        <!-- Información y botones de acción -->
+                        <div class="wizard-map-info">
+                            <p>
+                                <i class="fas fa-map-marker-alt"></i>
+                                Busca o selecciona en el mapa la ubicacion donde deseas instalar tus nuevos paneles
+                                solares, cuando estes listo apreta "Siguiente".
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 2: Consumo -->
+                <div class="wizard-step-content" data-step="2" id="wizardStep2">
+                    <div class="wizard-step-body">
+                        <!-- Selector de Moneda -->
+                        <div class="wizard-form-section">
+                            <label class="wizard-form-label">Moneda</label>
+                            <div class="currency-selector">
+                                <button type="button" class="currency-option active" data-currency="ARS"
+                                    id="currencyARS">
+                                    <span class="currency-code">
+                                        <img src="images/ar.webp" alt="Argentina" class="currency-flag-img">
+                                    </span>
+                                    <span class="currency-name">Peso Argentino</span>
+                                </button>
+                                <button type="button" class="currency-option coming-soon" data-currency="USD" id="currencyUSD" disabled>
+                                    <span class="currency-icon"><i class="fas fa-globe"></i></span>
+                                    <span class="currency-code">USD</span>
+                                    <span class="currency-name">Dólar Estadounidense</span>
+                                    <span class="coming-soon-badge">Próximamente</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Opciones de Consumo -->
+                        <div class="wizard-form-section">
+                            <label class="wizard-form-label">¿Cómo quieres ingresar tu consumo?</label>
+                            <div class="consumption-mode-selector">
+                                <button type="button" class="consumption-mode-option active" data-mode="aproximado"
+                                    id="modeAproximado">
+                                    <div class="mode-option-icon">
+                                        <i class="fas fa-calculator"></i>
+                                    </div>
+                                    <div class="mode-option-content">
+                                        <div class="mode-option-title">Consumo Aproximado</div>
+                                        <div class="mode-option-desc">Un valor para todos los meses</div>
+                                    </div>
+                                </button>
+                                <button type="button" class="consumption-mode-option coming-soon" data-mode="especifico"
+                                    id="modeEspecifico" disabled>
+                                    <div class="mode-option-icon">
+                                        <i class="fas fa-calendar-alt"></i>
+                                    </div>
+                                    <div class="mode-option-content">
+                                        <div class="mode-option-title">Consumo Específico</div>
+                                        <div class="mode-option-desc">Mes a mes detallado</div>
+                                    </div>
+                                    <span class="coming-soon-badge">Próximamente</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Consumo Aproximado -->
+                        <div class="wizard-form-section" id="consumoAproximadoSection">
+                            <label class="wizard-form-label" for="consumoAproximado">Consumo Mensual Aproximado
+                                (kWh)</label>
+                            <input type="number" id="consumoAproximado" class="wizard-form-input"
+                                placeholder="Ej: 350" min="1" step="0.1">
+                            <small class="wizard-form-help">Ingresa el consumo promedio mensual de tu hogar</small>
+                        </div>
+
+                        <!-- Consumo Específico (Mes a Mes) -->
+                        <div class="wizard-form-section" id="consumoEspecificoSection" style="display: none;">
+                            <label class="wizard-form-label">Consumo Mensual Detallado (kWh)</label>
+                            <div class="monthly-consumption-grid">
+                                <div class="monthly-consumption-item">
+                                    <label>Enero</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="0"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Febrero</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="1"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Marzo</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="2"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Abril</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="3"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Mayo</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="4"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Junio</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="5"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Julio</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="6"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Agosto</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="7"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Septiembre</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="8"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Octubre</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="9"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Noviembre</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="10"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                                <div class="monthly-consumption-item">
+                                    <label>Diciembre</label>
+                                    <input type="number" class="wizard-form-input monthly-input" data-month="11"
+                                        placeholder="0" min="0" step="0.1">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Precio por kWh -->
+                        <div class="wizard-form-section">
+                            <label class="wizard-form-label" for="precioKwh">Precio por kWh</label>
+                            <div class="price-input-wrapper">
+                                <span class="price-currency" id="priceCurrencyDisplay">ARS</span>
+                                <input type="number" id="precioKwh" class="wizard-form-input" placeholder="Ej: 180"
+                                    min="0" step="0.01">
+                            </div>
+                            <small class="wizard-form-help" id="precioKwhHelp">Precio actual aproximado: ~$180
+                                ARS/kWh (Nov 2025)</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 3: Dimensionamiento -->
+                <div class="wizard-step-content" data-step="3" id="wizardStep3">
+                    <div class="wizard-step-body">
+                        <!-- Modo de Dimensionamiento -->
+                        <div class="wizard-form-section dimensionamiento-section">
+                            <label class="wizard-form-label">
+                                <i class="fas fa-sliders-h"></i>
+                                ¿Cómo quieres dimensionar tu sistema?
+                            </label>
+
+                            <div class="dimensionamiento-options">
+                                <!-- Opción 1: Reducir Factura por Porcentaje -->
+                                <div class="dimensionamiento-option-card" data-mode="porcentaje">
+                                    <div class="option-header">
+                                        <div class="option-icon">
+                                            <i class="fas fa-percentage"></i>
+                                        </div>
+                                        <div class="option-title">
+                                            <h5>Reducir mi Factura</h5>
+                                            <p>Elige qué porcentaje de tu consumo quieres cubrir</p>
+                                        </div>
+                                        <div class="option-radio">
+                                            <input type="radio" name="wizard_dimensionamiento_mode"
+                                                id="wizardModePorcentaje" value="porcentaje" checked>
+                                            <label for="wizardModePorcentaje"></label>
+                                        </div>
+                                    </div>
+
+                                    <div class="option-content" id="wizardControlPorcentaje">
+                                        <div class="cobertura-control">
+                                            <div class="cobertura-display">
+                                                <span class="cobertura-label">Cobertura deseada:</span>
+                                                <span class="cobertura-value" id="wizardCoberturaValue">100%</span>
+                                            </div>
+                                            <input type="range" id="wizardPorcentajeCobertura" min="25" max="100"
+                                                step="5" value="100" class="cobertura-slider">
+                                            <small class="cobertura-help">Reduce tu factura eléctrica en el
+                                                porcentaje seleccionado</small>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Opción 2: Elegir Cantidad de Paneles -->
+                                <div class="dimensionamiento-option-card coming-soon" data-mode="paneles">
+                                    <div class="option-header">
+                                        <div class="option-icon">
+                                            <i class="fas fa-solar-panel"></i>
+                                        </div>
+                                        <div class="option-title">
+                                            <h5>Elegir Cantidad de Paneles</h5>
+                                            <p>Selecciona cuántos paneles quieres instalar</p>
+                                        </div>
+                                        <div class="option-radio">
+                                            <input type="radio" name="wizard_dimensionamiento_mode"
+                                                id="wizardModePaneles" value="paneles" disabled>
+                                            <label for="wizardModePaneles"></label>
+                                        </div>
+                                    </div>
+                                    <span class="coming-soon-badge">Próximamente</span>
+
+                                    <div class="option-content" id="wizardControlPaneles" style="display: none;">
+                                        <div class="paneles-control">
+                                            <div class="paneles-input-wrapper">
+                                                <button type="button" class="paneles-btn-minus"
+                                                    id="wizardBtnMenosPanel" aria-label="Reducir paneles">−</button>
+                                                <input type="number" id="wizardNumPanelesManual" min="1" value="1"
+                                                    step="1" class="paneles-input">
+                                                <button type="button" class="paneles-btn-plus"
+                                                    id="wizardBtnMasPanel" aria-label="Aumentar paneles">+</button>
+                                            </div>
+                                            <small class="paneles-help">El sistema calculará qué porcentaje de tu
+                                                consumo cubrirás</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 4: Ángulo de Instalación -->
+                <div class="wizard-step-content" data-step="4" id="wizardStep4">
+                    <div class="wizard-step-body">
+                        <div class="wizard-form-section">
+                            <label class="wizard-form-label">
+                                <i class="fas fa-angle-double-up"></i>
+                                Te ofrecemos dos configuraciones optimizadas:
+                            </label>
+
+                            <div class="angulo-info-section">
+                                <div class="angulo-explanation">
+                                    <div class="angulo-options">
+                                        <!-- Opción 20° -->
+                                        <div class="angulo-option-card" data-angulo="20">
+                                            <div class="angulo-option-media">
+                                                <img src="images/panel20.png" alt="Panel coplanar 20 grados">
+                                            </div>
+                                            <div class="angulo-option-header">
+                                                <div class="angulo-icon">
+                                                    <i class="fas fa-angle-down"></i>
+                                                </div>
+                                                <div class="angulo-option-title">
+                                                    <h5>20° - Instalación Coplanar</h5>
+                                                    <p class="angulo-subtitle">Estética y económica</p>
+                                                </div>
+                                                <div class="angulo-radio">
+                                                    <input type="radio" name="wizard_angulo" id="wizardAngulo20"
+                                                        value="20">
+                                                    <label for="wizardAngulo20"></label>
+                                                </div>
+                                            </div>
+                                            <div class="angulo-option-content">
+                                                <p class="angulo-summary">Ideal para techos planos. Más económica y
+                                                    con menor impacto visual.</p>
+                                                <ul class="angulo-benefits">
+                                                    <li>- Sin soportes adicionales</li>
+                                                    <li>- Paneles casi invisibles desde la calle</li>
+                                                    <li>- Optimizada para verano</li>
+                                                </ul>
+                                                <div class="angulo-recomendado">
+                                                    Si tu prioridad es estética y presupuesto ajustado.
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Opción 45° -->
+                                        <div class="angulo-option-card" data-angulo="45">
+                                            <div class="angulo-option-media">
+                                                <img src="images/panel45.png" alt="Paneles inclinados 45 grados">
+                                            </div>
+                                            <div class="angulo-option-header">
+                                                <div class="angulo-icon">
+                                                    <i class="fas fa-angle-up"></i>
+                                                </div>
+                                                <div class="angulo-option-title">
+                                                    <h5>45° - Optimización Anual</h5>
+                                                    <p class="angulo-subtitle">Máxima eficiencia</p>
+                                                </div>
+                                                <div class="angulo-radio">
+                                                    <input type="radio" name="wizard_angulo" id="wizardAngulo45"
+                                                        value="45">
+                                                    <label for="wizardAngulo45"></label>
+                                                </div>
+                                            </div>
+                                            <div class="angulo-option-content">
+                                                <p class="angulo-summary">Máximo rendimiento todo el año. Mejor
+                                                    captura en invierno.</p>
+                                                <ul class="angulo-benefits">
+                                                    <li>- Rendimiento estable verano/invierno</li>
+                                                    <li>- Mejor en invierno</li>
+                                                    <li>- Requiere soportes adicionales</li>
+                                                </ul>
+                                                <div class="angulo-recomendado">
+                                                    Si buscás máximo ahorro anual y energía estable.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Paso 5: Resultados -->
+                <div class="wizard-step-content" data-step="5" id="wizardStep5">
+                    <div class="wizard-step-body">
+                        <div class="wizard-results-container">
+                            <!-- Pestañas de Navegación (Siempre visibles desde el inicio) -->
+                            <div class="wizard-results-tabs-container" id="wizardResultsTabsContainer">
+                                <div class="wizard-results-tabs">
+                                    <button class="wizard-result-tab active" data-tab="panorama">
+                                        <i class="fas fa-chart-pie"></i>
+                                        <span>General</span>
+                                    </button>
+                                    <button class="wizard-result-tab" data-tab="energia">
+                                        <i class="fas fa-bolt"></i>
+                                        <span>Análisis Energético</span>
+                                    </button>
+                                    <button class="wizard-result-tab" data-tab="impacto">
+                                        <i class="fas fa-leaf"></i>
+                                        <span>Impacto Ambiental</span>
+                                    </button>
+                                    <button class="wizard-result-tab" data-tab="finanzas">
+                                        <i class="fas fa-dollar-sign"></i>
+                                        <span>Análisis Financiero</span>
+                                    </button>
+                                    <button class="wizard-result-tab" data-tab="instalacion">
+                                        <i class="fas fa-tools"></i>
+                                        <span>Tu Instalación</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Solapa 1: Panorama General (Default) -->
+                            <div class="wizard-tab-pane active" id="wizardTabPanorama">
+                                <div class="wizard-panorama-container">
+                                    <!-- Información de Paneles Recomendados -->
+                                    <div class="wizard-paneles-info">
+                                        <div class="wizard-paneles-card">
+                                            <div class="wizard-paneles-image">
+                                                <img src="images/panelfrontal.png" alt="Panel Solar" class="wizard-paneles-img">
+                                            </div>
+                                            <div class="wizard-paneles-content">
+                                                <div class="wizard-paneles-label">Paneles Recomendados</div>
+                                                <div class="wizard-paneles-value">
+                                                    <span id="wizardPanoramaNumPaneles">-</span> paneles de 190W
+                                                </div>
+                                                <div class="wizard-paneles-desc">Sistema optimizado para tu consumo</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- KPIs (3 indicadores clave) -->
+                                    <div class="wizard-panorama-kpis">
+                                        <div class="wizard-panorama-kpi">
+                                            <div class="wizard-panorama-kpi-icon"><i class="ti ti-currency-dollar"></i></div>
+                                            <div class="wizard-panorama-kpi-content">
+                                                <div class="wizard-panorama-kpi-label">Ahorro Mensual Estimado</div>
+                                                <div class="wizard-panorama-kpi-value"
+                                                    id="wizardPanoramaAhorroMensual">-</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="wizard-panorama-kpi">
+                                            <div class="wizard-panorama-kpi-icon"><i class="ti ti-calendar"></i></div>
+                                            <div class="wizard-panorama-kpi-content">
+                                                <div class="wizard-panorama-kpi-label">Periodo de Recupero</div>
+                                                <div class="wizard-panorama-kpi-value" id="wizardPanoramaROI">-</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="wizard-panorama-kpi">
+                                            <div class="wizard-panorama-kpi-icon"><i class="ti ti-bolt"></i></div>
+                                            <div class="wizard-panorama-kpi-content">
+                                                <div class="wizard-panorama-kpi-label">% de Autoconsumo</div>
+                                                <div class="wizard-panorama-kpi-value"
+                                                    id="wizardPanoramaAutoconsumo">-</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Veredicto Rápido -->
+                                    <div class="wizard-veredicto">
+                                        <div class="wizard-veredicto-icon"><i class="ti ti-star"></i></div>
+                                        <div class="wizard-veredicto-text" id="wizardVeredictoRapido">-</div>
+                                    </div>
+
+                                    <!-- Print Header (Hidden by default) -->
+                                    <div class="print-header" style="display: none;">
+                                        <div class="print-logo">
+                                            <img src="images/logo360.png" alt="Solar360">
+                                        </div>
+                                        <div class="print-info">
+                                            <h1>Reporte de Simulación Solar</h1>
+                                            <p id="printDate"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Solapa 2: Análisis Energético -->
+                            <div class="wizard-tab-pane" id="wizardTabEnergia" style="display: none;">
+                                <div class="wizard-results-detailed">
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Generación vs Consumo Mensual</h4>
+                                        <p class="wizard-tab-description">Comparación mensual de energía generada vs
+                                            consumida. La diferencia entre 20° y 45° se refleja especialmente en los
+                                            meses de invierno.</p>
+                                        <div class="wizard-chart-container">
+                                            <canvas id="wizardMonthlyChart"></canvas>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Datos de la Simulación</h4>
+                                        <div class="wizard-simulation-data">
+                                            <div class="wizard-data-card">
+                                                <div class="wizard-data-label">Radiación Promedio de la Zona</div>
+                                                <div class="wizard-data-value" id="wizardRadiacionPromedio">-</div>
+                                                <div class="wizard-data-desc" id="wizardUbicacionNombre">-</div>
+                                            </div>
+                                            <div class="wizard-data-card">
+                                                <div class="wizard-data-label">Generación Anual Total</div>
+                                                <div class="wizard-data-value" id="wizardGeneracionAnual">-</div>
+                                                <div class="wizard-data-desc">Energía generada por el sistema</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Tabla Mensual Detallada</h4>
+                                        <div class="monthly-table-container">
+                                            <table class="monthly-detail-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Mes</th>
+                                                        <th>Generación (kWh)</th>
+                                                        <th>Consumo (kWh)</th>
+                                                        <th>Balance</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="wizardMonthlyTableBody">
+                                                    <!-- Se llena dinámicamente desde llenarTablaMensualWizard() -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Ley de Generación Distribuida</h4>
+                                        <div class="wizard-energy-distribution">
+                                            <div class="wizard-distribution-chart">
+                                                <canvas id="wizardDistributionChart"></canvas>
+                                            </div>
+                                            <div class="wizard-distribution-stats">
+                                                <div class="wizard-stat-item">
+                                                    <div class="wizard-stat-label">Energía Consumida</div>
+                                                    <div class="wizard-stat-value" id="wizardEnergiaConsumida">-</div>
+                                                </div>
+                                                <div class="wizard-stat-item">
+                                                    <div class="wizard-stat-label">Energía Inyectada a la Red</div>
+                                                    <div class="wizard-stat-value" id="wizardEnergiaInyectada">-</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Solapa 3: Impacto Ambiental -->
+                            <div class="wizard-tab-pane" id="wizardTabImpacto" style="display: none;">
+                                <div class="wizard-results-detailed">
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Reducción de Emisiones de CO₂</h4>
+                                        <p class="wizard-tab-description">Tu sistema solar contribuye significativamente a la reducción de emisiones de gases de efecto invernadero.</p>
+                                        
+                                        <div class="wizard-impacto-container">
+                                            <div class="wizard-impacto-card">
+                                                <div class="wizard-impacto-icon"><i class="ti ti-world"></i></div>
+                                                <div class="wizard-impacto-content">
+                                                    <div class="wizard-impacto-label">CO₂ Evitado por Año</div>
+                                                    <div class="wizard-impacto-value" id="wizardImpactoCO2Anual">-</div>
+                                                    <div class="wizard-impacto-desc">kg de CO₂ equivalente</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="wizard-impacto-card">
+                                                <div class="wizard-impacto-icon"><i class="ti ti-tree"></i></div>
+                                                <div class="wizard-impacto-content">
+                                                    <div class="wizard-impacto-label">CO₂ Evitado en 25 Años</div>
+                                                    <div class="wizard-impacto-value" id="wizardImpactoCO225Anos">-</div>
+                                                    <div class="wizard-impacto-desc">toneladas de CO₂ equivalente</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Equivalencias Ambientales</h4>
+                                        <p class="wizard-tab-description">Tu impacto positivo en el medio ambiente puede medirse de diferentes formas:</p>
+                                        
+                                        <div class="wizard-equivalencias-grid">
+                                            <div class="wizard-equivalencia-card">
+                                                <div class="wizard-equivalencia-icon"><i class="ti ti-tree"></i></div>
+                                                <div class="wizard-equivalencia-content">
+                                                    <div class="wizard-equivalencia-label">Árboles Plantados</div>
+                                                    <div class="wizard-equivalencia-value" id="wizardEquivalenciaArboles">-</div>
+                                                    <div class="wizard-equivalencia-desc">equivalente a árboles plantados</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="wizard-equivalencia-card">
+                                                <div class="wizard-equivalencia-icon"><i class="ti ti-car"></i></div>
+                                                <div class="wizard-equivalencia-content">
+                                                    <div class="wizard-equivalencia-label">Autos Retirados</div>
+                                                    <div class="wizard-equivalencia-value" id="wizardEquivalenciaAutos">-</div>
+                                                    <div class="wizard-equivalencia-desc">autos retirados de circulación por 1 año</div>
+                                                </div>
+                                            </div>
+
+                                            <div class="wizard-equivalencia-card">
+                                                <div class="wizard-equivalencia-icon"><i class="ti ti-plane"></i></div>
+                                                <div class="wizard-equivalencia-content">
+                                                    <div class="wizard-equivalencia-label">Vuelos Evitados</div>
+                                                    <div class="wizard-equivalencia-value" id="wizardEquivalenciaVuelos">-</div>
+                                                    <div class="wizard-equivalencia-desc">vuelos Buenos Aires-Madrid evitados</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Contribución a los Objetivos de Desarrollo Sostenible</h4>
+                                        <div class="wizard-ods-container">
+                                            <div class="wizard-ods-item">
+                                                <div class="wizard-ods-icon"><i class="ti ti-bolt"></i></div>
+                                                <div class="wizard-ods-content">
+                                                    <strong>ODS 7: Energía Asequible y No Contaminante</strong>
+                                                    <p>Tu sistema contribuye al acceso a energía limpia y sostenible.</p>
+                                                </div>
+                                            </div>
+                                            <div class="wizard-ods-item">
+                                                <div class="wizard-ods-icon"><i class="ti ti-world"></i></div>
+                                                <div class="wizard-ods-content">
+                                                    <strong>ODS 13: Acción por el Clima</strong>
+                                                    <p>Reduces directamente las emisiones de gases de efecto invernadero.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Solapa 4: Flujo de Fondos -->
+                            <div class="wizard-tab-pane" id="wizardTabFinanzas" style="display: none;">
+                                <div class="wizard-results-detailed">
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Análisis Financiero</h4>
+
+                                        <!-- Input para ajustar inflación energética -->
+                                        <div class="wizard-inflacion-control coming-soon">
+                                            <label for="wizardInflacionInput">Inflación de Energía Estimada (% anual):</label>
+                                            <input type="number" id="wizardInflacionInput" min="0" max="50" step="0.5"
+                                                value="3" class="wizard-inflacion-input" disabled>
+                                            <button type="button" class="wizard-btn-recalcular"
+                                                id="wizardBtnRecalcular" disabled>
+                                                <i class="fas fa-sync-alt"></i>
+                                                Recalcular
+                                            </button>
+                                            <span class="coming-soon-badge">Próximamente</span>
+                                        </div>
+
+                                        <div class="financial-chart-container">
+                                            <canvas id="wizardFinancialChart"></canvas>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resumen financiero -->
+                                    <div class="wizard-tab-section">
+                                        <div class="financial-details-grid">
+                                            <div class="financial-detail-card">
+                                                <div class="detail-label">Periodo de Recupero</div>
+                                                <div class="detail-value" id="wizardDetailROI">-</div>
+                                                <div class="detail-desc">Tiempo de recuperación de la inversión</div>
+                                            </div>
+
+                                            <div class="financial-detail-card">
+                                                <div class="detail-label">Desglose de Costos</div>
+                                                <div class="cost-breakdown">
+                                                    <div class="cost-item">
+                                                        <span class="cost-label">Costo Fijo (Instalación/Inversor)</span>
+                                                        <span class="cost-value" id="wizardDetailCostoBase">-</span>
+                                                    </div>
+                                                    <div class="cost-item">
+                                                        <span class="cost-label">Paneles</span>
+                                                        <span class="cost-value" id="wizardDetailCostoPaneles">-</span>
+                                                    </div>
+                                                    <div class="cost-item cost-total">
+                                                        <span class="cost-label">Total</span>
+                                                        <span class="cost-value" id="wizardDetailCostoTotal">-</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="financial-detail-card highlight">
+                                                <div class="detail-label">Ahorro Acumulado a 25 años</div>
+                                                <div class="detail-value large" id="wizardDetailAhorro25">-</div>
+                                                <div class="detail-desc">Proyección a largo plazo</div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Tabla de Ahorro Acumulado</h4>
+                                        <div class="wizard-table-container">
+                                            <table class="wizard-ahorro-table">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Año</th>
+                                                        <th>Ahorro Acumulado</th>
+                                                        <th>Ahorro Anual</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="wizardAhorroTableBody">
+                                                    <!-- Se llena dinámicamente -->
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Solapa 5: Tu Instalación -->
+                            <div class="wizard-tab-pane" id="wizardTabInstalacion" style="display: none;">
+                                <div class="wizard-results-detailed">
+                                    <!-- Productos de la Instalación -->
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Tu Instalación Incluye</h4>
+                                        <div class="wizard-products-grid">
+                                            <!-- Paneles Solares -->
+                                            <div class="wizard-product-card">
+                                                <div class="wizard-product-image">
+                                                    <img src="images/producto1.png" alt="Paneles Solares"
+                                                        style="width: 100%; height: auto; border-radius: 8px;">
+                                                </div>
+                                                <div class="wizard-product-info">
+                                                    <h5 class="wizard-product-title">Paneles Solares</h5>
+                                                    <p class="wizard-product-detail">Módulo FV 360-Ref 190w</p>
+                                                    <p class="wizard-product-spec">Cantidad: <span
+                                                            id="wizardProductPanelesCantidad">-</span> paneles</p>
+                                                    <p class="wizard-product-spec">Potencia Total: <span
+                                                            id="wizardProductPotenciaTotal">-</span> kW</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Inversor -->
+                                            <div class="wizard-product-card">
+                                                <div class="wizard-product-image">
+                                                    <img src="images/producto2.png" alt="Inversor"
+                                                        style="width: 100%; height: auto; border-radius: 8px;">
+                                                </div>
+                                                <div class="wizard-product-info">
+                                                    <h5 class="wizard-product-title">Inversor Grid-Tie</h5>
+                                                    <p class="wizard-product-detail">Inversor 360solar</p>
+                                                    <p class="wizard-product-spec">Potencia: <span
+                                                            id="wizardProductInversorPotencia">-</span> kW</p>
+                                                    <p class="wizard-product-spec">Conectado a red eléctrica</p>
+                                                </div>
+                                            </div>
+
+                                            <!-- Soporte/Estructura -->
+                                            <div class="wizard-product-card">
+                                                <div class="wizard-product-image">
+                                                    <img id="wizardProductSoporteImagen" src="images/soporte45.png"
+                                                        alt="Estructura de Soporte"
+                                                        style="width: 100%; height: auto; border-radius: 8px;">
+                                                </div>
+                                                <div class="wizard-product-info">
+                                                    <h5 class="wizard-product-title">Estructura de Soporte</h5>
+                                                    <p class="wizard-product-detail" id="wizardProductEstructuraTipo">
+                                                        Aluminio Anodizado</p>
+                                                    <p class="wizard-product-spec">Inclinación: <span
+                                                            id="wizardProductInclinacion">45</span>°</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Espacio Requerido -->
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Espacio Requerido</h4>
+                                        <div class="wizard-espacio-info">
+                                            <div class="wizard-espacio-card">
+                                                <div class="wizard-espacio-icon">
+                                                    <i class="fas fa-ruler-combined"></i>
+                                                </div>
+                                                <div class="wizard-espacio-content">
+                                                    <div class="wizard-espacio-label">Superficie Total</div>
+                                                    <div class="wizard-espacio-value" id="wizardEspacioRequerido">-</div>
+                                                </div>
+                                            </div>
+                                            <div class="wizard-espacio-description">
+                                                Espacio aproximado necesario en tu techo. Cada panel ocupa
+                                                aproximadamente 1.5 m².
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navegación entre pasos -->
+            <div class="wizard-navigation" id="wizardNavigation" style="display: none;">
+                <button type="button" class="btn btn-secondary" id="btnWizardPrev">
+                    <i class="fas fa-arrow-left"></i> Anterior
+                </button>
+                <div class="wizard-navigation-actions">
+                    <button type="button" class="btn btn-outline" id="wizardBtnImprimir"
+                        onclick="imprimirReporteWizard()">
+                        <i class="fas fa-download"></i>
+                        <span>Descargar PDF</span>
+                    </button>
+                </div>
+                <button type="button" class="btn btn-primary" id="btnWizardNext">
+                    Siguiente <i class="fas fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <!-- Columna 1: Logo y Descripción -->
+                <div class="footer-column footer-brand">
+                    <div class="footer-logo">
+                        <img src="images/logo360.png" alt="360Solar" class="footer-logo-img">
+                    </div>
+                    <p class="footer-description">
+                        Transformando la radiación solar en capital. Ingeniería de precisión para sistemas fotovoltaicos residenciales.
+                    </p>
+                </div>
+
+                <!-- Columna 2: Navegación -->
+                <div class="footer-column footer-nav-column">
+                    <h3 class="footer-column-title">Navegación</h3>
+                    <nav class="footer-nav">
+                        <a href="index.html#inicio">Inicio</a>
+                        <a href="index.html#productos">Tecnología</a>
+                        <a href="simulador.html">Simulador</a>
+                        <a href="sobre-nosotros.html">Nosotros</a>
+                        <a href="index.html#contacto">Contacto</a>
+                    </nav>
+                </div>
+
+                <!-- Columna 3: Contacto -->
+                <div class="footer-column footer-contact">
+                    <h3 class="footer-column-title">Contacto</h3>
+                    <div class="footer-contact-info">
+                        <div class="footer-contact-item">
+                            <i class="fas fa-envelope"></i>
+                            <a href="mailto:info@solar360.com.ar">info@solar360.com.ar</a>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-phone"></i>
+                            <a href="tel:+541112345678">+54 11 1234-5678</a>
+                        </div>
+                        <div class="footer-contact-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>La Plata, Buenos Aires</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Copyright -->
+            <div class="footer-bottom">
+                <div class="footer-copyright">
+                    <p>© 2025 360Solar. Todos los derechos reservados. | Ingeniería Solar de Precisión</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cargar módulos ES6 con Vite -->
+    <script type="module" src="/assets/js/main.js"></script>
+</body>
+
+</html>
+

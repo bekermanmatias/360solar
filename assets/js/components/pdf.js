@@ -656,7 +656,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
             </section>
 
             <section class="print-section">
-                <h2>⚡ Sistema Recomendado</h2>
+                <h2><i class="ti ti-bolt"></i> Sistema Recomendado</h2>
                 <table>
                     <tbody>
                         <tr><td>Tipo de panel</td><td>${tipoPanel}</td></tr>
@@ -670,7 +670,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
             </section>
 
             <section class="print-section">
-                <h2>💰 Análisis Financiero</h2>
+                <h2><i class="ti ti-currency-dollar"></i> Análisis Financiero</h2>
                 <table>
                     <tbody>
                         <tr><td>Inversión total estimada</td><td>$${formatNumber(r.costo_total.toFixed(0))}</td></tr>
@@ -686,7 +686,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
             </section>
 
             <section class="print-section">
-                <h2>🌍 Impacto Ambiental</h2>
+                <h2><i class="ti ti-world"></i> Impacto Ambiental</h2>
                 <table>
                     <tbody>
                         <tr><td>CO₂ evitado por año</td><td>${formatNumber(r.co2_anual.toFixed(0))} kg</td></tr>
@@ -736,7 +736,7 @@ export function generarContenidoBoleta(imagenGeneracion = '', imagenFinanciera =
 
             ${imagenFinanciera ? `
             <section class="print-section print-chart-section">
-                <h2>💰 Análisis Financiero (10 años)</h2>
+                <h2><i class="ti ti-currency-dollar"></i> Análisis Financiero (10 años)</h2>
                 <div class="print-chart-container">
                     <img src="${imagenFinanciera}" alt="Gráfico de Análisis Financiero" class="print-chart-image" />
                 </div>

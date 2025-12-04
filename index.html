@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Tabler Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
     <!-- jsPDF y html2canvas para generación de PDF -->
@@ -38,7 +40,7 @@
                 <ul class="nav-menu">
                     <li><a href="#inicio" class="nav-link">Inicio</a></li>
                     <li><a href="#productos" class="nav-link">Tecnología</a></li>
-                    <li><a href="#simulador" class="nav-link" id="navSimulador">Simulador</a></li>
+                    <li><a href="simulador.html" class="nav-link" id="navSimulador">Simulador</a></li>
                     <li><a href="sobre-nosotros.html" class="nav-link">Nosotros</a></li>
                     <li><a href="#contacto" class="nav-link">Contacto</a></li>
                 </ul>
@@ -64,7 +66,7 @@
                 </h1>
                 <p class="hero-subtitle-minimal">Instalamos sistemas de última generación para que reduzcas tus costos, aumentando el valor de tu propiedad y cuidando el medio ambiente.</p>
                 <div class="hero-buttons">
-                    <button type="button" id="btnAbrirSimulador" class="btn-hero-minimal btn-hero-primary">Calcular ahorro</button>
+                    <a href="simulador.html" class="btn-hero-minimal btn-hero-primary">Calcular ahorro</a>
                     <a href="#contacto" class="btn-hero-minimal btn-hero-secondary">Contacto</a>
                 </div>
             </div>
@@ -293,7 +295,7 @@
                     <nav class="footer-nav">
                         <a href="#inicio">Inicio</a>
                         <a href="#productos">Tecnología</a>
-                        <a href="#simulador">Simulador</a>
+                        <a href="simulador.html">Simulador</a>
                         <a href="sobre-nosotros.html">Nosotros</a>
                         <a href="#contacto">Contacto</a>
                     </nav>
@@ -836,7 +838,7 @@
                                         <!-- KPIs (3 indicadores clave) -->
                                         <div class="wizard-panorama-kpis">
                                             <div class="wizard-panorama-kpi">
-                                                <div class="wizard-panorama-kpi-icon">💰</div>
+                                                <div class="wizard-panorama-kpi-icon"><i class="ti ti-currency-dollar"></i></div>
                                                 <div class="wizard-panorama-kpi-content">
                                                     <div class="wizard-panorama-kpi-label">Ahorro Mensual Estimado</div>
                                                     <div class="wizard-panorama-kpi-value"
@@ -845,7 +847,7 @@
                                             </div>
 
                                             <div class="wizard-panorama-kpi">
-                                                <div class="wizard-panorama-kpi-icon">📅</div>
+                                                <div class="wizard-panorama-kpi-icon"><i class="ti ti-calendar"></i></div>
                                                 <div class="wizard-panorama-kpi-content">
                                                     <div class="wizard-panorama-kpi-label">Periodo de Recupero</div>
                                                     <div class="wizard-panorama-kpi-value" id="wizardPanoramaROI">-
@@ -854,7 +856,7 @@
                                             </div>
 
                                             <div class="wizard-panorama-kpi">
-                                                <div class="wizard-panorama-kpi-icon">⚡</div>
+                                                <div class="wizard-panorama-kpi-icon"><i class="ti ti-bolt"></i></div>
                                                 <div class="wizard-panorama-kpi-content">
                                                     <div class="wizard-panorama-kpi-label">% de Autoconsumo</div>
                                                     <div class="wizard-panorama-kpi-value"
@@ -865,7 +867,7 @@
 
                                         <!-- Veredicto Rápido -->
                                         <div class="wizard-veredicto">
-                                            <div class="wizard-veredicto-icon">✨</div>
+                                            <div class="wizard-veredicto-icon"><i class="ti ti-star"></i></div>
                                             <div class="wizard-veredicto-text" id="wizardVeredictoRapido">-</div>
                                         </div>
 
@@ -965,7 +967,7 @@
                                         
                                         <div class="wizard-impacto-container">
                                             <div class="wizard-impacto-card">
-                                                <div class="wizard-impacto-icon">🌍</div>
+                                                <div class="wizard-impacto-icon"><i class="ti ti-world"></i></div>
                                                 <div class="wizard-impacto-content">
                                                     <div class="wizard-impacto-label">CO₂ Evitado por Año</div>
                                                     <div class="wizard-impacto-value" id="wizardImpactoCO2Anual">-</div>
@@ -974,7 +976,7 @@
                                             </div>
 
                                             <div class="wizard-impacto-card">
-                                                <div class="wizard-impacto-icon">🌳</div>
+                                                <div class="wizard-impacto-icon"><i class="ti ti-tree"></i></div>
                                                 <div class="wizard-impacto-content">
                                                     <div class="wizard-impacto-label">CO₂ Evitado en 25 Años</div>
                                                     <div class="wizard-impacto-value" id="wizardImpactoCO225Anos">-</div>
@@ -990,7 +992,7 @@
                                         
                                         <div class="wizard-equivalencias-grid">
                                             <div class="wizard-equivalencia-card">
-                                                <div class="wizard-equivalencia-icon">🌲</div>
+                                                <div class="wizard-equivalencia-icon"><i class="ti ti-tree"></i></div>
                                                 <div class="wizard-equivalencia-content">
                                                     <div class="wizard-equivalencia-label">Árboles Plantados</div>
                                                     <div class="wizard-equivalencia-value" id="wizardEquivalenciaArboles">-</div>
@@ -999,7 +1001,7 @@
                                             </div>
 
                                             <div class="wizard-equivalencia-card">
-                                                <div class="wizard-equivalencia-icon">🚗</div>
+                                                <div class="wizard-equivalencia-icon"><i class="ti ti-car"></i></div>
                                                 <div class="wizard-equivalencia-content">
                                                     <div class="wizard-equivalencia-label">Autos Retirados</div>
                                                     <div class="wizard-equivalencia-value" id="wizardEquivalenciaAutos">-</div>
@@ -1008,7 +1010,7 @@
                                             </div>
 
                                             <div class="wizard-equivalencia-card">
-                                                <div class="wizard-equivalencia-icon">✈️</div>
+                                                <div class="wizard-equivalencia-icon"><i class="ti ti-plane"></i></div>
                                                 <div class="wizard-equivalencia-content">
                                                     <div class="wizard-equivalencia-label">Vuelos Evitados</div>
                                                     <div class="wizard-equivalencia-value" id="wizardEquivalenciaVuelos">-</div>
@@ -1022,14 +1024,14 @@
                                         <h4 class="wizard-tab-title">Contribución a los Objetivos de Desarrollo Sostenible</h4>
                                         <div class="wizard-ods-container">
                                             <div class="wizard-ods-item">
-                                                <div class="wizard-ods-icon">⚡</div>
+                                                <div class="wizard-ods-icon"><i class="ti ti-bolt"></i></div>
                                                 <div class="wizard-ods-content">
                                                     <strong>ODS 7: Energía Asequible y No Contaminante</strong>
                                                     <p>Tu sistema contribuye al acceso a energía limpia y sostenible.</p>
                                                 </div>
                                             </div>
                                             <div class="wizard-ods-item">
-                                                <div class="wizard-ods-icon">🌍</div>
+                                                <div class="wizard-ods-icon"><i class="ti ti-world"></i></div>
                                                 <div class="wizard-ods-content">
                                                     <strong>ODS 13: Acción por el Clima</strong>
                                                     <p>Reduces directamente las emisiones de gases de efecto invernadero.</p>

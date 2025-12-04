@@ -121,7 +121,8 @@ button,
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(20px);
     box-shadow: 0 2px 20px rgba(0, 0, 0, 0.05);
-    z-index: 1000;
+    z-index: 2000;
+    /* Mayor que todos los elementos del wizard */
     transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
         box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -381,8 +382,10 @@ button,
     max-width: 900px;
     margin: 0;
     margin-left: 0;
-    margin-top: 10.5rem;
+    margin-top: 9rem;
     padding-left: 0;
+    padding-right: 2rem;
+    padding-bottom: 2rem;
     position: relative;
     z-index: 10;
 }
@@ -399,15 +402,109 @@ button,
     }
 }
 
-@media (min-width: 1200px) {
+/* Monitores medianos (1024px - 1199px) */
+@media (min-width: 1024px) and (max-width: 1199px) {
+    .hero {
+        padding: 70px 0 90px;
+        min-height: auto;
+    }
+
+    .hero .container {
+        padding-left: 0;
+        padding-right: 0;
+        max-width: 100%;
+    }
+
+    .hero-content-minimal {
+        max-width: none;
+        margin-left: 13rem;
+        padding-right: 2rem;
+        margin-top: 2.5rem;
+        padding-bottom: 2rem;
+        width: auto;
+    }
+
+    .hero-title-minimal,
+    .hero-content-minimal h1,
+    .hero h1,
+    .hero .hero-title-minimal {
+        font-size: 3.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle-minimal {
+        font-size: 1rem;
+        max-width: 90%;
+        margin-bottom: 1.5rem;
+    }
+
+    .hero-buttons {
+        gap: 1rem;
+    }
+
+    .btn-hero-minimal {
+        padding: 1rem 2.5rem;
+        font-size: 1.05rem;
+    }
+}
+
+/* Monitores pequeños de escritorio (1200px - 1366px) */
+@media (min-width: 1200px) and (max-width: 1366px) {
+    .hero {
+        padding: 70px 0 100px;
+        min-height: auto;
+    }
+
+    .hero .container {
+        padding-left: 0;
+        padding-right: 0;
+        max-width: 100%;
+    }
+
+    .hero-content-minimal {
+        max-width: none;
+        margin-left: 8rem;
+        padding-left: 0;
+        padding-right: 2rem;
+        margin-top: 3rem;
+        padding-bottom: 2rem;
+        width: auto;
+    }
+
+    .hero-title-minimal,
+    .hero-content-minimal h1,
+    .hero h1,
+    .hero .hero-title-minimal {
+        font-size: 3.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .hero-subtitle-minimal {
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+        max-width: 85%;
+    }
+
+    .hero-buttons {
+        gap: 1rem;
+    }
+
+    .btn-hero-minimal {
+        padding: 1rem 2.5rem;
+        font-size: 1.05rem;
+    }
+}
+
+/* Monitores grandes (1377px en adelante) */
+@media (min-width: 1377px) {
     .hero .container {
         padding-left: 0;
         padding-right: 2rem;
         max-width: 1400px;
     }
-    
+
     .hero-content-minimal {
-        margin-left: -35rem;
+        margin-left: -15rem;
         padding-left: 0;
     }
 }
@@ -417,10 +514,10 @@ button,
 .hero h1,
 .hero .hero-title-minimal {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif !important;
-    font-size: 5rem;
+    font-size: 4.5rem;
     font-weight: 900;
     line-height: 1.1;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1.25rem;
     color: #ffffff;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
     letter-spacing: -1px;
@@ -441,9 +538,9 @@ button,
 
 .hero-subtitle-minimal {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    font-size: 1.25rem;
+    font-size: 1.15rem;
     color: #ffffff;
-    margin-bottom: 2rem;
+    margin-bottom: 1.75rem;
     line-height: 1.6;
     text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.3);
     font-weight: 400;
@@ -458,7 +555,7 @@ button,
 .btn-hero-minimal {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     display: inline-block;
-    padding: 1.5rem 3.5rem;
+    padding: 1.25rem 3rem;
     border-radius: 12px;
     font-size: 1.15rem;
     font-weight: 700;
@@ -506,6 +603,13 @@ button,
     flex-direction: column;
     gap: 1rem;
     z-index: 10;
+}
+
+/* En monitores medianos, los cuadrados también se pegan al borde */
+@media (min-width: 1024px) and (max-width: 1366px) {
+    .hero-info-cards {
+        right: 2rem;
+    }
 }
 
 .hero-info-card {
@@ -611,7 +715,7 @@ button,
         flex-direction: row;
         justify-content: flex-start;
     }
-    
+
     .hero-info-card {
         min-width: 240px;
     }
@@ -622,14 +726,40 @@ button,
         flex-direction: column;
         width: 100%;
     }
-    
+
     .hero-info-card {
         min-width: 100%;
     }
-    
+
     .hero-card-number {
         font-size: 2.5rem;
         min-width: 60px;
+    }
+}
+
+/* Tablets y monitores pequeños (769px - 1023px) */
+@media (min-width: 769px) and (max-width: 1023px) {
+    .hero-content-minimal {
+        max-width: 100%;
+        margin-left: 2rem;
+        padding-left: 1.5rem;
+        padding-right: 1.5rem;
+        margin-top: 8rem;
+    }
+
+    .hero-title-minimal,
+    .hero-content-minimal h1,
+    .hero h1,
+    .hero .hero-title-minimal {
+        font-size: 3rem;
+    }
+
+    .hero-subtitle-minimal {
+        font-size: 1.1rem;
+    }
+
+    .hero-buttons {
+        gap: 1rem;
     }
 }
 
@@ -4599,6 +4729,14 @@ section:last-of-type::after {
     margin-bottom: 8px;
     border-bottom: 1px solid #000;
     padding-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.print-section h2 i {
+    font-size: 12pt;
+    color: var(--primary-color, #333);
     text-transform: uppercase;
 }
 
@@ -4613,6 +4751,14 @@ section:last-of-type::after {
     border-bottom: 1px solid #000;
     padding-bottom: 4px;
     text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.print-chart-section h2 i {
+    font-size: 12pt;
+    color: var(--primary-color, #333);
 }
 
 .print-chart-container {
@@ -5367,19 +5513,22 @@ section:last-of-type::after {
 .modal-wizard-visual.intro-overlay .intro-content {
     position: relative;
     z-index: 1;
-    padding: 3rem 2.5rem;
+    padding: 2rem 2.5rem;
+    /* Reducido el padding superior */
     color: white;
     width: 100%;
     height: 100%;
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    /* Alineado arriba */
     align-items: center;
     text-align: center;
 }
 
 .modal-wizard-visual.intro-overlay .intro-logo {
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
+    /* Reducido el margen inferior */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -5397,8 +5546,9 @@ section:last-of-type::after {
     font-size: 4rem;
     font-weight: 900;
     line-height: 1.1;
-    margin-bottom: 2rem;
-    margin-top: -4rem;
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    /* Eliminado el margen negativo */
     text-transform: uppercase;
     letter-spacing: -1px;
     text-align: center;
@@ -5448,7 +5598,7 @@ section:last-of-type::after {
     margin-bottom: 1.5rem;
     line-height: 1.2;
     color: white;
-    white-space: nowrap;
+    /* white-space: nowrap; Eliminado para permitir que el texto baje */
 }
 
 .wizard-instructions-question {
@@ -5509,25 +5659,49 @@ section:last-of-type::after {
     z-index: 1;
 }
 
+/* Asegurar que el mapa ocupe todo el espacio en la página del simulador */
+.simulador-page .wizard-step-map {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+
+.simulador-page .wizard-map-container {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}
+
 .wizard-map-controls {
     position: absolute;
     top: 1.5rem;
-    left: 1.5rem;
-    right: 5rem;
-    /* Dejar espacio para el botón de cerrar */
-    z-index: 1000;
+    /* Con espacio arriba */
+    left: 1rem;
+    right: 1rem;
+    z-index: 100;
+    /* Debajo del header (2000) */
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.5rem;
     max-width: 600px;
+    pointer-events: none;
+    /* Permitir clicks a través del contenedor */
+}
+
+.wizard-map-controls>* {
+    pointer-events: auto;
+    /* Restaurar clicks en los elementos hijos */
 }
 
 .wizard-map-toggles {
     position: absolute;
-    bottom: 120px;
-    /* Subido un poco más */
-    left: 1.5rem;
-    z-index: 1000;
+    bottom: 180px;
+    /* Por encima de la barra de info */
+    left: 1rem;
+    z-index: 100;
+    /* Debajo del header */
     display: flex;
     gap: 0.5rem;
     background: white;
@@ -5581,7 +5755,8 @@ section:last-of-type::after {
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     max-height: 350px;
     overflow-y: auto;
-    z-index: 1001 !important;
+    z-index: 150 !important;
+    /* Debajo del header pero encima de otros controles */
     margin-top: 1px;
     display: none !important;
     border-top: 1px solid #e8ecef;
@@ -5676,15 +5851,17 @@ section:last-of-type::after {
 
 .wizard-map-info {
     position: absolute;
-    bottom: 80px;
-    /* Por encima de los botones de navegación */
+    bottom: 90px;
+    /* Más arriba, por encima de la navegación */
     left: 0;
     right: 0;
     background: rgba(44, 62, 80, 0.95);
     color: white;
-    padding: 1.5rem 2rem;
-    z-index: 1000;
+    padding: 1rem 1.5rem;
+    z-index: 100;
+    /* Debajo del header */
     backdrop-filter: blur(10px);
+    margin: 0;
 }
 
 .wizard-map-info p {
@@ -5863,7 +6040,8 @@ section:last-of-type::after {
 
 /* Para pasos normales (no mapa) */
 .wizard-step-content:not([data-step="1"]) .wizard-step-body {
-    padding: 6rem 3rem 1rem 3rem;
+    padding: 2rem 3rem 1rem 3rem;
+    /* Reducido el padding superior */
     overflow-y: auto;
     width: 100%;
     max-width: 100%;
@@ -5875,14 +6053,18 @@ section:last-of-type::after {
 
 /* Paso 5: Resultados - el scroll principal lo maneja el bloque de resultados */
 #wizardStep5 .wizard-step-body {
-    overflow-y: hidden;
-    padding: 2.5rem 3rem 5rem 3rem;
-    /* un poco menos de blanco hasta los botones para que el card baje más */
+    overflow-y: auto;
+    padding: 1rem 3rem 1rem 3rem;
+    /* Reducido el padding superior */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
 /* Paso 4 específico - más ancho */
 #wizardStep4 .wizard-step-body {
-    padding: 6rem 4rem 1rem 4rem;
+    padding: 2rem 4rem 1rem 4rem;
+    /* Reducido el padding superior */
 }
 
 /* Paso 1 sin padding */
@@ -5896,7 +6078,8 @@ section:last-of-type::after {
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
-    padding: 6rem 3rem 1rem 3rem;
+    padding: 2rem 3rem 1rem 3rem;
+    /* Reducido el padding superior */
     overflow-y: auto;
     display: flex;
     flex-direction: column;
@@ -6295,6 +6478,9 @@ section:last-of-type::after {
 .wizard-results-container {
     max-width: 100%;
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 /* Dashboard de Impacto - Versión Resumida */
@@ -6453,8 +6639,11 @@ section:last-of-type::after {
     margin-bottom: 0;
     display: block;
     /* Siempre visible desde el inicio */
-    position: relative;
+    position: sticky;
+    top: 0;
     z-index: 10;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .wizard-results-tabs {
@@ -6518,8 +6707,10 @@ section:last-of-type::after {
     padding: 1.5rem 1.75rem;
     margin-top: 0;
     min-height: 420px;
-    max-height: calc(100vh - 600px);
-    overflow-y: auto;
+    max-height: none;
+    /* Sin límite de altura */
+    overflow-y: visible;
+    /* Sin scroll interno */
     overflow-x: hidden;
 }
 
@@ -6528,9 +6719,10 @@ section:last-of-type::after {
 #wizardTabFinanzas .wizard-results-detailed,
 #wizardTabInstalacion .wizard-results-detailed,
 #wizardTabImpacto .wizard-results-detailed {
-    max-height: calc(100vh - 190px);
-    /* ocupa un poco más hacia abajo sin chocar con los botones */
-    overflow-y: auto;
+    max-height: none;
+    /* Sin límite de altura */
+    overflow-y: visible;
+    /* Sin scroll interno */
 }
 
 .wizard-results-detailed::-webkit-scrollbar {
@@ -6907,7 +7099,9 @@ section:last-of-type::after {
 
 /* Estilos para Panorama General (Solapa 1) */
 .wizard-panorama-container {
-    padding: 2rem 0;
+    padding: 1.5rem 0;
+    padding-bottom: 2rem;
+    /* Espacio para que no quede tapado por la navegación */
 }
 
 .wizard-panorama-title {
@@ -6947,6 +7141,14 @@ section:last-of-type::after {
     font-size: 3rem;
     line-height: 1;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.wizard-panorama-kpi-icon i {
+    font-size: inherit;
 }
 
 .wizard-panorama-kpi-content {
@@ -6983,6 +7185,14 @@ section:last-of-type::after {
 .wizard-veredicto-icon {
     font-size: 2rem;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.wizard-veredicto-icon i {
+    font-size: inherit;
 }
 
 .wizard-veredicto-text {
@@ -7839,7 +8049,8 @@ section:last-of-type::after {
 
 /* Contenedor de acciones en la navegación */
 .wizard-navigation-actions {
-    display: none; /* Oculto por defecto, se muestra solo en paso 5 */
+    display: none;
+    /* Oculto por defecto, se muestra solo en paso 5 */
     align-items: center;
     gap: 1rem;
     margin-left: auto;
@@ -7910,6 +8121,14 @@ section:last-of-type::after {
 .wizard-impacto-icon {
     font-size: 2.5rem;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.wizard-impacto-icon i {
+    font-size: inherit;
 }
 
 .wizard-impacto-content {
@@ -7961,6 +8180,14 @@ section:last-of-type::after {
 .wizard-equivalencia-icon {
     font-size: 2rem;
     margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.wizard-equivalencia-icon i {
+    font-size: inherit;
 }
 
 .wizard-equivalencia-label {
@@ -8004,6 +8231,14 @@ section:last-of-type::after {
 .wizard-ods-icon {
     font-size: 1.5rem;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-color);
+}
+
+.wizard-ods-icon i {
+    font-size: inherit;
 }
 
 .wizard-ods-content strong {
@@ -8047,12 +8282,13 @@ section:last-of-type::after {
 /* Controles de zoom del mapa - mover a abajo derecha */
 #wizardMap .leaflet-control-zoom {
     position: absolute !important;
-    bottom: 180px !important;
-    /* Subido un poco más */
-    right: 1.5rem !important;
+    bottom: 200px !important;
+    /* Por encima de la barra de info */
+    right: 1rem !important;
     top: auto !important;
     left: auto !important;
-    z-index: 1000 !important;
+    z-index: 100 !important;
+    /* Debajo del header */
     margin: 0 !important;
 }
 
@@ -8666,6 +8902,7 @@ section:last-of-type::after {
 
 /* Mobile devices (max-width: 768px) */
 @media (max-width: 768px) {
+
     /* Header y Navegación */
     .header {
         padding: 0.75rem 1rem;
@@ -8731,6 +8968,7 @@ section:last-of-type::after {
         from {
             opacity: 0;
         }
+
         to {
             opacity: 1;
         }
@@ -9263,6 +9501,7 @@ section:last-of-type::after {
 
 /* Small mobile devices (max-width: 480px) */
 @media (max-width: 480px) {
+
     /* Hero */
     .hero-title-minimal {
         font-size: 1.75rem !important;
@@ -9322,4 +9561,449 @@ section:last-of-type::after {
     .hero {
         min-height: 60vh;
     }
+}
+
+/* ============================================
+   ESTILOS PARA PÁGINA DEL SIMULADOR (NO MODAL)
+   ============================================ */
+
+/* Contenedor principal de la página del simulador */
+.simulador-page {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    /* Sin scroll en el body, solo en el contenido */
+}
+
+/* Ocultar footer en la página del simulador */
+.simulador-page .footer {
+    display: none;
+}
+
+.simulador-page-container {
+    flex: 1;
+    display: flex;
+    position: relative;
+    height: calc(100vh - 80px);
+    /* Altura total menos header */
+    margin-top: 80px;
+    /* Altura del header fijo */
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    /* Evitar scroll en el contenedor principal */
+}
+
+/* Botón volver eliminado - no es necesario */
+
+/* Sección izquierda (visual) */
+.simulador-page-left {
+    width: 33.333%;
+    background: #f8f9fa;
+    overflow: hidden;
+    border-right: 2px solid #e8ecef;
+    height: 100%;
+    flex-shrink: 0;
+}
+
+.simulador-wizard-visual {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.simulador-wizard-visual img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.simulador-wizard-visual.intro-overlay {
+    background: linear-gradient(135deg, rgba(45, 55, 72, 0.95) 0%, rgba(26, 32, 44, 0.98) 100%);
+    position: relative;
+}
+
+.simulador-wizard-visual.intro-overlay::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('images/inicio-sim.jpg') center/cover;
+    opacity: 0.15;
+    z-index: 0;
+}
+
+.simulador-wizard-visual.intro-overlay .intro-content {
+    position: relative;
+    z-index: 1;
+    padding: 2rem 2.5rem;
+    /* Reducido el padding superior */
+    color: white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* Alineado arriba */
+    align-items: center;
+    text-align: center;
+}
+
+.simulador-wizard-visual.wizard-step-instructions {
+    background: linear-gradient(135deg, #2C3E50 0%, #1a202c 100%);
+    color: white;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 3rem 2rem;
+}
+
+/* Sección derecha (contenido) */
+.simulador-page-right {
+    width: 66.666%;
+    flex: 1;
+    background: #ffffff;
+    overflow-y: auto;
+    /* Scroll solo en el contenido */
+    overflow-x: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.simulador-wizard-content {
+    padding: 2rem;
+    min-height: 100%;
+    box-sizing: border-box;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: visible;
+}
+
+/* Navegación del wizard en página completa */
+.simulador-page-container .wizard-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 33.333%;
+    /* Ancho de la sección izquierda */
+    right: 0;
+    width: 66.666%;
+    /* Ancho de la sección derecha */
+    background: #ffffff;
+    border-top: 2px solid #e8ecef;
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 999;
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0;
+}
+
+/* Ajustar navegación en paso del mapa para que esté en la parte inferior */
+.simulador-page .wizard-step-map~.wizard-navigation {
+    position: fixed;
+    bottom: 0;
+    left: 33.333%;
+    /* Ancho de la sección izquierda */
+    right: 0;
+    width: 66.666%;
+}
+
+.simulador-page-container .wizard-navigation[style*="display: none"] {
+    display: none !important;
+}
+
+.simulador-page-container .wizard-navigation[style*="display: flex"] {
+    display: flex !important;
+}
+
+/* Ajustar padding del contenido cuando hay navegación */
+.simulador-page-container .simulador-wizard-content {
+    padding-bottom: 1rem;
+}
+
+/* Asegurar que el contenido del wizard pueda hacer scroll */
+.simulador-page-right .wizard-step-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+/* Paso 5 específico en página del simulador */
+.simulador-page #wizardStep5 .wizard-step-body {
+    overflow-y: visible;
+    height: auto;
+    /* Altura automática según contenido */
+    min-height: 100%;
+    padding: 0;
+    /* Sin padding para aprovechar todo el ancho */
+}
+
+.simulador-page #wizardStep5 .wizard-results-container {
+    height: auto;
+    /* Altura automática según contenido */
+    overflow-y: visible;
+    padding-bottom: 4rem;
+    /* Espacio vacío debajo de todo */
+}
+
+.simulador-page #wizardStep5 .wizard-tab-pane {
+    padding: 1.5rem 2rem 0 2rem;
+    /* Padding interno del contenido, sin padding inferior */
+    overflow-y: visible;
+    /* Sin scroll interno */
+    max-height: none;
+    /* Sin límite de altura */
+    height: auto;
+    /* Altura automática según contenido */
+}
+
+.simulador-page #wizardStep5 .wizard-results-detailed {
+    max-height: none;
+    /* Sin límite de altura */
+    overflow-y: visible;
+    /* Sin scroll interno */
+}
+
+.simulador-page #wizardStep5 .wizard-panorama-container {
+    padding-bottom: 0;
+    /* Sin padding adicional */
+}
+
+/* Asegurar que el body no tenga overflow hidden en la página del simulador */
+.simulador-page body {
+    overflow: visible !important;
+}
+
+body.simulador-page {
+    overflow: visible !important;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+/* Responsive para página del simulador */
+@media (max-width: 1024px) {
+    .simulador-page-container {
+        flex-direction: column;
+        margin-top: 70px;
+        height: calc(100vh - 70px);
+    }
+
+    .simulador-page-left {
+        width: 100%;
+        height: 40vh;
+        min-height: 300px;
+        flex-shrink: 0;
+        border-right: none;
+        border-bottom: 2px solid #e8ecef;
+    }
+
+    .simulador-page-right {
+        width: 100%;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .simulador-wizard-content {
+        padding: 1.5rem;
+    }
+
+    /* Ajustar controles del mapa en tablet */
+    .wizard-map-controls {
+        top: 1.5rem;
+    }
+
+    /* Ajustar navegación en tablet para paso del mapa */
+    .simulador-page .wizard-step-map~.wizard-navigation {
+        position: fixed;
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
+    .wizard-map-info {
+        bottom: 85px;
+        padding: 0.875rem 1.25rem;
+    }
+
+    .wizard-map-toggles {
+        bottom: 165px;
+    }
+
+    #wizardMap .leaflet-control-zoom {
+        bottom: 185px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .simulador-page-container {
+        margin-top: 60px;
+        height: calc(100vh - 60px);
+    }
+
+    .simulador-page-left {
+        height: 250px;
+        min-height: 250px;
+        flex-shrink: 0;
+    }
+
+    .simulador-page-right {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .simulador-wizard-content {
+        padding: 1.5rem 1rem;
+    }
+
+    .simulador-page-container .wizard-navigation {
+        position: fixed;
+        left: 0;
+        right: 0;
+        width: 100%;
+        padding: 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    .simulador-page-container .wizard-navigation .btn {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .simulador-wizard-visual.intro-overlay .intro-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .simulador-wizard-visual.intro-overlay .intro-title {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .simulador-wizard-visual.intro-overlay .intro-description {
+        font-size: 1rem;
+    }
+
+    /* Ajustar controles del mapa en móvil */
+    .wizard-map-controls {
+        top: 1rem;
+        max-width: calc(100% - 2rem);
+    }
+
+    .wizard-map-info {
+        bottom: 75px;
+        padding: 0.75rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .wizard-map-toggles {
+        bottom: 145px;
+    }
+
+    #wizardMap .leaflet-control-zoom {
+        bottom: 165px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .simulador-page-container {
+        height: calc(100vh - 60px);
+        margin-top: 60px;
+    }
+
+    .simulador-page-left {
+        height: 200px;
+        min-height: 200px;
+        flex-shrink: 0;
+    }
+
+    .simulador-page-right {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .simulador-wizard-visual.intro-overlay .intro-title {
+        font-size: 2rem;
+    }
+
+    .simulador-wizard-visual.intro-overlay .intro-logo .logo-img {
+        height: 60px;
+    }
+
+    .simulador-page-container .wizard-navigation {
+        position: fixed;
+        left: 0;
+        right: 0;
+        width: 100%;
+        padding: 0.75rem;
+    }
+
+    .simulador-page-container .wizard-navigation .btn {
+        font-size: 0.9rem;
+        padding: 0.6rem 1rem;
+    }
+
+    /* Ajustar controles del mapa en móvil pequeño */
+    .wizard-map-controls {
+        top: 1rem;
+        left: 0.5rem;
+        right: 0.5rem;
+    }
+
+    .wizard-map-info {
+        bottom: 65px;
+        padding: 0.625rem 0.875rem;
+        font-size: 0.85rem;
+    }
+
+    .wizard-map-toggles {
+        bottom: 130px;
+    }
+
+    #wizardMap .leaflet-control-zoom {
+        bottom: 150px !important;
+    }
+}
+
+/* Asegurar que los estilos del modal también funcionen en la página */
+.simulador-wizard-visual.intro-overlay .intro-logo {
+    margin-bottom: 1.5rem;
+    /* Reducido el margen inferior */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.simulador-wizard-visual.intro-overlay .intro-logo .logo-img {
+    height: 90px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+}
+
+.simulador-wizard-visual.intro-overlay .intro-title {
+    font-size: 4rem;
+    font-weight: 900;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    margin-top: 0;
+    /* Eliminado el margen negativo */
+}
+
+.simulador-wizard-visual.intro-overlay .intro-description {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    opacity: 0.95;
+    max-width: 90%;
 }

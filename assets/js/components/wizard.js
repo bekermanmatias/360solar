@@ -64,7 +64,11 @@ export function abrirModalSimulador() {
         actualizarWizardUI();
         console.log('✅ Modal abierto');
     } else {
-        console.error('❌ No se encontró el elemento modalSimulador');
+        // Si no hay modal, estamos en la página del simulador
+        // Redirigir a la página del simulador si no estamos ya ahí
+        if (!document.body.classList.contains('simulador-page')) {
+            window.location.href = 'simulador.html';
+        }
     }
 }
 
@@ -75,6 +79,14 @@ export function cerrarModalSimulador() {
         document.body.style.overflow = '';
         currentWizardStep = 0;
         actualizarWizardUI();
+    } else {
+        // Si no hay modal, estamos en la página del simulador
+        // Asegurar que el scroll esté habilitado
+        document.body.style.overflow = '';
+        document.body.style.overflowX = 'hidden';
+        document.body.style.overflowY = 'auto';
+        // Redirigir al inicio solo si se llama explícitamente
+        // (no redirigir automáticamente)
     }
 }
 
@@ -93,7 +105,8 @@ export function actualizarWizardUI() {
     const btnPrev = document.getElementById('btnWizardPrev');
     const btnNext = document.getElementById('btnWizardNext');
     const wizardNav = document.getElementById('wizardNavigation');
-    const wizardContent = document.querySelector('.modal-wizard-content');
+    // Buscar tanto en modal como en página
+    const wizardContent = document.querySelector('.modal-wizard-content') || document.querySelector('.simulador-wizard-content');
     const btnCerrar = document.getElementById('btnCerrarSimulador');
 
     if (btnCerrar) {
@@ -165,9 +178,14 @@ export function actualizarWizardUI() {
 export function actualizarWizardVisual() {
     const visualContent = document.getElementById('wizardVisualContent');
     if (!visualContent) return;
+    
+    // Ajustar clase según si estamos en modal o página
+    const isPageMode = document.body.classList.contains('simulador-page');
 
+    const visualClass = isPageMode ? 'simulador-wizard-visual' : 'modal-wizard-visual';
+    
     if (currentWizardStep === 0) {
-        visualContent.className = 'modal-wizard-visual intro-overlay';
+        visualContent.className = `${visualClass} intro-overlay`;
         visualContent.innerHTML = `
             <div class="intro-content">
                 <div class="intro-logo">
@@ -180,12 +198,9 @@ export function actualizarWizardVisual() {
             </div>
         `;
     } else if (currentWizardStep === 1) {
-        visualContent.className = 'modal-wizard-visual wizard-step-instructions';
+        visualContent.className = `${visualClass} wizard-step-instructions`;
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">
-                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
-                </div>
                 <h2 class="wizard-instructions-title">Ingresa tu Ubicación</h2>
                 <p class="wizard-instructions-question">¿Dónde te gustaría instalar tu Sistema?</p>
                 <div class="wizard-progress">
@@ -200,12 +215,9 @@ export function actualizarWizardVisual() {
             inicializarWizardMapa();
         }, 300);
     } else if (currentWizardStep === 2) {
-        visualContent.className = 'modal-wizard-visual wizard-step-instructions';
+        visualContent.className = `${visualClass} wizard-step-instructions`;
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">
-                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
-                </div>
                 <h2 class="wizard-instructions-title">Datos de tu Factura</h2>
                 <p class="wizard-instructions-question">Ingresa la información de consumo y precio de tu factura eléctrica</p>
                 <div class="wizard-progress">
@@ -217,12 +229,9 @@ export function actualizarWizardVisual() {
             </div>
         `;
     } else if (currentWizardStep === 3) {
-        visualContent.className = 'modal-wizard-visual wizard-step-instructions';
+        visualContent.className = `${visualClass} wizard-step-instructions`;
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">
-                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
-                </div>
                 <h2 class="wizard-instructions-title">Dimensiona tu Sistema</h2>
                 <p class="wizard-instructions-question">Elige cómo quieres dimensionar tu sistema solar: por porcentaje de cobertura o por cantidad de paneles</p>
                 <div class="wizard-progress">
@@ -234,12 +243,9 @@ export function actualizarWizardVisual() {
             </div>
         `;
     } else if (currentWizardStep === 4) {
-        visualContent.className = 'modal-wizard-visual wizard-step-instructions';
+        visualContent.className = `${visualClass} wizard-step-instructions`;
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">
-                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
-                </div>
                 <h2 class="wizard-instructions-title">Ángulo de Instalación</h2>
                 <p class="wizard-instructions-question">Selecciona el ángulo de inclinación de tus paneles. El ángulo influye en la eficiencia de generación de energía</p>
                 <div class="wizard-progress">
@@ -251,12 +257,9 @@ export function actualizarWizardVisual() {
             </div>
         `;
     } else if (currentWizardStep === 5) {
-        visualContent.className = 'modal-wizard-visual wizard-step-instructions';
+        visualContent.className = `${visualClass} wizard-step-instructions`;
         visualContent.innerHTML = `
             <div class="wizard-instructions-content">
-                <div class="wizard-logo">
-                    <img src="images/logo360.png" alt="Solar360" class="logo-img">
-                </div>
                 <h2 class="wizard-instructions-title">Tus Resultados</h2>
                 <p class="wizard-instructions-question">Aquí está el análisis completo de tu sistema. Revisa los detalles y ajusta según necesites.</p>
                 <div class="wizard-progress">
@@ -273,7 +276,7 @@ export function actualizarWizardVisual() {
             }, 100);
         }
     } else {
-        visualContent.className = 'modal-wizard-visual';
+        visualContent.className = visualClass;
         visualContent.innerHTML = `<img src="images/inicio-sim.jpg" alt="Paneles solares">`;
     }
 }
@@ -318,7 +321,7 @@ export function goToWizardStep(step) {
         }, 100);
     }
 
-    const content = document.querySelector('.modal-wizard-content');
+    const content = document.querySelector('.modal-wizard-content') || document.querySelector('.simulador-wizard-content');
     if (content) {
         content.scrollTop = 0;
     }
@@ -470,8 +473,14 @@ export function inicializarWizardModal() {
                     goToWizardStep(5);
                 }
             } else if (currentWizardStep === 5) {
-                // En el paso 5 (resultados), el botón "Finalizar" cierra el modal
-                cerrarModalSimulador();
+                // En el paso 5 (resultados), el botón "Finalizar" cierra el modal o redirige
+                const isPageMode = document.body.classList.contains('simulador-page');
+                if (isPageMode) {
+                    // En página completa, no hacer nada o mostrar mensaje
+                    mostrarNotificacion('✅ Simulación completada. Revisa tus resultados arriba.', 'success');
+                } else {
+                    cerrarModalSimulador();
+                }
             } else if (currentWizardStep === 1) {
                 if (ubicacionSeleccionada) {
                     const ubicacionOK = await confirmarUbicacionWizard();
