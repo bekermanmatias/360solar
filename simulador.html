@@ -563,23 +563,8 @@
                             <div class="wizard-tab-pane" id="wizardTabEnergia" style="display: none;">
                                 <div class="wizard-results-detailed">
                                     <div class="wizard-tab-section">
-                                        <h4 class="wizard-tab-title">Generación vs Consumo Mensual</h4>
-                                        <p class="wizard-tab-description">Comparación mensual de energía generada vs
-                                            consumida. La diferencia entre 20° y 45° se refleja especialmente en los
-                                            meses de invierno.</p>
-                                        <div class="wizard-chart-container">
-                                            <canvas id="wizardMonthlyChart"></canvas>
-                                        </div>
-                                    </div>
-
-                                    <div class="wizard-tab-section">
                                         <h4 class="wizard-tab-title">Datos de la Simulación</h4>
                                         <div class="wizard-simulation-data">
-                                            <div class="wizard-data-card">
-                                                <div class="wizard-data-label">Radiación Promedio de la Zona</div>
-                                                <div class="wizard-data-value" id="wizardRadiacionPromedio">-</div>
-                                                <div class="wizard-data-desc" id="wizardUbicacionNombre">-</div>
-                                            </div>
                                             <div class="wizard-data-card">
                                                 <div class="wizard-data-label">Generación Anual Total</div>
                                                 <div class="wizard-data-value" id="wizardGeneracionAnual">-</div>
@@ -590,6 +575,16 @@
                                                 <div class="wizard-data-value" id="wizardGeneracionMensualPromedio">-</div>
                                                 <div class="wizard-data-desc">Promedio de energía generada por mes</div>
                                             </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="wizard-tab-section">
+                                        <h4 class="wizard-tab-title">Generación vs Consumo Mensual</h4>
+                                        <p class="wizard-tab-description">Comparación mensual de energía generada vs
+                                            consumida. La diferencia entre 20° y 45° se refleja especialmente en los
+                                            meses de invierno.</p>
+                                        <div class="wizard-chart-container">
+                                            <canvas id="wizardMonthlyChart"></canvas>
                                         </div>
                                     </div>
 
