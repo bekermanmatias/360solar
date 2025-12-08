@@ -1044,6 +1044,12 @@ export function llenarDatosAnalisisEnergetico(resultados, generacionMensual, dat
         generacionAnual.textContent = `${formatearNumero(resultados.energia_anual_total)} kWh/año`;
     }
 
+    const generacionMensualPromedio = document.getElementById('wizardGeneracionMensualPromedio');
+    if (generacionMensualPromedio && resultados) {
+        const promedioMensual = resultados.energia_anual_total / 12;
+        generacionMensualPromedio.textContent = `${formatearNumero(promedioMensual)} kWh/mes`;
+    }
+
     const perdidasTemperatura = document.getElementById('wizardPerdidasTemperatura');
     if (perdidasTemperatura) {
         const tempPromedio = datos.temperatura.reduce((a, b) => a + b, 0) / datos.temperatura.length;
