@@ -5598,7 +5598,7 @@ section:last-of-type::after {
     margin-bottom: 1.5rem;
     line-height: 1.2;
     color: white;
-    /* white-space: nowrap; Eliminado para permitir que el texto baje */
+    white-space: nowrap;
 }
 
 .wizard-instructions-question {
