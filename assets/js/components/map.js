@@ -299,22 +299,31 @@ export async function obtenerDatosSolaresNASA(lat, lon, buttonIcon, buttonText) 
 
         console.log('✅ Datos recibidos de NASA POWER:', data);
 
-        // Extraer datos mensuales
-        const irradiance = data.properties.parameter.ALLSKY_SFC_SW_DWN;
-        const temperature = data.properties.parameter.T2M;
+        // Extraer datos mensuales robustamente (NASA incluye también un agregado anual)
+        const irradiance = data?.properties?.parameter?.ALLSKY_SFC_SW_DWN || {};
+        const temperature = data?.properties?.parameter?.T2M || {};
+        const yearPrefix = String(year);
+        const mesesKeys = Object.keys(irradiance)
+            .filter((key) => {
+                if (!key.startsWith(yearPrefix) || key.length !== 6) return false;
+                const month = Number(key.slice(4, 6));
+                return month >= 1 && month <= 12;
+            })
+            .sort();
 
-        // Convertir objeto de meses a array
-        const mesesKeys = Object.keys(irradiance).sort();
+        if (mesesKeys.length !== 12) {
+            throw new Error('NASA POWER devolvió meses incompletos');
+        }
 
         // Rellenar formulario (guardar datos internamente)
         for (let i = 0; i < 12; i++) {
             const mesKey = mesesKeys[i];
 
             // PSH ≈ Irradiancia diaria (kWh/m²/día)
-            const psh = irradiance[mesKey];
-            const temp = temperature[mesKey];
+            const psh = Number(irradiance[mesKey]);
+            const temp = Number(temperature[mesKey]);
 
-            if (psh !== undefined && temp !== undefined) {
+            if (Number.isFinite(psh) && psh >= 0 && Number.isFinite(temp)) {
                 const pshElement = document.getElementById(`psh_${i + 1}`);
                 const tempElement = document.getElementById(`temp_${i + 1}`);
                 if (pshElement) pshElement.value = psh.toFixed(1);

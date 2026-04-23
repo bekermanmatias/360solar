@@ -2041,11 +2041,38 @@ export async function obtenerDatosClimaticosWizard(lat, lon) {
 
         const data = await response.json();
 
-        const pshData = data.properties.parameter.ALLSKY_SFC_SW_DWN;
-        const tempData = data.properties.parameter.T2M;
+        const pshData = data?.properties?.parameter?.ALLSKY_SFC_SW_DWN || {};
+        const tempData = data?.properties?.parameter?.T2M || {};
+        const yearPrefix = String(year);
 
-        wizardData.psh = Object.values(pshData);
-        wizardData.temperatura = Object.values(tempData);
+        const monthlyKeys = Object.keys(pshData)
+            .filter((key) => {
+                if (!key.startsWith(yearPrefix) || key.length !== 6) return false;
+                const month = Number(key.slice(4, 6));
+                return month >= 1 && month <= 12;
+            })
+            .sort();
+
+        if (monthlyKeys.length !== 12) {
+            throw new Error('NASA POWER devolvió meses incompletos');
+        }
+
+        wizardData.psh = [];
+        wizardData.temperatura = [];
+
+        monthlyKeys.forEach((key, index) => {
+            const pshValue = Number(pshData[key]);
+            const tempValue = Number(tempData[key]);
+
+            if (!Number.isFinite(pshValue) || pshValue < 0 || !Number.isFinite(tempValue)) {
+                wizardData.psh.push(DATOS_EJEMPLO.psh[index]);
+                wizardData.temperatura.push(DATOS_EJEMPLO.temperatura[index]);
+                return;
+            }
+
+            wizardData.psh.push(pshValue);
+            wizardData.temperatura.push(tempValue);
+        });
 
     } catch (error) {
         console.warn('⚠️ NASA POWER falló, intentando Open-Meteo...');

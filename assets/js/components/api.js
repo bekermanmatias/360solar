@@ -17,8 +17,9 @@ import { locationState } from '../state.js';
  */
 export async function obtenerDatosSolaresNASA(lat, lon) {
     try {
-        const { baseUrl, parameters, community } = API_CONFIG.nasaPower;
-        const url = `${baseUrl}?parameters=${parameters}&community=${community}&longitude=${lon}&latitude=${lat}&start=2023&end=2023&format=JSON`;
+        const { community } = API_CONFIG.nasaPower;
+        const year = new Date().getFullYear() - 1;
+        const url = `https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=ALLSKY_SFC_SW_DWN,T2M&community=${community}&longitude=${lon}&latitude=${lat}&start=${year}&end=${year}&format=JSON`;
         
         const response = await fetch(url);
         if (!response.ok) {
@@ -26,37 +27,38 @@ export async function obtenerDatosSolaresNASA(lat, lon) {
         }
         
         const data = await response.json();
-        const properties = data.properties?.parameter;
+        const properties = data?.properties?.parameter;
         
         if (!properties) {
             throw new Error('Formato de datos inválido');
         }
         
-        // Extraer PSH (irradiancia solar diaria promedio en kWh/m²/día)
+        // NASA POWER mensual incluye un agregado anual (mes 13): filtrar solo meses válidos.
         const irradiancia = properties.ALLSKY_SFC_SW_DWN || {};
         const temperatura = properties.T2M || {};
-        
-        // Convertir a arrays mensuales
+        const yearPrefix = String(year);
+        const monthlyKeys = Object.keys(irradiancia)
+            .filter((key) => {
+                if (!key.startsWith(yearPrefix) || key.length !== 6) return false;
+                const month = Number(key.slice(4, 6));
+                return month >= 1 && month <= 12;
+            })
+            .sort();
+
+        if (monthlyKeys.length !== 12) {
+            throw new Error('Datos mensuales incompletos de NASA');
+        }
+
         const psh = [];
         const temp = [];
-        
-        for (let mes = 0; mes < 12; mes++) {
-            const mesKey = `2023${String(mes + 1).padStart(2, '0')}`;
-            const valoresIrradiancia = Object.values(irradiancia).filter(v => v !== null);
-            const valoresTemp = Object.values(temperatura).filter(v => v !== null);
-            
-            // Calcular promedio mensual
-            const pshMes = valoresIrradiancia.length > 0 
-                ? valoresIrradiancia.reduce((a, b) => a + b, 0) / valoresIrradiancia.length / 1000 // Convertir W/m² a kWh/m²
-                : 4.5; // Valor por defecto
-            
-            const tempMes = valoresTemp.length > 0
-                ? valoresTemp.reduce((a, b) => a + b, 0) / valoresTemp.length
-                : 20; // Valor por defecto
-            
-            psh.push(Math.max(0, pshMes));
-            temp.push(tempMes);
-        }
+
+        monthlyKeys.forEach((key) => {
+            const pshMes = Number(irradiancia[key]);
+            const tempMes = Number(temperatura[key]);
+
+            psh.push(Number.isFinite(pshMes) && pshMes >= 0 ? pshMes : 4.5);
+            temp.push(Number.isFinite(tempMes) ? tempMes : 20);
+        });
         
         return { psh, temperatura: temp, fuente: 'NASA' };
         
